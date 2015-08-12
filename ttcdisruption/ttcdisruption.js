@@ -1,10 +1,16 @@
+Notices = new Mongo.Collection("notices");
+
 if (Meteor.isClient) {
 
-  Template.ttcdisruption.helpers({
+  Template.body.helpers({
     // Helpers go here
+    // Get a list of TTC notices into the browser
+    notices: function () {
+      return Notices.find({}); 
+    }
   });
 
-  Template.ttcdisruption.events({
+  Template.body.events({
     // Events go here
   });
 }
@@ -26,11 +32,19 @@ if (Meteor.isServer) {
     //  since Nov. 11, 2011
     T.get('statuses/user_timeline',
         {
-            screen_name: 'TTCnotices'
+            screen_name: 'TTCnotices',
+            exclude_replies: true,
+            count: 10
         },
-        function(err, data, response) {
-            console.log(data[0]);
-        }
+        // callback for Twitter API query has to be bound to Meteor as follows:
+        Meteor.bindEnvironment(function(err, data, response) {
+            _.each(data, function (item){
+              // Go through the data and add it to the Notices collection
+              Notices.insert({
+                description: item.text
+              });
+            });
+        })
     );
 
   });

@@ -4,8 +4,13 @@
 
 <body>
   <h1>TTC Disruption Analytics</h1>
+  	{{#each notices}}
+		{{> ttcdisruption}}
+	{{/each}}
 </body>
 
 <template name="ttcdisruption">
-  <p>This is a sample template</p>
+	<div>
+	  	{{ description }}
+  	</div>
 </template>
