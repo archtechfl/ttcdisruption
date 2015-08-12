@@ -19,6 +19,8 @@ if (Meteor.isServer) {
   Meteor.startup(function () {
     // code to run on server at startup
 
+    Notices.remove({});
+
     var Twit = Meteor.npmRequire('twit');
 
     var T = new Twit({
@@ -34,15 +36,22 @@ if (Meteor.isServer) {
         {
             screen_name: 'TTCnotices',
             exclude_replies: true,
-            count: 10
+            count: 200
         },
         // callback for Twitter API query has to be bound to Meteor as follows:
         Meteor.bindEnvironment(function(err, data, response) {
             _.each(data, function (item){
               // Go through the data and add it to the Notices collection
-              Notices.insert({
-                description: item.text
-              });
+              // First, turn to lowercase
+              var itemText = item.text;
+              var itemLowerCase = itemText.toString().toLowerCase();
+              // Filter out lowercase
+              var allClear = itemLowerCase.search("all clear");
+              if (allClear == -1){
+                Notices.insert({
+                  description: itemLowerCase
+                });
+              }
             });
         })
     );
