@@ -30,8 +30,7 @@ if (Meteor.isServer) {
         access_token_secret:  Meteor.settings.access_token_secret
     });
 
-    //  search twitter for all tweets containing the word 'banana'
-    //  since Nov. 11, 2011
+    //  search twitter use timeline "TTCalerts"
     T.get('statuses/user_timeline',
         {
             screen_name: 'TTCnotices',
@@ -45,8 +44,9 @@ if (Meteor.isServer) {
               // First, turn to lowercase
               var itemText = item.text;
               var itemLowerCase = itemText.toString().toLowerCase();
-              // Filter out lowercase
+              // Find tweets with all clear
               var allClear = itemLowerCase.search("all clear");
+              // Don't add "all clear" tweets to database
               if (allClear == -1){
                 Notices.insert({
                   description: itemLowerCase
