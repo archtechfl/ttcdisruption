@@ -14,37 +14,32 @@ if (Meteor.isClient) {
     // Events go here
   });
 
-  // Common subway method
-  function subwayCheck (text) {
-    // Track the presence of key terms
-    var tracker = 0;
-    // Get the text
-    var text = text;
-    // Check for mention of line and a number, ex. "line 1" or "trains"
-    var searchTerms = /(line)\s\d{1}/g;
-    var trainsExp = "trains";
-    // Search terms array
-    var searchArray = [searchTerms, trainsExp];
-    // Check the text for either search term that might indicate subway
-    _.each(searchArray, function (item) {
-        var result = text.search(item);
-        tracker += result;
-    });
-    // If the tracker is greater than 0, there are matches
-    if (tracker > 0){
-      return true;
-    } else {
-      return false;
-    }
-    // End return
-  };
-
   // Determine if owner
   Template.ttcdisruption.helpers({
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
         // Track the presence of key terms
-        return subwayCheck(this.description);
+        var tracker = 0;
+        // Get the text
+        var text = this.description;
+        // Check for mention of line and a number, ex. "line 1" or "trains"
+        var trainsCheck = text.search("trains");
+        // Check for line
+        var searchTerms = /(line)\s\d{1}/g;
+        var trainsExp = "trains";
+        // Search terms array
+        var searchArray = [searchTerms, trainsExp];
+        // Check the text for either search term that might indicate subway
+        _.each(searchArray, function (item) {
+            var result = text.search(item);
+            tracker += result;
+        });
+        // If the tracker is greater than 0, there are matches
+        if (tracker > 0){
+          return true;
+        } else {
+          return false;
+        }
     },
     // Check if the alert is related to a streetcar
     isStreetcar: function () {
@@ -61,7 +56,22 @@ if (Meteor.isClient) {
     },
     // identify the subway line
     subwayLine: function () {
-      console.log(Meteor.call("isSubway"));
+      // Line storage
+      var ttcSubwayLines = {
+        1: "yus",
+        2: "bloor-danforth",
+        3: "rt",
+        4: "sheppard"
+      };
+      // Check for the grouping of line and number, regex
+      var searchTerms = /(line)\s\d{1}/g;
+      // Line number check
+      var lineCheck = /\d{1}/g;
+      // Get the desired text block with the line number
+      var lineBlock = this.description.match(searchTerms)[0];
+      // Get the actual line number, and make sure it is registered as a number
+      var lineNumber = Number(lineBlock.match(lineCheck)[0]);
+      return ttcSubwayLines[lineNumber];
     }// End subway line identification
   });
 

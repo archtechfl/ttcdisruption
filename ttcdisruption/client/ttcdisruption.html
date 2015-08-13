@@ -14,7 +14,7 @@
 <template name="ttcdisruption">
 	<li class="disruption-entry">
 		{{#if isSubway }}
-			<i class="fa fa-subway"></i>
+			<span class="subway-disruption {{subwayLine}}"><i class="fa fa-subway"></i></span>
 		{{else}}
 			{{#if isStreetcar }}
 				<i class="fa fa-train"></i>
