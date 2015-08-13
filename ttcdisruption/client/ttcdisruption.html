@@ -11,6 +11,6 @@
 
 <template name="ttcdisruption">
 	<ul>
-	  	<li>{{ description }}</li>
+	  	<li>{{#if isSubway }}<span>Subway - </span>{{/if}}{{ description }}</li>
   	</ul>
 </template>
