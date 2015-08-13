@@ -66,10 +66,10 @@ if (Meteor.isClient) {
     subwayLine: function () {
       // Line storage
       var ttcSubwayLines = {
-        1: "yus",
-        2: "bloor-danforth",
-        3: "rt",
-        4: "sheppard",
+        1: "Yonge-University-Spadina",
+        2: "Bloor-Danforth",
+        3: "Scarborough-RT",
+        4: "Sheppard",
         5: "no-line-provided"
       };
       // Check for the grouping of line and number, regex
@@ -279,8 +279,22 @@ if (Meteor.isClient) {
     var findBus = /\d{1,3}.?\s(\w)+/g;
     // bus matches
     var busMatch = this.description.match(findBus);
-    console.log(busMatch);
-    return "bus";
+    // Filter out minute entries
+    _.each(busMatch, function (item, index) {
+        var findMinutesDelay = item.search("minute");
+        if (findMinutesDelay != -1){
+            busMatch.splice(index, 1);
+        }
+    });
+    // Create an array to store the route numbers that are found
+    var routesListing = [];
+    // Get routes
+    _.each(busMatch, function (item, index) {
+        var getNumber = item.match(/\d{1,3}/g);
+        var routeNumber = Number(getNumber[0]);
+        routesListing.push(routeNumber);
+    });
+    return routesListing;
     } // End getBus method
   });
 
