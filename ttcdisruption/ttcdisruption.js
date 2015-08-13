@@ -18,11 +18,34 @@ if (Meteor.isClient) {
   Template.ttcdisruption.helpers({
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
+        // Track the presence of key terms
+        var tracker = 0;
         // Get the text
         var text = this.description;
-        // Check for mention of line and a number, ex. "line 1"
-        var subwayCheck = text.search("trains");
-        if (subwayCheck != -1){
+        // Check for mention of line and a number, ex. "line 1" or "trains"
+        var trainsCheck = text.search("trains");
+        // Check for line
+        var searchTerms = /(line)\s\d{1}/g;
+        var trainsExp = "trains";
+        // Search terms array
+        var searchArray = [searchTerms, trainsExp];
+        _.each(searchArray, function (item) {
+            var result = text.search(item);
+            tracker += result;
+        });
+        if (tracker > 0){
+          return true;
+        } else {
+          return false;
+        }
+    },
+    // Check if the alert is related to a streetcar
+    isStreetcar: function () {
+        // Get the text
+        var text = this.description;
+        // Check for mention of a streetcar line number, ex "501"
+        var streetcarCheck = text.search(/(5{1}\d{2})/);
+        if (streetcarCheck != -1){
           return true;
         } else {
           return false;

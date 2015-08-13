@@ -4,13 +4,22 @@
 
 <body>
   <h1>TTC Disruption Analytics</h1>
+  	<ul class="disruption-list">
   	{{#each notices}}
 		{{> ttcdisruption}}
 	{{/each}}
+	</ul>
 </body>
 
 <template name="ttcdisruption">
-	<ul>
-	  	<li>{{#if isSubway }}<span>Subway - </span>{{/if}}{{ description }}</li>
-  	</ul>
+	<li class="disruption-entry">
+		{{#if isSubway }}
+			<i class="fa fa-subway"></i>
+		{{else}}
+			{{#if isStreetcar }}
+				<i class="fa fa-train"></i>
+			{{/if}}
+		{{/if}}
+		{{ description }}
+	</li>
 </template>
