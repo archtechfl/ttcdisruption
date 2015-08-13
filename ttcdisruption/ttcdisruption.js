@@ -14,30 +14,37 @@ if (Meteor.isClient) {
     // Events go here
   });
 
+  // Common subway method
+  function subwayCheck (text) {
+    // Track the presence of key terms
+    var tracker = 0;
+    // Get the text
+    var text = text;
+    // Check for mention of line and a number, ex. "line 1" or "trains"
+    var searchTerms = /(line)\s\d{1}/g;
+    var trainsExp = "trains";
+    // Search terms array
+    var searchArray = [searchTerms, trainsExp];
+    // Check the text for either search term that might indicate subway
+    _.each(searchArray, function (item) {
+        var result = text.search(item);
+        tracker += result;
+    });
+    // If the tracker is greater than 0, there are matches
+    if (tracker > 0){
+      return true;
+    } else {
+      return false;
+    }
+    // End return
+  };
+
   // Determine if owner
   Template.ttcdisruption.helpers({
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
         // Track the presence of key terms
-        var tracker = 0;
-        // Get the text
-        var text = this.description;
-        // Check for mention of line and a number, ex. "line 1" or "trains"
-        var trainsCheck = text.search("trains");
-        // Check for line
-        var searchTerms = /(line)\s\d{1}/g;
-        var trainsExp = "trains";
-        // Search terms array
-        var searchArray = [searchTerms, trainsExp];
-        _.each(searchArray, function (item) {
-            var result = text.search(item);
-            tracker += result;
-        });
-        if (tracker > 0){
-          return true;
-        } else {
-          return false;
-        }
+        return subwayCheck(this.description);
     },
     // Check if the alert is related to a streetcar
     isStreetcar: function () {
@@ -45,12 +52,17 @@ if (Meteor.isClient) {
         var text = this.description;
         // Check for mention of a streetcar line number, ex "501"
         var streetcarCheck = text.search(/(5{1}\d{2})/);
+        // If there is a stretcar line number, results will be 0 or greater
         if (streetcarCheck != -1){
           return true;
         } else {
           return false;
         }
-    }
+    },
+    // identify the subway line
+    subwayLine: function () {
+      console.log(Meteor.call("isSubway"));
+    }// End subway line identification
   });
 
 }
