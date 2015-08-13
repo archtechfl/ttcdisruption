@@ -19,24 +19,31 @@ if (Meteor.isClient) {
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
         // Track the presence of key terms
-        var tracker = 0;
+        var tracker = [];
         // Get the text
         var text = this.description;
-        // Check for mention of line and a number, ex. "line 1" or "trains"
-        var trainsCheck = text.search("trains");
         // Check for line
         var searchTerms = /(line)\s\d{1}/g;
+        // Check for trains
         var trainsExp = "trains";
+        // Check for station abbreviation
         var stationAbbr = "stn";
+        // Check for elevator
+        var elevatorTerm = "elevator";
+        // Check for platform
+        var platformTerm = "platform";
         // Search terms array
-        var searchArray = [searchTerms, trainsExp, stationAbbr];
+        var searchArray = [searchTerms, trainsExp, stationAbbr, elevatorTerm, platformTerm];
         // Check the text for either search term that might indicate subway
         _.each(searchArray, function (item) {
             var result = text.search(item);
-            tracker += result;
+            // If there is a valid search term, add it to the tracker
+            if (result != -1){
+                tracker.push(result);
+            }
         });
         // If the tracker is greater than 0, there are matches
-        if (tracker > 0){
+        if (tracker.length > 0){
           return true;
         } else {
           return false;
@@ -69,7 +76,7 @@ if (Meteor.isClient) {
       var searchTerms = /(line)\s\d{1}/g;
       // Line number check
       var lineCheck = /\d{1}/g;
-      // Get the desired text block with the line number
+      // Get the desired text block with the line number, if line number is present
       try {
         var lineBlock = this.description.match(searchTerms)[0];
         // Get the actual line number, and make sure it is registered as a number
