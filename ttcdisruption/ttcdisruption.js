@@ -27,8 +27,9 @@ if (Meteor.isClient) {
         // Check for line
         var searchTerms = /(line)\s\d{1}/g;
         var trainsExp = "trains";
+        var stationAbbr = "stn";
         // Search terms array
-        var searchArray = [searchTerms, trainsExp];
+        var searchArray = [searchTerms, trainsExp, stationAbbr];
         // Check the text for either search term that might indicate subway
         _.each(searchArray, function (item) {
             var result = text.search(item);
