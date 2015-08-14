@@ -1,54 +1,85 @@
+/* Body */
+
+body {
+	background-color: @body-background;
+}
+
+/* End body */
+
 i.fa {
-
-	margin-right: 10px;
-
-	/* Train, subway and bus colors */
-
-	&.fa-train {
-		color: @ttc-red;
-	}
-
-	/* End colors */
+	margin: .5em 1em;
+	font-weight: 500;
+	font-size: 1.5em;
 
 }
-
-// Subway disruption colors
-
-.subway-disruption {
-
-	&.Bloor-Danforth {
-		color: @ttc-green;
-	}
-
-	&.Yonge-University-Spadina {
-		color: @ttc-yellow;
-	}
-
-	&.Scarborough-RT {
-		color: @ttc-blue;	
-	}
-
-	&.Sheppard {
-		color: @ttc-purple;
-	}
-
-}
-
-// End subway disruption colors
 
 /* Disruption list */
 
 .disruption-list {
 
 	.disruption-entry {
-		margin: 5px 5px;
 		list-style-type: none;
+		color: @std-text-white;
 
-		.bus-routes-affected {
+		.bus-routes-affected,
+		.subway-line-number,
+		.streetcar-line-number {
 			font-weight: 700;
-			font-size: 1.2em; 
+			font-size: 1.2em;
+			margin: .5em 1em; 
+			text-align: center;
+		}
+
+		.time-month-day {
+
+			.time-month {
+				display: block;
+			}
+
+		}
+
+		// Uniform padding for text cells
+		.time-month-day,
+		.time-of-day,
+		.description {
+			padding: 1.2em;
 		}
 
 	}
 
+}
+
+// Subway disruption colors
+
+.subway-entry {
+
+	&.Bloor-Danforth {
+		background-color: @ttc-green;
+	}
+
+	&.Yonge-University-Spadina {
+		background-color: @ttc-yellow;
+		color: @std-text-dark-grey;
+	}
+
+	&.Scarborough-RT {
+		background-color: @ttc-blue;	
+	}
+
+	&.Sheppard {
+		background-color: @ttc-purple;
+	}
+
+}
+
+// Streetcar 
+
+.streetcar-entry {
+	background-color: @ttc-red;
+}
+
+// Bus
+
+.bus-entry {
+	background-color: @ttc-bus;
 }

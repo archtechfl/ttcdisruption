@@ -45,6 +45,13 @@
           return false;
         }
     },
+    // Get streetcar number
+    streetcarNumber: function () {
+        // Get the text
+        var text = this.description;
+        var streetcarNum = text.match(/(5{1}\d{2})/)[0];
+        return streetcarNum;
+    },
     // identify the subway line
     subwayLine: function () {
       // Line storage
@@ -67,7 +74,10 @@
       } catch(err) {
         var lineNumber = 5;
       }
-      return ttcSubwayLines[lineNumber];
+      return {
+            "name": ttcSubwayLines[lineNumber],
+            "number": lineNumber
+        };
     },// End subway line identification
     getBus: function () {
       // Get the bus number, and display along with bus route name
@@ -278,5 +288,22 @@
         routesListing.push(routeNumber);
     });
     return routesListing;
-    } // End getBus method
+    }, // End getBus method
+    timeMonthDay: function () {
+        // Get the month and day for display
+        var time = moment(this.time);
+        var month = time.format("MMM");
+        var day = time.format("DD");
+        return {
+            "day": day,
+            "month": month
+        };
+    },
+    timeOfDay: function () {
+        // Display time, ex 11:50 PM
+        var time = moment(this.time);
+        var formattedTimeOfDay = time.format("hh:mm A");
+        return formattedTimeOfDay;
+    }
+
   });
