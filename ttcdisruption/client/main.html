@@ -1,0 +1,22 @@
+<head>
+  <title>TTC Twitter Notice App</title>
+</head>
+
+<body>
+	<div class="container">
+	  	<h1>TTC Twitter Notice App</h1>
+	  	<p>Easy to read display of the latest Twitter notices with enhanced visuals showing vehicle type,
+	  	location, and type of disruption</p>
+	  	<div class="current-time">
+	  		<span>Last updated: </span>
+	  		<p>{{ currentTime }}</p>
+	  	</div>
+	  	<table class="table table-bordered disruption-list">
+		  	<tbody>
+		  	{{#each notices}}
+				{{> ttcdisruption}}
+			{{/each}}
+			</tbody>
+		</table>
+	</div>
+</body>

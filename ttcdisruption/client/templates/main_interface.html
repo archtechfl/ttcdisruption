@@ -1,0 +1,50 @@
+<template name="ttcdisruption">
+		{{#if isSubway }}
+		<tr class="disruption-entry subway-entry {{subwayLine.name}}">
+			<td class="icon">
+				<i class="fa fa-subway"></i>
+			</td>
+			<td class="route-numbers">
+				<div class="subway-line-number">{{ subwayLine.number }}</div>
+			</td>
+			<td class="time-month-day">
+				<span class="time-month">{{ timeMonthDay.month }}</span>
+				<span class="time-day">{{ timeMonthDay.day }}</span>
+			</td>
+			<td class="time-of-day">{{ timeOfDay }}</td>
+			<td class="description">{{{ description }}}</td>
+		</tr>
+		{{else}}
+			{{#if isStreetcar }}
+			<tr class="disruption-entry streetcar-entry">
+				<td class="icon"><i class="fa fa-train"></i></td>
+				<td class="route-numbers">
+					<div class="streetcar-line-number">{{ streetcarNumber }}</div>
+				</td>
+				<td class="time-month-day">
+					<span class="time-month">{{ timeMonthDay.month }}</span>
+					<span class="time-day">{{ timeMonthDay.day }}</span>
+				</td>
+				<td class="time-of-day">{{ timeOfDay }}</td>
+				<td class="description">{{{ description }}}</td>
+			</tr>
+			{{else}}
+				<tr class="disruption-entry bus-entry">
+					<td class="icon"><i class="fa fa-bus"></i></td>
+					<td class="route-numbers">
+						<div class="bus-routes-affected">
+							{{#each getBus}}
+								<div class="individual-route">{{.}}</div>
+							{{/each}}
+						</div>
+					</td>
+					<td class="time-month-day">
+						<span class="time-month">{{ timeMonthDay.month }}</span>
+						<span class="time-day">{{ timeMonthDay.day }}</span>
+					</td>
+					<td class="time-of-day">{{ timeOfDay }}</td>
+					<td class="description">{{{ description }}}</td>
+				</tr>
+			{{/if}}
+		{{/if}}
+</template>
