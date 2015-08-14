@@ -1,20 +1,3 @@
-<head>
-  <title>TTC Disruption</title>
-</head>
-
-<body>
-	<div class="container">
-	  	<h1>TTC Disruption Analytics</h1>
-	  	<table class="table table-bordered disruption-list">
-		  	<tbody>
-		  	{{#each notices}}
-				{{> ttcdisruption}}
-			{{/each}}
-			</tbody>
-		</table>
-	</div>
-</body>
-
 <template name="ttcdisruption">
 	<tr class="disruption-entry">
 		{{#if isSubway }}

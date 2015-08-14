@@ -1,4 +1,77 @@
-var StorageBusRoutes = {
+  Template.ttcdisruption.helpers({
+    // Owner is defined when the task is created, set to the user ID that created it
+    isSubway: function () {
+        // Track the presence of key terms
+        var tracker = [];
+        // Get the text
+        var text = this.description;
+        // Check for line
+        var searchTerms = /(line)\s\d{1}/g;
+        // Check for trains
+        var trainsExp = "trains";
+        // Check for station abbreviation
+        var stationAbbr = "stn";
+        // Check for elevator
+        var elevatorTerm = "elevator";
+        // Check for platform
+        var platformTerm = "platform";
+        // Search terms array
+        var searchArray = [searchTerms, trainsExp, stationAbbr, elevatorTerm, platformTerm];
+        // Check the text for either search term that might indicate subway
+        _.each(searchArray, function (item) {
+            var result = text.search(item);
+            // If there is a valid search term, add it to the tracker
+            if (result != -1){
+                tracker.push(result);
+            }
+        });
+        // If the tracker is greater than 0, there are matches
+        if (tracker.length > 0){
+          return true;
+        } else {
+          return false;
+        }
+    },
+    // Check if the alert is related to a streetcar
+    isStreetcar: function () {
+        // Get the text
+        var text = this.description;
+        // Check for mention of a streetcar line number, ex "501"
+        var streetcarCheck = text.search(/(5{1}\d{2})/);
+        // If there is a stretcar line number, results will be 0 or greater
+        if (streetcarCheck != -1){
+          return true;
+        } else {
+          return false;
+        }
+    },
+    // identify the subway line
+    subwayLine: function () {
+      // Line storage
+      var ttcSubwayLines = {
+        1: "Yonge-University-Spadina",
+        2: "Bloor-Danforth",
+        3: "Scarborough-RT",
+        4: "Sheppard",
+        5: "no-line-provided"
+      };
+      // Check for the grouping of line and number, regex
+      var searchTerms = /(line)\s\d{1}/g;
+      // Line number check
+      var lineCheck = /\d{1}/g;
+      // Get the desired text block with the line number, if line number is present
+      try {
+        var lineBlock = this.description.match(searchTerms)[0];
+        // Get the actual line number, and make sure it is registered as a number
+        var lineNumber = Number(lineBlock.match(lineCheck)[0]);
+      } catch(err) {
+        var lineNumber = 5;
+      }
+      return ttcSubwayLines[lineNumber];
+    },// End subway line identification
+    getBus: function () {
+      // Get the bus number, and display along with bus route name
+      var busRoutes = {
         5: "Avenue Rd",
         6: "Bay",
         7: "Bathurst",
@@ -140,7 +213,7 @@ var StorageBusRoutes = {
         199: "Finch Rocket",
         224: "Victoria Park North",
       };
-      var StorageNightRoutes = {
+      var nightRoutes = {
         300: "Bloor - Danforth",
         301: "Queen",
         302: "Danforth Rd - McCowan",
@@ -166,7 +239,7 @@ var StorageBusRoutes = {
         354: "Lawrence East",
         385: "Sheppard East"
       };
-    var StorageCommunityRoutes = {
+    var communityRoutes = {
         400: "Lawrence Manor",
         402: "Parkdale",
         403: "South Don Mills",
@@ -176,10 +249,34 @@ var StorageBusRoutes = {
         407: "Toronto Rehab Cardiac Centre",
         408: "Venue Shuttle East"
       };
-    var StorageDowntownExp = {
+    var downtownExp = {
         141: "Downtown / Mt Pleasant Express",
         142: "Downtown / Avenue Rd Express",
         143: "Downtown / Beach Express",
         144: "Downtown / Don Valley Express",
         145: "Downtown / Humber Bay Express"
       };
+    var routeMaster = [busRoutes, nightRoutes, communityRoutes, downtownExp];
+
+    // bus route search regexp
+    var findBus = /\d{1,3}.?\s(\w)+/g;
+    // bus matches
+    var busMatch = this.description.match(findBus);
+    // Filter out minute entries
+    _.each(busMatch, function (item, index) {
+        var findMinutesDelay = item.search("minute");
+        if (findMinutesDelay != -1){
+            busMatch.splice(index, 1);
+        }
+    });
+    // Create an array to store the route numbers that are found
+    var routesListing = [];
+    // Get routes
+    _.each(busMatch, function (item, index) {
+        var getNumber = item.match(/\d{1,3}/g);
+        var routeNumber = Number(getNumber[0]);
+        routesListing.push(routeNumber);
+    });
+    return routesListing;
+    } // End getBus method
+  });
