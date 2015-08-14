@@ -1,0 +1,54 @@
+i.fa {
+
+	margin-right: 10px;
+
+	/* Train, subway and bus colors */
+
+	&.fa-train {
+		color: @ttc-red;
+	}
+
+	/* End colors */
+
+}
+
+// Subway disruption colors
+
+.subway-disruption {
+
+	&.Bloor-Danforth {
+		color: @ttc-green;
+	}
+
+	&.Yonge-University-Spadina {
+		color: @ttc-yellow;
+	}
+
+	&.Scarborough-RT {
+		color: @ttc-blue;	
+	}
+
+	&.Sheppard {
+		color: @ttc-purple;
+	}
+
+}
+
+// End subway disruption colors
+
+/* Disruption list */
+
+.disruption-list {
+
+	.disruption-entry {
+		margin: 5px 5px;
+		list-style-type: none;
+
+		.bus-routes-affected {
+			font-weight: 700;
+			font-size: 1.2em; 
+		}
+
+	}
+
+}

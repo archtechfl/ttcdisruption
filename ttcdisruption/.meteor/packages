@@ -7,3 +7,12 @@
 meteor-platform
 autopublish
 insecure
+meteorhacks:npm
+
+
+npm-container
+fortawesome:fontawesome
+less
+iron:router
+momentjs:moment
+nemo64:bootstrap
