@@ -69,7 +69,6 @@ Meteor.methods({
                     });
                   }
                   if (index === 199){
-                    var oldestTweet = item.id;
                     totalRetrieved = totalRetrieved + (index + 1);
                     tweetParameters["max_id"] = oldestTweet;
                   }
