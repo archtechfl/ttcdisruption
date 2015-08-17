@@ -11,6 +11,8 @@
         var trainsExp = "trains";
         // Check for station abbreviation
         var stationAbbr = "stn";
+        // Check for station wording
+        var stationAbbr = "station";
         // Check for elevator
         var elevatorTerm = "elevator";
         // Check for platform

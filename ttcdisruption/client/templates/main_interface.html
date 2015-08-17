@@ -1,25 +1,25 @@
 <template name="ttcdisruption">
-		{{#if isSubway }}
-		<tr class="disruption-entry subway-entry {{subwayLine.name}}">
-			<td class="icon">
-				<i class="fa fa-subway"></i>
-			</td>
-			<td class="route-numbers">
-				<div class="subway-line-number">{{ subwayLine.number }}</div>
-			</td>
-			<td class="time-month-day">
-				<span class="time-month">{{ getDateTime.month }}</span>
-				<span class="time-day">{{ getDateTime.day }}</span>
-			</td>
-			<td class="time-of-day">{{ getDateTime.time }}</td>
-			<td class="description">{{{ description }}}</td>
-		</tr>
-		{{else}}
-			{{#if isStreetcar }}
-			<tr class="disruption-entry streetcar-entry">
+		{{#if isStreetcar }}
+		<tr class="disruption-entry streetcar-entry">
 				<td class="icon"><i class="fa fa-train"></i></td>
 				<td class="route-numbers">
 					<div class="streetcar-line-number">{{ streetcarNumber }}</div>
+				</td>
+				<td class="time-month-day">
+					<span class="time-month">{{ getDateTime.month }}</span>
+					<span class="time-day">{{ getDateTime.day }}</span>
+				</td>
+				<td class="time-of-day">{{ getDateTime.time }}</td>
+				<td class="description">{{{ description }}}</td>
+			</tr>
+		{{else}}
+			{{#if isSubway }}
+			<tr class="disruption-entry subway-entry {{subwayLine.name}}">
+				<td class="icon">
+					<i class="fa fa-subway"></i>
+				</td>
+				<td class="route-numbers">
+					<div class="subway-line-number">{{ subwayLine.number }}</div>
 				</td>
 				<td class="time-month-day">
 					<span class="time-month">{{ getDateTime.month }}</span>
