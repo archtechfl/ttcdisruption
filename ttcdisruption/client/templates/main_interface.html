@@ -8,10 +8,10 @@
 				<div class="subway-line-number">{{ subwayLine.number }}</div>
 			</td>
 			<td class="time-month-day">
-				<span class="time-month">{{ timeMonthDay.month }}</span>
-				<span class="time-day">{{ timeMonthDay.day }}</span>
+				<span class="time-month">{{ getDateTime.month }}</span>
+				<span class="time-day">{{ getDateTime.day }}</span>
 			</td>
-			<td class="time-of-day">{{ timeOfDay }}</td>
+			<td class="time-of-day">{{ getDateTime.time }}</td>
 			<td class="description">{{{ description }}}</td>
 		</tr>
 		{{else}}
@@ -22,10 +22,10 @@
 					<div class="streetcar-line-number">{{ streetcarNumber }}</div>
 				</td>
 				<td class="time-month-day">
-					<span class="time-month">{{ timeMonthDay.month }}</span>
-					<span class="time-day">{{ timeMonthDay.day }}</span>
+					<span class="time-month">{{ getDateTime.month }}</span>
+					<span class="time-day">{{ getDateTime.day }}</span>
 				</td>
-				<td class="time-of-day">{{ timeOfDay }}</td>
+				<td class="time-of-day">{{ getDateTime.time }}</td>
 				<td class="description">{{{ description }}}</td>
 			</tr>
 			{{else}}
@@ -39,10 +39,10 @@
 						</div>
 					</td>
 					<td class="time-month-day">
-						<span class="time-month">{{ timeMonthDay.month }}</span>
-						<span class="time-day">{{ timeMonthDay.day }}</span>
+						<span class="time-month">{{ getDateTime.month }}</span>
+						<span class="time-day">{{ getDateTime.day }}</span>
 					</td>
-					<td class="time-of-day">{{ timeOfDay }}</td>
+					<td class="time-of-day">{{ getDateTime.time }}</td>
 					<td class="description">{{{ description }}}</td>
 				</tr>
 			{{/if}}

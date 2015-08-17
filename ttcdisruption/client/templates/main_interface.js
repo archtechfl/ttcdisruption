@@ -269,11 +269,13 @@
     var routeMaster = [busRoutes, nightRoutes, communityRoutes, downtownExp];
 
     // bus route search regexp
-    var findBus = /\d{1,3}.?\s(\w)+/g;
+    var findBus = /\d{1,3}[a-f]?\s(\w)+/g;
     // bus matches
     var busMatch = this.description.match(findBus);
     // Filter out minute entries
+    // 17-08-2015: need to distinguish when entries appear with road names like "Highway 7"
     _.each(busMatch, function (item, index) {
+        console.log(item);
         var findMinutesDelay = item.search("minute");
         if (findMinutesDelay != -1){
             busMatch.splice(index, 1);
@@ -289,21 +291,34 @@
     });
     return routesListing;
     }, // End getBus method
-    timeMonthDay: function () {
+    getDateTime: function () {
         // Get the month and day for display
+        // 17-08-2016: need to adjust for momentJS deprecation
+        /*
+        > moment("2014-04-25T01:32:21.196Z");  // iso string, utc timezone
+        > moment("2014-04-25T01:32:21.196+0600");  // iso string with timezone
+        > moment("2014 04 25", "YYYY MM DD"); // string with format
+
+        These are the only allowable formats now, must convert current format
+        "Mon Aug 17 20:53:23 +0000 2015" to standard ISO
+
+        Possible solution: 
+
+        1) split ["Wed", "Aug", "12", "15:39:42", "+0000", "2015"]
+        2) convert month to digits
+        3) rearrange and supply to new Moment
+
+        */
+        console.log(this.time.split(" "));
         var time = moment(this.time);
         var month = time.format("MMM");
         var day = time.format("DD");
+        var formattedTimeOfDay = time.format("hh:mm A");
         return {
             "day": day,
-            "month": month
+            "month": month,
+            "time": formattedTimeOfDay
         };
-    },
-    timeOfDay: function () {
-        // Display time, ex 11:50 PM
-        var time = moment(this.time);
-        var formattedTimeOfDay = time.format("hh:mm A");
-        return formattedTimeOfDay;
     }
 
   });
