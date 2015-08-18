@@ -58,6 +58,8 @@ Meteor.methods({
                   var retweet = itemLowerCase.search("@");
                   // Don't add "all clear" tweets to database
                   if (allClear == -1 && retweet == -1){
+                    // convert quotation marks to simple
+                    itemLowerCase = itemLowerCase.replace("’","'");
                     Notices.insert({
                       description: itemLowerCase,
                       time: item.created_at,

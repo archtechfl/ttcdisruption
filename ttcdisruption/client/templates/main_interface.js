@@ -84,30 +84,39 @@
     getBus: function () {
         // bus route search regexp
         // OLD var findBus = /\d{1,3}[a-f]?\s(\w)+/g;
-        var findBus = /\d{1,3}[a-f]?\s[a-zA-Z’]+/g;
+        var findBus = /\d{1,3}[a-f]?\s[a-zA-Z']+/g;
         // bus matches
         var busMatch = this.description.match(findBus);
         // Filter out minute entries
         // 17-08-2015: need to distinguish when entries appear with road names like "Highway 7"
-        _.each(busMatch, function (item, index) {
-            // Get actual bus route number from match capture
-            var routeNumberExp = /\d{1,3}/g;
-            var numberMatched = item.match(routeNumberExp)[0];
-            // compare bus route name to the pairing retrived before
-            var routeName = busInfo.retrieveRouteName(numberMatched);
-            // console.log(item);
-            var findMinutesDelay = item.search("minute");
-            if (findMinutesDelay != -1){
-                busMatch.splice(index, 1);
-            }
-        });
+
         // Create an array to store the route numbers that are found
         var routesListing = [];
-        // Get routes
+        // Go through possible routes
         _.each(busMatch, function (item, index) {
-            var getNumber = item.match(/\d{1,3}/g);
-            var routeNumber = Number(getNumber[0]);
-            routesListing.push(routeNumber);
+            console.log("________");
+            // Get actual bus route number from match capture
+            var routeNumberExp = /\d{1,3}/g;
+            // Assign possible route to another variable
+            var busMatchEntry = item;
+            var numberMatched = busMatchEntry.match(routeNumberExp)[0];
+            // compare bus route name to the pairing retrived before
+            var routeName = busInfo.retrieveRouteName(numberMatched).toLowerCase().split(" ")[0];
+            // Check to see if bus route is actually a bus route (sanity check)
+            var searchArray = [routeName, "bus", "route"];
+            // Check the text for either search term that might indicate subway
+            var tracker = [];
+            _.each(searchArray, function (item) {
+                var result = busMatchEntry.search(item);
+                // If there is a valid search term, add it to the tracker
+                if (result != -1){
+                    tracker.push(result);
+                }
+            });
+            // If the tracker is greater than 0, there are matches
+            if (tracker.length > 0){
+                routesListing.push(numberMatched);
+            }
         });
         return routesListing;
     }, // End getBus method
