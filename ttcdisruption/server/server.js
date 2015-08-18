@@ -4,6 +4,10 @@ if (Meteor.isServer) {
     Notices.remove({});
     // begin tweet retrieval cycle for user TTCalerts
     Meteor.call("getTweets");
+    // This code only runs on the server
+    Meteor.publish("notices", function () {
+        return Notices.find();
+    });
   });
 };
 

@@ -2,6 +2,8 @@ Notices = new Mongo.Collection("notices");
 
 if (Meteor.isClient) {
 
+  Meteor.subscribe("notices");
+
   Meteor.startup(function () {
     console.log("ON PAGE REFRESH");
   });
