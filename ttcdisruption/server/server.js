@@ -1,6 +1,7 @@
 if (Meteor.isServer) {
   Meteor.startup(function () {
     // code to run on server at startup
+    console.log(Notices.find().count());
     Notices.remove({});
     // begin tweet retrieval cycle for user TTCalerts
     Meteor.call("getTweets");
@@ -43,12 +44,10 @@ Meteor.methods({
                   // First, turn to lowercase
                   var itemText = item.text;
                   var itemLowerCase = itemText.toString().toLowerCase();
-                  // Find tweets with all clear
-                  var allClear = itemLowerCase.search("all clear");
                   // Find tweets with rt @user_name (retweets)
                   var retweet = itemLowerCase.search("@");
                   // Don't add "all clear" tweets to database
-                  if (allClear == -1 && retweet == -1){
+                  if (retweet == -1){
                     // convert quotation marks to simple
                     itemLowerCase = itemLowerCase.replace("’","'");
                     Notices.insert({
