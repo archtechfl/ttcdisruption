@@ -1,4 +1,5 @@
 Notices = new Mongo.Collection("notices");
+State = new Mongo.Collection("state");
 
 if (Meteor.isClient) {
 

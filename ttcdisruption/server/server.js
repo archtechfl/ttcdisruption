@@ -1,8 +1,12 @@
 if (Meteor.isServer) {
   Meteor.startup(function () {
     // code to run on server at startup
-    console.log(Notices.find().count());
     Notices.remove({});
+    // Establish initial state
+    State.insert({
+        newest_id: 0,
+        purpose: "tracking"
+    });
     // begin tweet retrieval cycle for user TTCalerts
     Meteor.call("getTweets");
     // This code only runs on the server
@@ -56,11 +60,10 @@ Meteor.methods({
                       tweet_id: item.id
                     });
                   }
-                  if (index === 199){
-                    var oldestTweet = item.id;
-                    // console.log(oldestTweet);
-                    totalRetrieved = totalRetrieved + (index + 1);
-                    tweetParameters["max_id"] = oldestTweet;
+                  if (index === 0){
+                    var newestTweet = item.id;
+                    // Update state
+                    State.update({purpose: "tracking"}, {$set: {newest_id: newestTweet}});
                   }
                 });
             })
