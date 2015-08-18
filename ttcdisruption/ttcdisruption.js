@@ -22,10 +22,6 @@ if (Meteor.isClient) {
 }
 
 Meteor.methods({
-  test: function (oldestTweet) {
-    // This is a generic testing function confirming that methods are hooked up
-    console.log(oldestTweet);
-  },
   getTweets: function () {
     var Twit = Meteor.npmRequire('twit');
 
@@ -40,6 +36,7 @@ Meteor.methods({
     // Parameters object
     var tweetParameters = {
         screen_name: 'TTCnotices',
+        // max_id: 631518489279250400,
         count: 200
     };
 
@@ -62,6 +59,8 @@ Meteor.methods({
                   var retweet = itemLowerCase.search("@");
                   // Don't add "all clear" tweets to database
                   if (allClear == -1 && retweet == -1){
+                    // convert quotation marks to simple
+                    itemLowerCase = itemLowerCase.replace("’","'");
                     Notices.insert({
                       description: itemLowerCase,
                       time: item.created_at,
@@ -70,6 +69,7 @@ Meteor.methods({
                   }
                   if (index === 199){
                     var oldestTweet = item.id;
+                    console.log(oldestTweet);
                     totalRetrieved = totalRetrieved + (index + 1);
                     tweetParameters["max_id"] = oldestTweet;
                   }
