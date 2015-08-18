@@ -22,10 +22,6 @@ if (Meteor.isClient) {
 }
 
 Meteor.methods({
-  test: function (oldestTweet) {
-    // This is a generic testing function confirming that methods are hooked up
-    console.log(oldestTweet);
-  },
   getTweets: function () {
     var Twit = Meteor.npmRequire('twit');
 
@@ -69,6 +65,7 @@ Meteor.methods({
                     });
                   }
                   if (index === 199){
+                    var oldestTweet = item.id;
                     totalRetrieved = totalRetrieved + (index + 1);
                     tweetParameters["max_id"] = oldestTweet;
                   }

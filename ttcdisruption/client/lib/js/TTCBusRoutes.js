@@ -186,4 +186,37 @@ function BusRoutesLibrary () {
       };
 };
 
+BusRoutesLibrary.prototype.retrieveRouteName = function(routeNumber) {
+    var route = routeNumber;
+    if (routeNumber >= 400){
+        // Community route
+        try {
+            return this.community_routes[routeNumber];
+        } catch (err) {
+            return "invalid";
+        }
+    } else if (routeNumber >= 300 && routeNumber < 400){
+        // Night route
+        try {
+            return this.night_routes[routeNumber];
+        } catch (err) {
+            return "invalid";
+        }
+    } else if (routeNumber > 140 && routeNumber < 146){
+        // Downtown express
+        try {
+            return this.downtown_exp_routes[routeNumber];
+        } catch (err) {
+            return "invalid";
+        }
+    } else {
+        // Regular routes
+        try {
+            return this.standard_routes[routeNumber];
+        } catch (err) {
+            return "invalid";
+        }
+    }
+};
+
 busInfo = new BusRoutesLibrary();
