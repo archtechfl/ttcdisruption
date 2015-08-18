@@ -152,7 +152,6 @@
             var entry = intersection[0];
             entry = entry.replace("at ", "");
             entry = entry.replace("and ", "");
-            console.log(entry);
             var crossStreets = entry.split(" ");
             return crossStreets;
         }
