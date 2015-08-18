@@ -36,6 +36,7 @@ Meteor.methods({
     // Parameters object
     var tweetParameters = {
         screen_name: 'TTCnotices',
+        // max_id: 631518489279250400,
         count: 200
     };
 
@@ -68,6 +69,7 @@ Meteor.methods({
                   }
                   if (index === 199){
                     var oldestTweet = item.id;
+                    console.log(oldestTweet);
                     totalRetrieved = totalRetrieved + (index + 1);
                     tweetParameters["max_id"] = oldestTweet;
                   }

@@ -11,6 +11,9 @@
 				</td>
 				<td class="time-of-day">{{ getDateTime.time }}</td>
 				<td class="description">{{{ description }}}</td>
+				<!-- {{#each getIntersection}}
+					<td class="cross-street">{{.}}</td>
+				{{/each}} -->
 			</tr>
 		{{else}}
 			{{#if isSubway }}
@@ -44,6 +47,9 @@
 					</td>
 					<td class="time-of-day">{{ getDateTime.time }}</td>
 					<td class="description">{{{ description }}}</td>
+					<!-- {{#each getIntersection}}
+						<td class="cross-street">{{.}}</td>
+					{{/each}} -->
 				</tr>
 			{{/if}}
 		{{/if}}

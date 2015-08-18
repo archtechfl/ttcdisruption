@@ -94,7 +94,6 @@
         var routesListing = [];
         // Go through possible routes
         _.each(busMatch, function (item, index) {
-            console.log("________");
             // Get actual bus route number from match capture
             var routeNumberExp = /\d{1,3}/g;
             // Assign possible route to another variable
@@ -141,6 +140,22 @@
             "month": month,
             "time": formattedTimeOfDay
         };
+    },
+    getIntersection: function () {
+        // Get intersection method
+        // Looks for common patterns and parses the intersection
+        var intersectionExpA = /((at)\s\w+\s(and)\s\w+)/g;
+        // Get text and search
+        var text = this.description;
+        var intersection = text.match(intersectionExpA);
+        if (intersection){
+            var entry = intersection[0];
+            entry = entry.replace("at ", "");
+            entry = entry.replace("and ", "");
+            console.log(entry);
+            var crossStreets = entry.split(" ");
+            return crossStreets;
+        }
     }
 
   });
