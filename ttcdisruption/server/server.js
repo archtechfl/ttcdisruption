@@ -37,17 +37,17 @@ if (Meteor.isServer) {
                         var itemText = item.text;
                         if (latestTweetId){
                             var sanityCheckLatestTweet = (item.id === latest_tweet_id);
-                            var latestSanity = true;
+                            var latestSanity = false;
                             console.log("previous latest is IN results, EXCLUDE");
                         } else {
-                            var latestSanity = false;
+                            var latestSanity = true;
                             console.log("proceeding NORMALLY");
                         }
                         var itemLowerCase = itemText.toString().toLowerCase();
                         // Find tweets with rt @user_name (retweets)
                         var retweet = itemLowerCase.search("@");
                         // Don't add "all clear" tweets to database
-                        if (retweet == -1 && !latestSanity){
+                        if (retweet == -1 && latestSanity){
                             console.log("Inserting");
                             // convert quotation marks to simple
                             itemLowerCase = itemLowerCase.replace("’","'");
