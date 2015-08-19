@@ -7,8 +7,6 @@ if (Meteor.isClient) {
 
   Meteor.startup(function () {
     console.log("PAGE refresh");
-    var test = Meteor.call("test");
-    console.log(test);
   });
 
   Template.body.helpers({
@@ -29,3 +27,4 @@ if (Meteor.isClient) {
   });
 
 }
+

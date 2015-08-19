@@ -14,3 +14,4 @@ less
 iron:router
 momentjs:moment
 nemo64:bootstrap
+percolate:synced-cron

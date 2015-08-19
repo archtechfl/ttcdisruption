@@ -21,10 +21,10 @@ if (Meteor.isServer) {
 
             // Add additional param if this is an update call
             if (latest_tweet_id){
-                console.log("_____________");
-                console.log("LATEST supplied");
-                console.log(latest_tweet_id);
-                console.log("_____________");
+                // console.log("_____________");
+                // console.log("LATEST supplied");
+                // console.log(latest_tweet_id);
+                // console.log("_____________");
                 tweetParameters["since_id"] = latest_tweet_id;
             }
 
@@ -79,12 +79,7 @@ if (Meteor.isServer) {
                 count: storageCount
             };
             return returnObj;
-          }, // end get state method
-          test: function () {
-            // General testing method for checking connectivity
-            // IMPORTANT: remove before production
-            return "testing";
-          }
+          } // end get state method
         });
     // ------------------------------------------------------------------
     // END METHODS
