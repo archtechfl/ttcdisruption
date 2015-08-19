@@ -35,12 +35,18 @@ if (Meteor.isServer) {
                         // Go through the data and add it to the Notices collection
                         // First, turn to lowercase
                         var itemText = item.text;
+                        var latestSanity = "";
                         if (latestTweetId){
                             var sanityCheckLatestTweet = (item.id === latest_tweet_id);
-                            var latestSanity = false;
-                            console.log("previous latest is IN results, EXCLUDE");
+                            if (sanityCheckLatestTweet == true){
+                                latestSanity = false;
+                                console.log("previous latest is IN results, EXCLUDE");
+                            } else {
+                                latestSanity = true;
+                                console.log("proceeding NORMALLY");
+                            }
                         } else {
-                            var latestSanity = true;
+                            latestSanity = true;
                             console.log("proceeding NORMALLY");
                         }
                         var itemLowerCase = itemText.toString().toLowerCase();
