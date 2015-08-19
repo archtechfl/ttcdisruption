@@ -6,7 +6,9 @@ if (Meteor.isClient) {
   Meteor.subscribe("notices");
 
   Meteor.startup(function () {
-    console.log("ON PAGE REFRESH");
+    console.log("PAGE refresh");
+    var test = Meteor.call("test");
+    console.log(test);
   });
 
   Template.body.helpers({
