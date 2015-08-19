@@ -130,11 +130,14 @@
         These are the only allowable formats now, must convert current format
         "Mon Aug 17 20:53:23 +0000 2015" to standard ISO
 
+        DONE - 19 August 2015
+
         */
-        var time = moment(this.time, "ddd MMM DD hh:mm:ss ZZ YYYY");
+        var time = moment(this.time);
         var month = time.format("MMM");
         var day = time.format("DD");
         var formattedTimeOfDay = time.format("hh:mm A");
+
         return {
             "day": day,
             "month": month,

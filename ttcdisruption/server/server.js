@@ -21,55 +21,64 @@ if (Meteor.isServer) {
 
             // Add additional param if this is an update call
             if (latest_tweet_id){
-                // console.log("_____________");
-                // console.log("LATEST supplied");
-                // console.log(latest_tweet_id);
-                // console.log("_____________");
+                console.log("_____________");
+                console.log("LATEST TWEET ID");
+                console.log(latest_tweet_id);
+                console.log("_____________");
                 tweetParameters["since_id"] = latest_tweet_id;
             }
 
             var totalRetrieved = 0;
 
-            for (var counter = 0; counter < 1; counter++){
-                // Search twitter user timeline "TTCalerts"
-                T.get('statuses/user_timeline',
-                    tweetParameters,
-                    // callback for Twitter API query has to be bound to Meteor as follows:
-                    Meteor.bindEnvironment(function(err, data, response) {
-                        _.each(data, function (item, index){
-                            // Go through the data and add it to the Notices collection
-                            // First, turn to lowercase
-                            var itemText = item.text;
-                            var itemLowerCase = itemText.toString().toLowerCase();
-                            // Find tweets with rt @user_name (retweets)
-                            var retweet = itemLowerCase.search("@");
-                            // Don't add "all clear" tweets to database
-                            if (retweet == -1){
-                                // convert quotation marks to simple
-                                itemLowerCase = itemLowerCase.replace("’","'");
-                                Notices.insert({
-                                    description: itemLowerCase,
-                                    time: item.created_at,
-                                    tweet_id: item.id
-                                });
-                            }
-                            if (index === 0){
-                                var newestTweet = item.id;
-                                // Update state
-                                State.update(
-                                    {purpose: "tracking"},
-                                    {
-                                        $set: {
-                                            newest_id: newestTweet,
-                                            state_time: new Date()
-                                        }
+            // Search twitter user timeline "TTCalerts"
+            T.get('statuses/user_timeline',
+                tweetParameters,
+                // callback for Twitter API query has to be bound to Meteor as follows:
+                Meteor.bindEnvironment(function(err, data, response) {
+                    _.each(data, function (item, index){
+                        // Go through the data and add it to the Notices collection
+                        // First, turn to lowercase
+                        var itemText = item.text;
+                        if (latestTweetId){
+                            var sanityCheckLatestTweet = (item.id === latest_tweet_id);
+                            var latestSanity = true;
+                            console.log("previous latest is IN results, EXCLUDE");
+                        } else {
+                            var latestSanity = false;
+                            console.log("proceeding NORMALLY");
+                        }
+                        var itemLowerCase = itemText.toString().toLowerCase();
+                        // Find tweets with rt @user_name (retweets)
+                        var retweet = itemLowerCase.search("@");
+                        // Don't add "all clear" tweets to database
+                        if (retweet == -1 && !latestSanity){
+                            console.log("Inserting");
+                            // convert quotation marks to simple
+                            itemLowerCase = itemLowerCase.replace("’","'");
+                            // Set moment on server
+                            var time = moment(item.created_at, "ddd MMM DD hh:mm:ss ZZ YYYY").toISOString();
+                            Notices.insert({
+                                description: itemLowerCase,
+                                time: time,
+                                tweet_id: item.id
+                            });
+                        }
+                        if (index === 0){
+                            var newestTweet = item.id;
+                            // Update state
+                            State.update(
+                                {purpose: "tracking"},
+                                {
+                                    $set: {
+                                        newest_id: newestTweet,
+                                        state_time: new Date()
                                     }
-                                );// End State update
-                            }
-                        });
-                    })
-                );
-            }// End loop
+                                }
+                            );// End State update
+                        }
+                    });
+                })
+            );
           },// End get tweets method
           getStateInfo: function () {
             var checkStateStorage = State.findOne({});
@@ -86,7 +95,6 @@ if (Meteor.isServer) {
     // ------------------------------------------------------------------
     // BEGIN SERVER CODE
     console.log("refreshing");
-    // Notices.remove({});
     // Establish initial state
     var checkStateStorage = Meteor.call("getStateInfo");
     if (checkStateStorage.count == 0){
@@ -95,12 +103,14 @@ if (Meteor.isServer) {
             purpose: "tracking",
             state_time: new Date()
         });
+        console.log("STATUS: getting initial tweetss");
         // begin tweet retrieval cycle for user TTCalerts
         Meteor.call("getTweets", false);
     } else {
         // begin tweet retrieval cycle for user TTCalerts starting with newest
         var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
         var latestTweetId = getLatestTweet.newest_id;
+        console.log("STATUS: getting latest tweet");
         Meteor.call("getTweets", latestTweetId);
     }
     // This code only runs on the server
