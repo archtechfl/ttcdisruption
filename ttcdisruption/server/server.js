@@ -21,10 +21,6 @@ if (Meteor.isServer) {
 
             // Add additional param if this is an update call
             if (latest_tweet_id){
-                console.log("_____________");
-                console.log("LATEST TWEET ID");
-                console.log(latest_tweet_id);
-                console.log("_____________");
                 tweetParameters["since_id"] = latest_tweet_id;
             }
 
@@ -94,7 +90,6 @@ if (Meteor.isServer) {
     // END METHODS
     // ------------------------------------------------------------------
     // BEGIN SERVER CODE
-    console.log("refreshing");
     // Establish initial state
     var checkStateStorage = Meteor.call("getStateInfo");
     if (checkStateStorage.count == 0){
@@ -103,14 +98,12 @@ if (Meteor.isServer) {
             purpose: "tracking",
             state_time: new Date()
         });
-        console.log("STATUS: getting initial tweetss");
         // begin tweet retrieval cycle for user TTCalerts
         Meteor.call("getTweets", false);
     } else {
         // begin tweet retrieval cycle for user TTCalerts starting with newest
         var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
         var latestTweetId = getLatestTweet.newest_id;
-        console.log("STATUS: getting latest tweet");
         Meteor.call("getTweets", latestTweetId);
     }
     // This code only runs on the server
