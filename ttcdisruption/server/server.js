@@ -24,8 +24,6 @@ if (Meteor.isServer) {
                 tweetParameters["since_id"] = latest_tweet_id;
             }
 
-            var totalRetrieved = 0;
-
             // Search twitter user timeline "TTCalerts"
             T.get('statuses/user_timeline',
                 tweetParameters,
@@ -40,21 +38,21 @@ if (Meteor.isServer) {
                             var sanityCheckLatestTweet = (item.id === latest_tweet_id);
                             if (sanityCheckLatestTweet == true){
                                 latestSanity = false;
-                                console.log("previous latest is IN results, EXCLUDE");
+                                // console.log("previous latest is IN results, EXCLUDE");
                             } else {
                                 latestSanity = true;
-                                console.log("proceeding NORMALLY");
+                                // console.log("proceeding NORMALLY");
                             }
                         } else {
                             latestSanity = true;
-                            console.log("proceeding NORMALLY");
+                            // console.log("proceeding NORMALLY");
                         }
                         var itemLowerCase = itemText.toString().toLowerCase();
                         // Find tweets with rt @user_name (retweets)
                         var retweet = itemLowerCase.search("@");
                         // Don't add "all clear" tweets to database
                         if (retweet == -1 && latestSanity){
-                            console.log("Inserting");
+                            // console.log("Inserting");
                             // convert quotation marks to simple
                             itemLowerCase = itemLowerCase.replace("’","'");
                             // Set moment on server
@@ -83,6 +81,12 @@ if (Meteor.isServer) {
             );
           },// End get tweets method
           getStateInfo: function () {
+            // Gets the state object that stores info about the main Notices
+            // collection, so that it doesn't have to be queried at the beginning of
+            // an update process
+            //
+            // The State is stored at the end of the update process, and read at the beginning of
+            // the next cycle
             var checkStateStorage = State.findOne({});
             var storageCount = State.find().count();
             var returnObj = {
