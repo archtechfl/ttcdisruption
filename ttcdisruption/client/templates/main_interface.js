@@ -56,6 +56,7 @@
     },
     // identify the subway line
     subwayLine: function () {
+      var text  = this.description;
       // Line storage
       var ttcSubwayLines = {
         1: "Yonge-University-Spadina",
@@ -70,10 +71,12 @@
       var lineCheck = /\d{1}/g;
       // Get the desired text block with the line number, if line number is present
       try {
-        var lineBlock = this.description.match(searchTerms)[0];
+        var lineBlock = text.match(searchTerms)[0];
         // Get the actual line number, and make sure it is registered as a number
         var lineNumber = Number(lineBlock.match(lineCheck)[0]);
       } catch(err) {
+        // Line number not included, proceed to search through station databases
+        var stationLookup = stationInfo.retrieveLineNumber(text);
         var lineNumber = 5;
       }
       return {
