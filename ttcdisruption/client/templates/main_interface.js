@@ -6,7 +6,7 @@
         // Get the text
         var text = this.description;
         // Check for line
-        var lineSearch = /(line)\s\d{1}/g;
+        var lineSearch = /(line)\s?\d{1}/g;
         // Check for trains
         var trainsExp = "trains";
         // Check for station abbreviation
@@ -66,7 +66,7 @@
         5: "no-line-provided"
       };
       // Check for the grouping of line and number, regex
-      var searchTerms = /(line)\s\d{1}/g;
+      var searchTerms = /(line)\s?\d{1}/g;
       // Line number check
       var lineCheck = /\d{1}/g;
       // Get the desired text block with the line number, if line number is present
@@ -103,6 +103,11 @@
             var busMatchEntry = item;
             var numberMatched = busMatchEntry.match(routeNumberExp)[0];
             // compare bus route name to the pairing retrived before
+            if (numberMatched === 401){
+                console.log("1) busMatchEntry: " + busMatchEntry);
+                console.log("2) numberMatched: " + numberMatched);
+                console.log("3) routeName: " + busInfo.retrieveRouteName(numberMatched));
+            }
             var routeName = busInfo.retrieveRouteName(numberMatched).toLowerCase().split(" ")[0];
             // Check to see if bus route is actually a bus route (sanity check)
             var searchArray = [routeName, "bus", "route"];

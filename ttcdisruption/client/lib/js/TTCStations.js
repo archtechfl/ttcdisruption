@@ -92,7 +92,7 @@ function StationLibrary () {
 
 StationLibrary.prototype.retrieveLineNumber = function(alert) {
     // Search through the alert for any station names
-    console.log("_________________");
+    // console.log("_________________");
     var textToSearch = alert.toLowerCase();
     var matches = [];
     _.each(this.stationList, function (lineList, index) {
@@ -114,7 +114,7 @@ StationLibrary.prototype.retrieveLineNumber = function(alert) {
     // Need to go through the matches if there are multiple stations,
     // and determine which line to apply the label to
     _.each(matches, function (item, index) {
-        console.log(item.line);
+        // console.log(item.line);
     });
 };
 

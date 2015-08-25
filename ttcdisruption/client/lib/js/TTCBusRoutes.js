@@ -184,36 +184,68 @@ function BusRoutesLibrary () {
         144: "Downtown / Don Valley Express",
         145: "Downtown / Humber Bay Express"
       };
+    this.masterList = {
+        "standard_routes": this.standard_routes,
+        "night_routes": this.night_routes,
+        "community_routes": this.community_routes,
+        "downtown_exp_routes": this.downtown_exp_routes
+    };
+    this.createIndexes();
+};
+
+BusRoutesLibrary.prototype.createIndexes = function() {
+    // Create simple index arrays for determining if route is valid
+    var self = this;
+    self.indexes = {
+        "standard_routes": [],
+        "night_routes": [],
+        "community_routes": [],
+        "downtown_exp_routes": []
+    };
+    _.each(self.masterList, function (sublist, index) {
+        _.each(sublist, function (item, subindex) {
+            self.indexes[index].push(Number(subindex));
+        });
+    });
+    console.log(self.indexes);
 };
 
 BusRoutesLibrary.prototype.retrieveRouteName = function(routeNumber) {
-    var route = routeNumber;
-    if (routeNumber >= 400){
+    var self = this;
+    var route = Number(routeNumber);
+    if (route >= 400){
+        var checkIndex = _.contains(self.indexes["community_routes"], route);
         // Community route
-        try {
-            return this.community_routes[routeNumber];
-        } catch (err) {
+        if (checkIndex){
+            return this.community_routes[route];
+        } else {
             return "invalid";
         }
-    } else if (routeNumber >= 300 && routeNumber < 400){
+    } else if (route >= 300 && route < 400){
         // Night route
-        try {
-            return this.night_routes[routeNumber];
-        } catch (err) {
+        var checkIndex = _.contains(self.indexes["night_routes"], route);
+        // Community route
+        if (checkIndex){
+            return this.night_routes[route];
+        } else {
             return "invalid";
         }
-    } else if (routeNumber > 140 && routeNumber < 146){
+    } else if (route > 140 && route < 146){
         // Downtown express
-        try {
-            return this.downtown_exp_routes[routeNumber];
-        } catch (err) {
+        var checkIndex = _.contains(self.indexes["downtown_exp_routes"], route);
+        // Community route
+        if (checkIndex){
+            return this.downtown_exp_routes[route];
+        } else {
             return "invalid";
         }
     } else {
         // Regular routes
-        try {
-            return this.standard_routes[routeNumber];
-        } catch (err) {
+        var checkIndex = _.contains(self.indexes["standard_routes"], route);
+        // Community route
+        if (checkIndex){
+            return this.standard_routes[route];
+        } else {
             return "invalid";
         }
     }
