@@ -13,6 +13,14 @@ i.fa {
 
 }
 
+.disruption-table-header {
+	background-color: @std-black;
+	color: @std-text-white;
+	th {
+		text-align: center;
+	}
+}
+
 /* Disruption list */
 
 .disruption-list {
@@ -34,9 +42,12 @@ i.fa {
 		.time-of-day {
 			font-weight: 700;
 			font-size: 1.1em;
-			padding: 1.1em;
-			min-width: 110px;
+			min-width: 115px;
 			text-align: center;
+		}
+
+		.icon-pad {
+			padding: 1.1em;
 		}
 
 		.time-month-day {
@@ -51,6 +62,26 @@ i.fa {
 		.time-month-day,
 		.description {
 			padding: 1.2em;
+		}
+
+		// Disruption icons
+		.type-involving {
+			min-width: 155px;
+			span {
+				float: left;
+			}
+			i, .icon-police {
+				margin: .1em .1em;
+			}
+			.type-text {
+				margin-left: .3em;
+			}
+			.type-icon {
+				width: 2.3em;
+			}
+			.icon-police {
+				font-size: 1.5em;
+			}
 		}
 
 	}

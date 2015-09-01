@@ -166,6 +166,51 @@
             var crossStreets = entry.split(" ");
             return crossStreets;
         }
+    },
+    disruptionType: function () {
+        // Disruption type reporting
+        var text = this.description;
+        // Track the disruption type
+        var type = "";
+        var disruptionTypes = {
+            "police": ["tps", "security", "police"],
+            "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
+            "mechanical": ["mechanical", "stalled", "broken", "track", "signal", "disabled"],
+            "automobile": ["collision", "blocking", "auto"],
+            "construction": ["construction", "repairs"],
+            "reroute": ["turning", "diverting"],
+            "medical": ["medical"],
+            "alarm": ["alarm"],
+            "resolved": ["clear"]
+        };
+        var icons = {
+            "police": "police",
+            "fire": "fire-extinguisher",
+            "mechanical": "cogs",
+            "automobile": "car",
+            "construction": "wrench",
+            "reroute": "long-arrow-right",
+            "medical": "medkit",
+            "alarm": "exclamation-triangle",
+            "resolved": "thumbs-up",
+            "other": "question"
+        }
+        var search = _.find(disruptionTypes, function(category, index){ 
+            return _.find(category, function(entry){
+                if (text.search(entry) > -1){
+                    type = index;
+                } else {
+                    type = "other";
+                }
+                return text.search(entry) > -1; 
+            }); 
+        });
+        var returnObj = {
+            "icon": icons[type],
+            "text": type,
+            "police": type === "police"
+        };
+        return returnObj;
     }
 
   });
