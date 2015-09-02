@@ -32,14 +32,16 @@ if (Meteor.isClient) {
             });
           }
         } else {
+          var time = moment().subtract(3, 'hours').toISOString();
           // Otherwise, return all of the alerts
-          return Notices.find(
+          var data = Notices.find(
             {
-              "time" : { $gte : moment().subtract(3, 'hours').toISOString() }
+              "time" : { $gte : time }
             },
             {
               sort: {time:-1}, reactive:true
             });
+          return data;
         }
     },
     currentTime: function () {
