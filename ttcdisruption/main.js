@@ -5,8 +5,14 @@ if (Meteor.isClient) {
 
   Meteor.subscribe("notices");
 
+  var clock = function () {
+    Session.set("currentTime", moment().toISOString());
+  };
+
+
   Meteor.startup(function () {
-    console.log("PAGE refresh");
+    console.log("PAGE REFRESH");
+    setInterval(clock, 1000);
   });
 
   Template.body.helpers({
@@ -27,7 +33,6 @@ if (Meteor.isClient) {
             } else {
               state = "";
             }
-            console.log(state);
             return Notices.find(
               {
                 "time" : { $gte : state }
@@ -57,7 +62,8 @@ if (Meteor.isClient) {
     },
     currentTime: function () {
         // Get the current time
-        var now = moment().format('DD MMM YYYY, h:mm:ss A');
+        var current = Session.get("currentTime");
+        var now = moment(current).format('DD MMM YYYY, h:mm:ss A');
         return now;
     }//,
     /*
