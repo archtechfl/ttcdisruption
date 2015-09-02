@@ -65,14 +65,7 @@ if (Meteor.isClient) {
         var current = Session.get("currentTime");
         var now = moment(current).format('DD MMM YYYY, h:mm:ss A');
         return now;
-    }//,
-    /*
-    timeAgo: function (number, period){
-        // Return ISO time stamps for filtering based on past range
-        var num = Number(number);
-        return moment().subtract(num, period).toISOString();
     }
-    */
   });
 
   Template.body.events({
