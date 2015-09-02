@@ -3,6 +3,7 @@ if (Meteor.isServer) {
         // BEGIN meteor methods
         Meteor.methods({
           getTweets: function (latest_tweet_id) {
+            console.log("Getting Tweets");
             var Twit = Meteor.npmRequire('twit');
 
             // Create new twitter access object
@@ -112,13 +113,29 @@ if (Meteor.isServer) {
         Meteor.call("getTweets", false);
     } else {
         // begin tweet retrieval cycle for user TTCalerts starting with newest
+
+        // SyncedCron.add({
+        //   name: 'Get newest tweets',
+        //   schedule: function(parser) {
+        //     // parser is a later.parse object
+        //     return parser.text('every 5 minutes');
+        //   },
+        //   job: function() {
+        //     var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
+        //     var latestTweetId = getLatestTweet.newest_id;
+        //     return Meteor.call("getTweets", latestTweetId);
+        //   }
+        // });
         var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
         var latestTweetId = getLatestTweet.newest_id;
-        Meteor.call("getTweets", latestTweetId);
+        console.log(latestTweetId);
+        return Meteor.call("getTweets", latestTweetId);
     }
     // This code only runs on the server
     Meteor.publish("notices", function () {
         return Notices.find();
     });// End meteor publish
+    // Start CRON job
+    // SyncedCron.start();
   });// End meteor server startup function
 }; // End is server condition
