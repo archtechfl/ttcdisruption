@@ -207,7 +207,6 @@ BusRoutesLibrary.prototype.createIndexes = function() {
             self.indexes[index].push(Number(subindex));
         });
     });
-    console.log(self.indexes);
 };
 
 BusRoutesLibrary.prototype.retrieveRouteName = function(routeNumber) {

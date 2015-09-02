@@ -77,7 +77,7 @@
       } catch(err) {
         // Line number not included, proceed to search through station databases
         var stationLookup = stationInfo.retrieveLineNumber(text);
-        var lineNumber = 5;
+        var lineNumber = stationLookup;
       }
       return {
             "name": ttcSubwayLines[lineNumber],
@@ -86,13 +86,9 @@
     },// End subway line identification
     getBus: function () {
         // bus route search regexp
-        // OLD var findBus = /\d{1,3}[a-f]?\s(\w)+/g;
         var findBus = /\d{1,3}[a-f]?\s[a-zA-Z']+/g;
         // bus matches
         var busMatch = this.description.match(findBus);
-        // Filter out minute entries
-        // 17-08-2015: need to distinguish when entries appear with road names like "Highway 7"
-
         // Create an array to store the route numbers that are found
         var routesListing = [];
         // Go through possible routes
@@ -103,11 +99,6 @@
             var busMatchEntry = item;
             var numberMatched = busMatchEntry.match(routeNumberExp)[0];
             // compare bus route name to the pairing retrived before
-            if (numberMatched === 401){
-                console.log("1) busMatchEntry: " + busMatchEntry);
-                console.log("2) numberMatched: " + numberMatched);
-                console.log("3) routeName: " + busInfo.retrieveRouteName(numberMatched));
-            }
             var routeName = busInfo.retrieveRouteName(numberMatched).toLowerCase().split(" ")[0];
             // Check to see if bus route is actually a bus route (sanity check)
             var searchArray = [routeName, "bus", "route"];
@@ -125,7 +116,34 @@
                 routesListing.push(numberMatched);
             }
         });
-        return routesListing;
+        /*
+        Need to distinguish route listings when they
+        appear in groups, such as the following:
+
+        25,51,53 routes
+        */
+        var multipleRouteNoNames = /(\d{1,3}(,*)(\s)*)+routes/g;
+        var prefaceMulti = /routes\s(\d{1,3}(,*)\s)+(and)*((\s)*\d{1,3})/g;
+        var searchMulti = this.description.search(multipleRouteNoNames);
+        var searchPreface = this.description.search(prefaceMulti);
+        if (searchMulti > -1 || searchPreface > -1){
+            if (searchMulti > -1){
+                searchMulti = this.description.match(multipleRouteNoNames);
+                if (searchMulti.length != 0){
+                    var additionalRoutes = searchMulti[0].match(/\d{1,3}/g);
+                    var combined = _.union(additionalRoutes, routesListing);
+                }
+            } else {
+                prefaceMulti = this.description.match(prefaceMulti);
+                if (prefaceMulti.length != 0){
+                    var additionalRoutes = prefaceMulti[0].match(/\d{1,3}/g);
+                    var combined = _.union(additionalRoutes, routesListing);
+                }
+            }
+            return combined;
+        } else {
+            return routesListing;
+        }
     }, // End getBus method
     getDateTime: function () {
         // Get the month and day for display
@@ -173,11 +191,11 @@
         // Track the disruption type
         var type = "";
         var disruptionTypes = {
-            "police": ["tps", "security", "police"],
+            "police": ["tps", "security", "police", "unauthorized"],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
-            "mechanical": ["mechanical", "stalled", "broken", "track", "signal", "disabled"],
+            "mechanical": ["mechanical", "stalled", "broken", "signal", "disabled"],
             "automobile": ["collision", "blocking", "auto"],
-            "construction": ["construction", "repairs"],
+            "construction": ["construction", "repairs", "track"],
             "reroute": ["turning", "diverting"],
             "medical": ["medical"],
             "alarm": ["alarm"],
@@ -185,7 +203,7 @@
         };
         var icons = {
             "police": "police",
-            "fire": "fire-extinguisher",
+            "fire": "fire",
             "mechanical": "cogs",
             "automobile": "car",
             "construction": "wrench",

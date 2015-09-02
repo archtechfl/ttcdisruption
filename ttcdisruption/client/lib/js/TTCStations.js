@@ -1,5 +1,4 @@
 function StationLibrary () {
-    console.log("New station library");
     var lineOne = [
         "Downsview",
         "Wilson",
@@ -91,8 +90,6 @@ function StationLibrary () {
 };
 
 StationLibrary.prototype.retrieveLineNumber = function(alert) {
-    // Search through the alert for any station names
-    // console.log("_________________");
     var textToSearch = alert.toLowerCase();
     var matches = [];
     _.each(this.stationList, function (lineList, index) {
@@ -105,17 +102,13 @@ StationLibrary.prototype.retrieveLineNumber = function(alert) {
             }
         });
     });
-    var lineCount = [
-        {line: 1, count: 0},
-        {line: 2, count: 0},
-        {line: 3, count: 0},
-        {line: 4, count: 0}
-    ];
-    // Need to go through the matches if there are multiple stations,
-    // and determine which line to apply the label to
-    _.each(matches, function (item, index) {
-        // console.log(item.line);
-    });
+    // if there is one match, that is the line
+    var lengthMatches = matches.length;
+    if (lengthMatches === 1){
+        return matches[0].line;
+    } else {
+        return 5;
+    }
 };
 
 stationInfo = new StationLibrary();
