@@ -11,6 +11,14 @@
 	  		<span>Last refreshed: </span>
 	  		<p>{{ currentTime }}</p>
 	  	</div>
+	  	<div class="ui-control">
+		  	<select>
+			  	<option value="{{timeAgo '3' 'hours'}}" selected>Last 3 Hours</option>
+			  	<option value="{{timeAgo '24' 'hours'}}">Last 24 Hours</option>
+			  	<option value="{{timeAgo '1' 'week'}}">Last Week</option>
+			  	<option value="all">All alerts</option>
+			</select>
+		</div>
 	  	<table class="table table-bordered disruption-list">
 	  		<!-- 
 	  		Police icon courtesy OCHA Visual Information Unit, Public Domain

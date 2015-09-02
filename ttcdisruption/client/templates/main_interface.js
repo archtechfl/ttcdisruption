@@ -224,10 +224,6 @@ Template.ttcdisruption.helpers({
             return _.find(category, function(entry){
                 if (text.search(entry) > -1){
                     type = index;
-                    if (type === "police"){
-                        console.log(entry);
-                        console.log(text);
-                    }
                 } else {
                     type = "other";
                 }
