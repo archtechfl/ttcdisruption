@@ -3,6 +3,7 @@ if (Meteor.isServer) {
         // BEGIN meteor methods
         Meteor.methods({
           getTweets: function (latest_tweet_id) {
+            console.log("Latest ID: " + latest_tweet_id);
             var Twit = Meteor.npmRequire('twit');
 
             // Create new twitter access object
@@ -34,7 +35,7 @@ if (Meteor.isServer) {
                         // First, turn to lowercase
                         var itemText = item.text;
                         var latestSanity = "";
-                        if (latestTweetId){
+                        if (latest_tweet_id){
                             var sanityCheckLatestTweet = (item.id === latest_tweet_id);
                             if (sanityCheckLatestTweet == true){
                                 latestSanity = false;
@@ -125,7 +126,7 @@ if (Meteor.isServer) {
           name: 'Testing',
           schedule: function(parser) {
             // parser is a later.parse object
-            return parser.text('every 5 minutes');
+            return parser.text('every 30 seconds');
           },
           job: function() {
             var tester = testCron();
