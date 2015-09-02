@@ -9,8 +9,18 @@
 					<span class="time-month">{{ getDateTime.month }}</span>
 					<span class="time-day">{{ getDateTime.day }}</span>
 				</td>
-				<td class="time-of-day">{{ getDateTime.time }}</td>
-				<td class="description">{{{ description }}}</td>
+				<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
+				<td class="type-involving icon-pad">
+					<span class="type-icon">
+						{{#if disruptionType.police }}
+							<span class="icon-police"></span>
+						{{else}}
+							<i class="fa fa-{{ disruptionType.icon }}"></i>
+						{{/if}}
+					</span>
+					<span class="type-text">{{ disruptionType.text }}</span>
+				</td>
+				<td class="description">{{{ formattedDescription }}}</td>
 				<!-- {{#each getIntersection}}
 					<td class="cross-street">{{.}}</td>
 				{{/each}} -->
@@ -28,8 +38,18 @@
 					<span class="time-month">{{ getDateTime.month }}</span>
 					<span class="time-day">{{ getDateTime.day }}</span>
 				</td>
-				<td class="time-of-day">{{ getDateTime.time }}</td>
-				<td class="description">{{{ description }}}</td>
+				<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
+				<td class="type-involving icon-pad">
+					<span class="type-icon">
+						{{#if disruptionType.police }}
+							<span class="icon-police"></span>
+						{{else}}
+							<i class="fa fa-{{ disruptionType.icon }}"></i>
+						{{/if}}
+					</span>
+					<span class="type-text">{{ disruptionType.text }}</span>
+				</td>
+				<td class="description">{{{ formattedDescription }}}</td>
 			</tr>
 			{{else}}
 				<tr class="disruption-entry bus-entry">
@@ -45,8 +65,18 @@
 						<span class="time-month">{{ getDateTime.month }}</span>
 						<span class="time-day">{{ getDateTime.day }}</span>
 					</td>
-					<td class="time-of-day">{{ getDateTime.time }}</td>
-					<td class="description">{{{ description }}}</td>
+					<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
+					<td class="type-involving icon-pad">
+						<span class="type-icon">
+						{{#if disruptionType.police }}
+							<span class="icon-police"></span>
+						{{else}}
+							<i class="fa fa-{{ disruptionType.icon }}"></i>
+						{{/if}}
+					</span>
+						<span class="type-text">{{ disruptionType.text }}</span>
+					</td>
+					<td class="description">{{{ formattedDescription }}}</td>
 					<!-- {{#each getIntersection}}
 						<td class="cross-street">{{.}}</td>
 					{{/each}} -->

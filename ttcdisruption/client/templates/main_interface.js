@@ -1,4 +1,11 @@
-  Template.ttcdisruption.helpers({
+function formatDescription (text) {
+    var text = text;
+    formattedText = text.replace(/http:\/\/.+/g, "");
+    formattedText = formattedText.replace(/\#ttc/g, "");
+    return formattedText;
+};
+
+Template.ttcdisruption.helpers({
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
         // Track the presence of key terms
@@ -6,7 +13,7 @@
         // Get the text
         var text = this.description;
         // Check for line
-        var lineSearch = /(line)\s\d{1}/g;
+        var lineSearch = /(line)\s?\d{1}/g;
         // Check for trains
         var trainsExp = "trains";
         // Check for station abbreviation
@@ -56,6 +63,7 @@
     },
     // identify the subway line
     subwayLine: function () {
+      var text  = this.description;
       // Line storage
       var ttcSubwayLines = {
         1: "Yonge-University-Spadina",
@@ -65,16 +73,18 @@
         5: "no-line-provided"
       };
       // Check for the grouping of line and number, regex
-      var searchTerms = /(line)\s\d{1}/g;
+      var searchTerms = /(line)\s?\d{1}/g;
       // Line number check
       var lineCheck = /\d{1}/g;
       // Get the desired text block with the line number, if line number is present
       try {
-        var lineBlock = this.description.match(searchTerms)[0];
+        var lineBlock = text.match(searchTerms)[0];
         // Get the actual line number, and make sure it is registered as a number
         var lineNumber = Number(lineBlock.match(lineCheck)[0]);
       } catch(err) {
-        var lineNumber = 5;
+        // Line number not included, proceed to search through station databases
+        var stationLookup = stationInfo.retrieveLineNumber(text);
+        var lineNumber = stationLookup;
       }
       return {
             "name": ttcSubwayLines[lineNumber],
@@ -83,13 +93,9 @@
     },// End subway line identification
     getBus: function () {
         // bus route search regexp
-        // OLD var findBus = /\d{1,3}[a-f]?\s(\w)+/g;
         var findBus = /\d{1,3}[a-f]?\s[a-zA-Z']+/g;
         // bus matches
         var busMatch = this.description.match(findBus);
-        // Filter out minute entries
-        // 17-08-2015: need to distinguish when entries appear with road names like "Highway 7"
-
         // Create an array to store the route numbers that are found
         var routesListing = [];
         // Go through possible routes
@@ -117,7 +123,34 @@
                 routesListing.push(numberMatched);
             }
         });
-        return routesListing;
+        /*
+        Need to distinguish route listings when they
+        appear in groups, such as the following:
+
+        25,51,53 routes
+        */
+        var multipleRouteNoNames = /(\d{1,3}(,*)(\s)*)+routes/g;
+        var prefaceMulti = /routes\s(\d{1,3}(,*)\s)+(and)*((\s)*\d{1,3})/g;
+        var searchMulti = this.description.search(multipleRouteNoNames);
+        var searchPreface = this.description.search(prefaceMulti);
+        if (searchMulti > -1 || searchPreface > -1){
+            if (searchMulti > -1){
+                searchMulti = this.description.match(multipleRouteNoNames);
+                if (searchMulti.length != 0){
+                    var additionalRoutes = searchMulti[0].match(/\d{1,3}/g);
+                    var combined = _.union(additionalRoutes, routesListing);
+                }
+            } else {
+                prefaceMulti = this.description.match(prefaceMulti);
+                if (prefaceMulti.length != 0){
+                    var additionalRoutes = prefaceMulti[0].match(/\d{1,3}/g);
+                    var combined = _.union(additionalRoutes, routesListing);
+                }
+            }
+            return combined;
+        } else {
+            return routesListing;
+        }
     }, // End getBus method
     getDateTime: function () {
         // Get the month and day for display
@@ -158,6 +191,55 @@
             var crossStreets = entry.split(" ");
             return crossStreets;
         }
+    },
+    disruptionType: function () {
+        // Disruption type reporting
+        var text = formatDescription(this.description);
+        // Track the disruption type
+        var type = "";
+        var disruptionTypes = {
+            "police": ["tps", "security", "police", "unauthorized"],
+            "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
+            "mechanical": ["mechanical", "stalled", "broken", "signal", "disabled"],
+            "automobile": ["collision", "blocking", "auto"],
+            "construction": ["construction", "repairs", "track"],
+            "reroute": ["turning", "diverting"],
+            "medical": ["medical"],
+            "alarm": ["alarm"],
+            "resolved": ["clear"]
+        };
+        var icons = {
+            "police": "police",
+            "fire": "fire",
+            "mechanical": "cogs",
+            "automobile": "car",
+            "construction": "wrench",
+            "reroute": "long-arrow-right",
+            "medical": "medkit",
+            "alarm": "exclamation-triangle",
+            "resolved": "thumbs-up",
+            "other": "question"
+        }
+        var search = _.find(disruptionTypes, function(category, index){ 
+            return _.find(category, function(entry){
+                if (text.search(entry) > -1){
+                    type = index;
+                } else {
+                    type = "other";
+                }
+                return text.search(entry) > -1; 
+            }); 
+        });
+        var returnObj = {
+            "icon": icons[type],
+            "text": type,
+            "police": type === "police"
+        };
+        return returnObj;
+    },
+    formattedDescription: function () {
+        // Format description
+        return formatDescription(this.description);
     }
 
   });
