@@ -1,4 +1,11 @@
-  Template.ttcdisruption.helpers({
+function formatDescription (text) {
+    var text = text;
+    formattedText = text.replace(/http:\/\/.+/g, "");
+    formattedText = formattedText.replace(/\#ttc/g, "");
+    return formattedText;
+};
+
+Template.ttcdisruption.helpers({
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
         // Track the presence of key terms
@@ -187,7 +194,7 @@
     },
     disruptionType: function () {
         // Disruption type reporting
-        var text = this.description;
+        var text = formatDescription(this.description);
         // Track the disruption type
         var type = "";
         var disruptionTypes = {
@@ -217,6 +224,10 @@
             return _.find(category, function(entry){
                 if (text.search(entry) > -1){
                     type = index;
+                    if (type === "police"){
+                        console.log(entry);
+                        console.log(text);
+                    }
                 } else {
                     type = "other";
                 }
@@ -229,6 +240,10 @@
             "police": type === "police"
         };
         return returnObj;
+    },
+    formattedDescription: function () {
+        // Format description
+        return formatDescription(this.description);
     }
 
   });

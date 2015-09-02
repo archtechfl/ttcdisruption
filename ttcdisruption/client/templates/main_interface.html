@@ -20,7 +20,7 @@
 					</span>
 					<span class="type-text">{{ disruptionType.text }}</span>
 				</td>
-				<td class="description">{{{ description }}}</td>
+				<td class="description">{{{ formattedDescription }}}</td>
 				<!-- {{#each getIntersection}}
 					<td class="cross-street">{{.}}</td>
 				{{/each}} -->
@@ -49,7 +49,7 @@
 					</span>
 					<span class="type-text">{{ disruptionType.text }}</span>
 				</td>
-				<td class="description">{{{ description }}}</td>
+				<td class="description">{{{ formattedDescription }}}</td>
 			</tr>
 			{{else}}
 				<tr class="disruption-entry bus-entry">
@@ -76,7 +76,7 @@
 					</span>
 						<span class="type-text">{{ disruptionType.text }}</span>
 					</td>
-					<td class="description">{{{ description }}}</td>
+					<td class="description">{{{ formattedDescription }}}</td>
 					<!-- {{#each getIntersection}}
 						<td class="cross-street">{{.}}</td>
 					{{/each}} -->

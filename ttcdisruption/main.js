@@ -13,10 +13,13 @@ if (Meteor.isClient) {
     // Helpers go here
     // Get a list of TTC notices into the browser
     notices: function () {
-      return Notices.find({},
-      {
-        sort: {time:-1}, reactive:true
-      });
+      return Notices.find(
+        {
+          "time" : { $gte : moment().subtract(24, 'hours').toISOString() }
+        },
+        {
+          sort: {time:-1}, reactive:true
+        });
     },
     currentTime: function () {
         // Get the current time
