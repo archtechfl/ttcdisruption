@@ -114,34 +114,32 @@ if (Meteor.isServer) {
     } else {
         // begin tweet retrieval cycle for user TTCalerts starting with newest
         var testCron = function () {
-            console.log("______________");
-            console.log("test!");
+            // console.log("______________");
+            // console.log("test!");
             var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
             var latestTweetId = getLatestTweet.newest_id;
-            console.log(latestTweetId);
+            // console.log(latestTweetId);
             Meteor.call("getTweets", latestTweetId);
-            console.log("______________");
+            // console.log("______________");
         };
         SyncedCron.add({
-          name: 'Testing',
+          name: 'Update feed',
           schedule: function(parser) {
             // parser is a later.parse object
-            return parser.text('every 30 seconds');
+            return parser.text('every 2 minutes');
           },
           job: function() {
             var tester = testCron();
             return tester;
           }
         });
-        // begin tweet retrieval cycle for user TTCalerts starting with newest
-        // var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
-        // var latestTweetId = getLatestTweet.newest_id;
-        // Meteor.call("getTweets", latestTweetId);
     }
     // This code only runs on the server
     Meteor.publish("notices", function () {
         return Notices.find();
     });// End meteor publish
+    // Start CRON job
     SyncedCron.start();
+    // Start CRON job
   });// End meteor server startup function
 }; // End is server condition
