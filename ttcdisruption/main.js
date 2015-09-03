@@ -5,8 +5,14 @@ if (Meteor.isClient) {
 
   Meteor.subscribe("notices");
 
+  var clock = function () {
+    Session.set("currentTime", moment().toISOString());
+  };
+
+
   Meteor.startup(function () {
-    console.log("PAGE refresh");
+    console.log("PAGE REFRESH");
+    setInterval(clock, 1000);
   });
 
   Template.body.helpers({
@@ -15,8 +21,18 @@ if (Meteor.isClient) {
     notices: function () {
         if (Session.get("displayState")) {
           // Filter alerts based on visibility selection
-          var state = Session.get("displayState");
+          var state = Number(Session.get("displayState"));
+          var time = "";
           if (state != "all"){
+            if (state === 1){
+              state = moment().subtract(3, 'hours').toISOString();
+            } else if (state === 2){
+              state = moment().subtract(24, 'hours').toISOString();
+            } else if (state === 3){
+              state = moment().subtract(1, 'week').toISOString();
+            } else {
+              state = "";
+            }
             return Notices.find(
               {
                 "time" : { $gte : state }
@@ -46,13 +62,9 @@ if (Meteor.isClient) {
     },
     currentTime: function () {
         // Get the current time
-        var now = moment().format('DD MMM YYYY, h:mm:ss A');
+        var current = Session.get("currentTime");
+        var now = moment(current).format('DD MMM YYYY, h:mm:ss A');
         return now;
-    },
-    timeAgo: function (number, period){
-        // Return ISO time stamps for filtering based on past range
-        var num = Number(number);
-        return moment().subtract(num, period).toISOString();
     }
   });
 
