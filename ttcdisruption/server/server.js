@@ -113,7 +113,7 @@ if (Meteor.isServer) {
         Meteor.call("getTweets", false);
     } else {
         // begin tweet retrieval cycle for user TTCalerts starting with newest
-        var testCron = function () {
+        var newestTweetsCron = function () {
             // console.log("______________");
             // console.log("test!");
             var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
@@ -129,8 +129,8 @@ if (Meteor.isServer) {
             return parser.text('every 2 minutes');
           },
           job: function() {
-            var tester = testCron();
-            return tester;
+            var refresher = newestTweetsCron();
+            return refresher;
           }
         });
     }
