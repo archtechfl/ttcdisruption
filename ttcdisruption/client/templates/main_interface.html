@@ -3,7 +3,11 @@
 		<tr class="disruption-entry streetcar-entry">
 				<td class="icon"><i class="fa fa-train"></i></td>
 				<td class="route-numbers">
-					<div class="streetcar-line-number">{{ streetcarNumber }}</div>
+					<div class="streetcar-routes-affected">
+					{{#each streetcarNumber}}
+						<div class="streetcar-line-number">{{.}}</div>
+					{{/each}}
+					</div>
 				</td>
 				<td class="time-month-day">
 					<span class="time-month">{{ getDateTime.month }}</span>
