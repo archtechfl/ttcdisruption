@@ -20,12 +20,14 @@ Template.ttcdisruption.helpers({
         var stationAbbr = "stn";
         // Check for station wording
         var stationFull = "station";
+        // Subway wording
+        var subwayWord = "subway";
         // Check for elevator
         var elevatorTerm = "elevator";
         // Check for platform
         var platformTerm = "platform";
         // Search terms array
-        var searchArray = [lineSearch, trainsExp, stationAbbr, stationFull, elevatorTerm, platformTerm];
+        var searchArray = [lineSearch, trainsExp, stationAbbr, stationFull, elevatorTerm, platformTerm, subwayWord];
         // Check the text for either search term that might indicate subway
         _.each(searchArray, function (item) {
             var result = text.search(item);
@@ -34,8 +36,20 @@ Template.ttcdisruption.helpers({
                 tracker.push(result);
             }
         });
-        // If the tracker is greater than 0, there are matches
-        if (tracker.length > 0){
+        // Check to make sure that the reference isn't to a bus
+        var busSearch = ["diverting"];
+        var busTracker = [];
+        // Check the text for either search term that might indicate bus
+        _.each(busSearch, function (item) {
+            var result = text.search(item);
+            // If there is a valid search term, add it to the bus tracker
+            if (result != -1){
+                busTracker.push(result);
+            }
+        });
+        // If the tracker is greater than 0 and bus tracker is nil, 
+        // there is a subway entry
+        if (tracker.length > 0 && busTracker.length === 0){
           return true;
         } else {
           return false;
@@ -215,6 +229,7 @@ Template.ttcdisruption.helpers({
             "reroute": ["turning", "diverting"],
             "medical": ["medical"],
             "alarm": ["alarm"],
+            "delay": ["holding", "longer"],
             "resolved": ["clear"]
         };
         var icons = {
@@ -225,6 +240,7 @@ Template.ttcdisruption.helpers({
             "construction": "wrench",
             "reroute": "long-arrow-right",
             "medical": "medkit",
+            "delay": "clock-o",
             "alarm": "exclamation-triangle",
             "resolved": "thumbs-up",
             "other": "question"
