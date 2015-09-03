@@ -109,7 +109,8 @@ if (Meteor.isServer) {
             purpose: "tracking",
             state_time: new Date()
         });
-        // begin tweet retrieval cycle for user TTCalerts
+        // begin tweet retrieval cycle for user TTCalerts, for first time
+        // This would only occur with a fresh database
         Meteor.call("getTweets", false);
     } else {
         // begin tweet retrieval cycle for user TTCalerts starting with newest
@@ -122,6 +123,7 @@ if (Meteor.isServer) {
             Meteor.call("getTweets", latestTweetId);
             // console.log("______________");
         };
+        // Update the tweet database every 2 minutes
         SyncedCron.add({
           name: 'Update feed',
           schedule: function(parser) {
@@ -134,12 +136,11 @@ if (Meteor.isServer) {
           }
         });
     }
-    // This code only runs on the server
+    // Publish the notices collection to client
     Meteor.publish("notices", function () {
         return Notices.find();
     });// End meteor publish
     // Start CRON job
     SyncedCron.start();
-    // Start CRON job
   });// End meteor server startup function
 }; // End is server condition
