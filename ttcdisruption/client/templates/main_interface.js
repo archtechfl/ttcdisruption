@@ -46,7 +46,7 @@ Template.ttcdisruption.helpers({
         // Get the text
         var text = this.description;
         // Check for mention of a streetcar line number, ex "501"
-        var streetcarCheck = text.search(/(5{1}\d{2})/);
+        var streetcarCheck = text.search(/(5{1}\d{2})/g);
         // If there is a stretcar line number, results will be 0 or greater
         if (streetcarCheck != -1){
           return true;
@@ -58,8 +58,17 @@ Template.ttcdisruption.helpers({
     streetcarNumber: function () {
         // Get the text
         var text = this.description;
-        var streetcarNum = text.match(/(5{1}\d{2})/)[0];
-        return streetcarNum;
+        var routeListing = [];
+        var streetcarNum = text.match(/(5{1}\d{2})/g);
+        // Handle how many streetcar routes may be involved
+        if (streetcarNum.length > 0){
+            _.each(streetcarNum, function (item, index) {
+                routeListing.push(item);
+            });
+        } else {
+            routeListing.push(0);
+        }
+        return routeListing;
     },
     // identify the subway line
     subwayLine: function () {
