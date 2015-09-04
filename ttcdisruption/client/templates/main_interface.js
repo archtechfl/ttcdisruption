@@ -226,8 +226,8 @@ Template.ttcdisruption.helpers({
         var disruptionTypes = {
             "police": ["tps", "security", "police", "unauthorized"],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
-            "mechanical": ["mechanical", "stalled", "broken", "signal", "disabled"],
             "automobile": ["collision", "blocking", "auto"],
+            "mechanical": ["mechanical", "stalled", "broken", "signal", "disabled"],
             "construction": ["construction", "repairs", "track"],
             "reroute": ["diverting"],
             "surface_stoppage": ["turning back"],
