@@ -131,7 +131,8 @@ function BusRoutesLibrary () {
         171: "Mt Dennis",
         172: "Cherry Street",
         190: "Scarborough Centre Rocket",
-        191: "Highway 27 Rocket",
+        191: "Hwy 27 Rocket",
+        // 191: "Highway 27 Rocket",
         192: "Airport Rocket",
         193: "Exhibition Rocket",
         194: "Aquatics Centre Rocket",
@@ -243,6 +244,7 @@ BusRoutesLibrary.prototype.retrieveRouteName = function(routeNumber) {
         var checkIndex = _.contains(self.indexes["standard_routes"], route);
         // Community route
         if (checkIndex){
+            console.log(this.standard_routes[route]);
             return this.standard_routes[route];
         } else {
             return "invalid";
