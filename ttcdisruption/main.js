@@ -11,7 +11,6 @@ if (Meteor.isClient) {
 
 
   Meteor.startup(function () {
-    console.log("PAGE REFRESH");
     setInterval(clock, 1000);
   });
 
@@ -22,7 +21,6 @@ if (Meteor.isClient) {
         if (Session.get("displayState")) {
           // Filter alerts based on visibility selection
           var state = Number(Session.get("displayState"));
-          console.log("STATE: " + state);
           if (state != 4){
             if (state === 1){
               state = moment().subtract(3, 'hours').toISOString();
@@ -41,7 +39,6 @@ if (Meteor.isClient) {
                 sort: {time:-1}, reactive:true
               });
           } else {
-            console.log("NO STATE ENTRY");
             return Notices.find(
             {},
             {
@@ -49,7 +46,6 @@ if (Meteor.isClient) {
             });
           }
         } else {
-          console.log("DEFAULT");
           var time = moment().subtract(3, 'hours').toISOString();
           // Otherwise, return all of the alerts
           var data = Notices.find(
