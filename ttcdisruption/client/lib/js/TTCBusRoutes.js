@@ -244,6 +244,7 @@ BusRoutesLibrary.prototype.retrieveRouteName = function(routeNumber) {
         var checkIndex = _.contains(self.indexes["standard_routes"], route);
         // Community route
         if (checkIndex){
+            console.log(this.standard_routes[route]);
             return this.standard_routes[route];
         } else {
             return "invalid";

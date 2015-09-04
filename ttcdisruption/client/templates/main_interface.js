@@ -116,7 +116,7 @@ Template.ttcdisruption.helpers({
     },// End subway line identification
     getBus: function () {
         // bus route search regexp
-        var findBus = /\d{1,3}[a-f]?\s[a-zA-Z']+/g;
+        var findBus = /\d{1,3}[a-f]?\s+[a-zA-Z']+/g;
         // bus matches
         var busMatch = this.description.match(findBus);
         // Create an array to store the route numbers that are found
@@ -172,6 +172,13 @@ Template.ttcdisruption.helpers({
             }
             return combined;
         } else {
+            if (routesListing.length === 0){
+                // console.log(busMatch);
+            }
+            console.log("____________");
+            console.log(this.description);
+            console.log(routesListing);
+            console.log("____________");
             return routesListing;
         }
     }, // End getBus method
@@ -226,7 +233,8 @@ Template.ttcdisruption.helpers({
             "mechanical": ["mechanical", "stalled", "broken", "signal", "disabled"],
             "automobile": ["collision", "blocking", "auto"],
             "construction": ["construction", "repairs", "track"],
-            "reroute": ["turning", "diverting"],
+            "reroute": ["diverting"],
+            "surface_stoppage": ["turning back"],
             "medical": ["medical"],
             "alarm": ["alarm"],
             "delay": ["holding", "longer"],
@@ -243,6 +251,7 @@ Template.ttcdisruption.helpers({
             "delay": "clock-o",
             "alarm": "exclamation-triangle",
             "resolved": "thumbs-up",
+            "surface_stoppage": "refresh",
             "other": "question"
         }
         var search = _.find(disruptionTypes, function(category, index){ 
