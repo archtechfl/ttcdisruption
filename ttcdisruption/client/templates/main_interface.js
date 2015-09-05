@@ -35,17 +35,9 @@ Template.ttcdisruption.helpers({
         });
         // If the tracker is greater than 0 and bus tracker is nil, 
         // there is a subway entry
-        // console.log("__________");
-        // console.log(tracker);
         if (tracker.length > 0 && excludeTracker.length === 0){
-            // console.log("Subway");
-            // console.log(text);
-            // console.log("__________");
             return true;
         } else {
-            // console.log("Not Subway");
-            // console.log(text);
-            // console.log("__________");
             return false;
         }
     },
@@ -200,19 +192,44 @@ Template.ttcdisruption.helpers({
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /((at)\s[\w\s']+(and)\s[\w\s']+)/g;
+        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s']+)/g;
+        var intersectionExpB = /(\s(on)\s(\w|\s)+(at\s)(\w)+)/g;
         // Get text and search
         var text = this.description;
+        console.log(text);
         var intersection = text.match(intersectionExpA);
+        var intersectionB = text.match(intersectionExpB);
         // Create an array of search terms for divisions 
         var descriptionDividers = ["due", "has"];
         if (intersection){
             var entry = intersection[0];
-            // console.log(entry);
-            entry = entry.replace("at ", "");
-            entry = entry.replace("and ", "");
-            var crossStreets = entry.split("due");
+            console.log(entry);
+            // Check for multiple "at" and select the second group is present
+            var multipleAtCheck = entry.match(/\s(at)\s/g).length;
+            if (multipleAtCheck > 1){
+                entry = entry.split( "at ")[2];
+            }
+            // End multiple at
+            entry = entry.replace(" at ", "");
+            var crossStreets = [];
+            if (entry.search(" and ") > -1){
+                crossStreets = entry.split(" and ");
+            } else {
+                crossStreets = entry.split(" &amp; ");
+            }
+            _.each(crossStreets, function (item, index){
+                // Remove "has cleared" or any other combinations
+                var currentStreet = crossStreets[index];
+                crossStreets[index] = currentStreet.replace(/(\s(((has)|(is))|(due to))\s.+)/g, "");
+            });
             return crossStreets;
+        } else if (intersectionB) {
+            var entry = intersectionB[0];
+            entry = entry.replace(" on ", "");
+            var crossStreets = entry.split(" at ");
+            return crossStreets;
+        } else {
+            return [];
         }
     },
     disruptionType: function () {
