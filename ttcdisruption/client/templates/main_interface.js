@@ -192,7 +192,10 @@ Template.ttcdisruption.helpers({
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s']+)/g;
+        // Old
+        // var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s']+)/g;
+        // New
+        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s']+((and)|(&amp;))*[\w\s']+)/g;
         var intersectionExpB = /(\s(on)\s(\w|\s)+(at\s)(\w)+)/g;
         // Get text and search
         var text = this.description;
@@ -203,32 +206,37 @@ Template.ttcdisruption.helpers({
         var descriptionDividers = ["due", "has"];
         if (intersection){
             var entry = intersection[0];
-            console.log(entry);
             // Check for multiple "at" and select the second group is present
             var multipleAtCheck = entry.match(/\s(at)\s/g).length;
             if (multipleAtCheck > 1){
                 entry = entry.split( "at ")[2];
             }
-            // End multiple at
+            // End multiple at condition
+            // replace "at" with blank text
             entry = entry.replace(" at ", "");
             var crossStreets = [];
+            // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
             } else {
                 crossStreets = entry.split(" &amp; ");
             }
+            // Go through cross streets and remove unnecessary text not referring to streets
             _.each(crossStreets, function (item, index){
                 // Remove "has cleared" or any other combinations
                 var currentStreet = crossStreets[index];
                 crossStreets[index] = currentStreet.replace(/(\s(((has)|(is))|(due to))\s.+)/g, "");
             });
+            // return cross street array
             return crossStreets;
         } else if (intersectionB) {
             var entry = intersectionB[0];
+            // Handle "on" street condition
             entry = entry.replace(" on ", "");
             var crossStreets = entry.split(" at ");
             return crossStreets;
         } else {
+            // return blank if nothing satisfied
             return [];
         }
     },
