@@ -9,50 +9,44 @@ Template.ttcdisruption.helpers({
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
         // Track the presence of key terms
-        var tracker = [];
+        var tracker = "";
         // Get the text
         var text = this.description;
-        // Check for line
-        var lineSearch = /(line)\s?\d{1}/g;
-        // Check for trains
-        var trainsExp = "trains";
-        // Check for station abbreviation
-        var stationAbbr = "stn";
-        // Check for station wording
-        var stationFull = "station";
-        // Subway wording
-        var subwayWord = "subway";
-        // Check for elevator
-        var elevatorTerm = "elevator";
-        // Check for platform
-        var platformTerm = "platform";
-        // Search terms array
-        var searchArray = [lineSearch, trainsExp, stationAbbr, stationFull, elevatorTerm, platformTerm, subwayWord];
+        // Search terms object
+        var searchTerms = {
+            "line search": /(line)\s?\d{1}/g,
+            "trains": "trains",
+            "station abbreviation": "stn",
+            "station full": "station",
+            "subway": "subway",
+            "elevator": "elevator",
+            "platform": "platform"
+        };
         // Check the text for either search term that might indicate subway
-        _.each(searchArray, function (item) {
-            var result = text.search(item);
-            // If there is a valid search term, add it to the tracker
-            if (result != -1){
-                tracker.push(result);
-            }
+        tracker = _.filter(searchTerms, function(term, index){ 
+            return text.search(term) > -1;
         });
-        // Check to make sure that the reference isn't to a bus
-        var busSearch = ["diverting"];
-        var busTracker = [];
+        // Check to make sure that the reference isn't to a bus or go station
+        var sanityExclude = ["diverting", "go station"];
+        var excludeTracker = [];
         // Check the text for either search term that might indicate bus
-        _.each(busSearch, function (item) {
-            var result = text.search(item);
-            // If there is a valid search term, add it to the bus tracker
-            if (result != -1){
-                busTracker.push(result);
-            }
+        excludeTracker = _.filter(sanityExclude, function(term){ 
+            return text.search(term) > -1;
         });
         // If the tracker is greater than 0 and bus tracker is nil, 
         // there is a subway entry
-        if (tracker.length > 0 && busTracker.length === 0){
-          return true;
+        // console.log("__________");
+        // console.log(tracker);
+        if (tracker.length > 0 && excludeTracker.length === 0){
+            // console.log("Subway");
+            // console.log(text);
+            // console.log("__________");
+            return true;
         } else {
-          return false;
+            // console.log("Not Subway");
+            // console.log(text);
+            // console.log("__________");
+            return false;
         }
     },
     // Check if the alert is related to a streetcar
@@ -206,15 +200,18 @@ Template.ttcdisruption.helpers({
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /((at)\s\w+\s(and)\s\w+)/g;
+        var intersectionExpA = /((at)\s[\w\s']+(and)\s[\w\s']+)/g;
         // Get text and search
         var text = this.description;
         var intersection = text.match(intersectionExpA);
+        // Create an array of search terms for divisions 
+        var descriptionDividers = ["due", "has"];
         if (intersection){
             var entry = intersection[0];
+            // console.log(entry);
             entry = entry.replace("at ", "");
             entry = entry.replace("and ", "");
-            var crossStreets = entry.split(" ");
+            var crossStreets = entry.split("due");
             return crossStreets;
         }
     },
