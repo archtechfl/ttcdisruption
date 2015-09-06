@@ -1,7 +1,7 @@
 function formatDescription (text) {
     var text = text;
     formattedText = text.replace(/http:\/\/.+/g, "");
-    formattedText = formattedText.replace(/\#ttc/g, "");
+    formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
     return formattedText;
 };
 
@@ -191,10 +191,10 @@ Template.ttcdisruption.helpers({
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /(\s(at)\s[\w\.\s']+((and)|(&amp;))\s[\w\.\s']+((and)|(&amp;))*[\w\.\s\']+(?=.))/g;
-        var intersectionExpB = /(\s(on)\s(\w|\s)+(at\s)(\w)+)/g;
+        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s\'\,]+((and)|(&amp;))*[\w\s\'\,]+)/g;
+        var intersectionExpB = /(\s(on)\s[\w\s]+(at\s)[\w\s]+)/g;
         // Get text and search
-        var text = this.description;
+        var text = this.description.replace("st.","st");
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
@@ -219,12 +219,6 @@ Template.ttcdisruption.helpers({
             } else {
                 crossStreets = entry.split(" &amp; ");
             }
-            // Go through cross streets and remove unnecessary text not referring to streets
-            _.each(crossStreets, function (item, index){
-                // Remove "has cleared" or any other combinations
-                var currentStreet = crossStreets[index];
-                crossStreets[index] = currentStreet.replace(/(\s(((has)|(is))|(due to))\s.+)/g, "");
-            });
             // return cross street array
             returnArray = crossStreets;
         } else if (intersectionB) {
@@ -237,10 +231,16 @@ Template.ttcdisruption.helpers({
             // return blank if nothing satisfied
             returnArray = [];
         }
-        // Remove periods and shuttle bus mentions
+        // Remove punctuation and shuttle bus mentions
+        // Also remove "due" or "has" condtions
         _.each(returnArray, function (item, index){
-            returnArray[index] = returnArray[index].replace(".","");
-            returnArray[index] = returnArray[index].replace(/\s(shuttle).+/g, "");
+            var streetToEdit = item;
+            streetToEdit = streetToEdit.replace(/[\.\,]+/g,"");
+            streetToEdit = streetToEdit.replace(/(shuttle).+/g, "");
+            // Go through cross streets and remove unnecessary text not referring to streets
+            streetToEdit = streetToEdit.replace(/(\s((has)|(is))\s.+)/g, "");
+            streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
+            crossStreets[index] = streetToEdit;
         });
         return returnArray;
     },
@@ -344,8 +344,8 @@ Template.ttcdisruption.helpers({
             return returnDict[directionName];
         } else {
             return {
-                "icon": "arrows",
-                "text": "CLR"
+                "icon": "",
+                "text": ""
             }
         }
     },
@@ -353,7 +353,8 @@ Template.ttcdisruption.helpers({
         // Get the station name(s) for an alert
         var searches = {
             "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
-            "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g
+            "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
+            "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g
         };
         // Alert text
         var text = this.description;
@@ -374,9 +375,13 @@ Template.ttcdisruption.helpers({
         _.each(result, function (item, index){
             var initialText = item;
             edited = initialText.replace("at ","");
+            edited = edited.replace("between ","");
+            if (edited.search("to") > -1){
+                edited = edited.split(" to ");
+            }
             result[index] = edited;
         });
-        return result;
+        return _.flatten(result);
     }
 
   });
