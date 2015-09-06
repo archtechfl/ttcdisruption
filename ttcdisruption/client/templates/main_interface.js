@@ -92,8 +92,7 @@ Template.ttcdisruption.helpers({
         var lineNumber = Number(lineBlock.match(lineCheck)[0]);
       } catch(err) {
         // Line number not included, proceed to search through station databases
-        var stationLookup = stationInfo.retrieveLineNumber(text);
-        var lineNumber = stationLookup;
+        var lineNumber = 5;
       }
       return {
             "name": ttcSubwayLines[lineNumber],
@@ -192,16 +191,15 @@ Template.ttcdisruption.helpers({
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        // Old
-        // var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s']+)/g;
-        // New
-        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s']+((and)|(&amp;))*[\w\s']+)/g;
+        var intersectionExpA = /(\s(at)\s[\w\.\s']+((and)|(&amp;))\s[\w\.\s']+((and)|(&amp;))*[\w\.\s\']+(?=.))/g;
         var intersectionExpB = /(\s(on)\s(\w|\s)+(at\s)(\w)+)/g;
         // Get text and search
         var text = this.description;
-        console.log(text);
+        // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
+        // Data to return
+        var returnArray = [];
         // Create an array of search terms for divisions 
         var descriptionDividers = ["due", "has"];
         if (intersection){
@@ -228,17 +226,23 @@ Template.ttcdisruption.helpers({
                 crossStreets[index] = currentStreet.replace(/(\s(((has)|(is))|(due to))\s.+)/g, "");
             });
             // return cross street array
-            return crossStreets;
+            returnArray = crossStreets;
         } else if (intersectionB) {
             var entry = intersectionB[0];
-            // Handle "on" street condition
-            entry = entry.replace(" on ", "");
+            // Handle "on" street condition, and periods
+            entry = entry.replace(/\s(on)\s/g, "");
             var crossStreets = entry.split(" at ");
-            return crossStreets;
+            returnArray = crossStreets;
         } else {
             // return blank if nothing satisfied
-            return [];
+            returnArray = [];
         }
+        // Remove periods and shuttle bus mentions
+        _.each(returnArray, function (item, index){
+            returnArray[index] = returnArray[index].replace(".","");
+            returnArray[index] = returnArray[index].replace(/\s(shuttle).+/g, "");
+        });
+        return returnArray;
     },
     disruptionType: function () {
         // Disruption type reporting
@@ -248,9 +252,9 @@ Template.ttcdisruption.helpers({
         var disruptionTypes = {
             "police": ["tps", "security", "police", "unauthorized"],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
-            "automobile": ["collision", "blocking", "auto"],
-            "mechanical": ["mechanical", "stalled", "broken", "signal", "disabled"],
+            "vehicular": ["collision", "blocking", "auto"],
             "construction": ["construction", "repairs", "track"],
+            "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "reroute": ["diverting"],
             "surface_stoppage": ["turning back"],
             "medical": ["medical"],
@@ -262,7 +266,7 @@ Template.ttcdisruption.helpers({
             "police": "police",
             "fire": "fire",
             "mechanical": "cogs",
-            "automobile": "car",
+            "vehicular": "car",
             "construction": "wrench",
             "reroute": "long-arrow-right",
             "medical": "medkit",
@@ -272,13 +276,18 @@ Template.ttcdisruption.helpers({
             "surface_stoppage": "refresh",
             "other": "question"
         }
-        var search = _.find(disruptionTypes, function(category, index){ 
+        // Two level find to get the key with the first match to search terms
+        var search = _.find(disruptionTypes, function(category, index){
+            // returns true for the first disruption array that contains a term match
+            // to the twitter alert
+            // - This is used to retrieve index or disruption type 
             return _.find(category, function(entry){
                 if (text.search(entry) > -1){
                     type = index;
                 } else {
                     type = "other";
                 }
+                // return true if the disruptuon type is found in the alert
                 return text.search(entry) > -1; 
             }); 
         });
@@ -292,6 +301,82 @@ Template.ttcdisruption.helpers({
     formattedDescription: function () {
         // Format description
         return formatDescription(this.description);
+    },
+    direction: function () {
+        // get text
+        var text =  this.description;
+        // report the direction of delay, convert into icon for readability
+        var directions = {
+            "east": ["e/b", "eastbound"],
+            "west": ["w/b", "westbound"],
+            "north": ["n/b", "northbound", "norhtbound"],
+            "south": ["s/b", "southbound"],
+            "both": ["both"]
+        };
+        // Font awesome classes and letters
+        var returnDict = {
+            "north": {"text": "N","icon": "long-arrow-up"},
+            "south": {"text": "S","icon": "long-arrow-down"},
+            "east": {"text": "E","icon": "long-arrow-right"},
+            "west": {"text": "W","icon": "long-arrow-left"},
+            "both": {"text": "BD","icon": "exchange"}
+        }
+        // get alert text and search for directions
+        var directionExp = /(([a-z]+(bound))|([nsew]\/b))/g;
+        // Storage for direction
+        var directionName = "";
+        var search = _.find(directions, function(dir, index){
+            // returns true for the first array that contains a term match
+            // to the direction
+            // - this is used to retrive index (direction)
+            return _.find(dir, function(entry){
+                if (text.search(entry) > -1){
+                    directionName = index;
+                } else {
+                    directionName = "other";
+                }
+                // return true if the direction is found in the alert
+                return text.search(entry) > -1; 
+            }); 
+        });
+        // Return direction letter and icon class
+        if (directionName != "other"){
+            return returnDict[directionName];
+        } else {
+            return {
+                "icon": "arrows",
+                "text": "CLR"
+            }
+        }
+    },
+    stationNames: function () {
+        // Get the station name(s) for an alert
+        var searches = {
+            "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
+            "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g
+        };
+        // Alert text
+        var text = this.description;
+        // Get result
+        var result = [];
+        var search = _.find(searches, function(search, index){
+            // Determines which search to use based on results
+            var matching = text.match(search);
+            if (matching){
+                var matches = matching;
+                result = matches;
+            } else {
+                var matches = [];
+            }
+            return matches.length > 0;
+        });
+        // Remove at and due
+        _.each(result, function (item, index){
+            var initialText = item;
+            edited = initialText.replace("at ","");
+            result[index] = edited;
+        });
+        return result;
     }
 
   });
