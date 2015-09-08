@@ -157,9 +157,6 @@ Template.ttcdisruption.helpers({
             }
             return combined;
         } else {
-            if (routesListing.length === 0){
-                // console.log(busMatch);
-            }
             return routesListing;
         }
     }, // End getBus method
