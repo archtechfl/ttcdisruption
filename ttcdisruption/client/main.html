@@ -7,6 +7,7 @@
 	  	<h1>TTC Twitter Notice App</h1>
 	  	<p>Easy to read display of the latest Twitter notices with enhanced visuals showing vehicle type,
 	  	location, and type of disruption</p>
+	  	<p>Note: this application is currently in development. No guarantee is made regarding accuracy.</p>
 	  	<div class="current-time">
 	  		<p>Current Time: </p>
 	  		<p class="time-display">{{ currentTime }}</p>
@@ -19,7 +20,7 @@
 			  	<option value="4">All alerts</option>
 			</select>
 		</div>
-	  	<table class="table table-bordered disruption-list">
+	  	<table class="table disruption-list">
 	  		<!-- 
 	  		Police icon courtesy OCHA Visual Information Unit, Public Domain
 	  		https://thenounproject.com/ochaavmu/
@@ -28,9 +29,11 @@
 		  		<tr class="disruption-table-header">
 					<th class="icon-header">Mode</th>
 					<th class="route-numbers-header">Routes</th>
-					<th class="time-month-day-header">Date</th>
 					<th class="time-of-day-header">Time</th>
+					<th class="time-month-day-header">Date</th>
 					<th class="type-involving-header">Type</th>
+					<th class="intersection-header">Location</th>
+					<th class="direction-header">Direction</th>
 					<th class="description-header">Description</th>
 				</tr>
 		  	{{#each notices}}

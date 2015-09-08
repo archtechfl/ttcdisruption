@@ -2,7 +2,24 @@
 
 .disruption-list {
 
+	border-spacing: 0.15em 0.4em;
+	border-collapse: separate;
+
+	tbody {
+
+		.disruption-entry {
+
+			td {
+				border-top: none;
+				vertical-align: middle;
+			}
+
+		}
+
+	}
+
 	.disruption-entry {
+
 		list-style-type: none;
 		color: @std-text-white;
 
@@ -63,6 +80,45 @@
 			}
 			.icon-police {
 				font-size: 1.5em;
+			}
+		}
+
+		// Intersection 
+
+		.intersection, .station-location {
+
+			min-width: 15em;
+			padding: 0em 1em;
+
+			i.fa {
+				margin: 0.2em 1em 0.2em 0em;
+				font-size: 1em;
+			}
+
+			span.cross-street, span.station-name {
+				display: block;
+			    margin: .5em;
+			    padding: .1em .6em;
+			}
+
+			span.cross-street {
+				border: 1px solid #fff;
+			}
+
+		}
+
+		// Direction 
+
+		.direction {
+
+			text-align: center;
+
+			i.fa {
+				margin: .2em .2em;
+			}
+			.letter {
+				font-weight: 700;
+				font-size: 1.2em;
 			}
 		}
 
