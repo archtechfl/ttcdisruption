@@ -2,7 +2,9 @@ function formatDescription (text) {
     var text = text;
     formattedText = text.replace(/http:\/\/.+/g, "");
     formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
-    formattedText = formattedText.replace("&amp;", "");
+    // handle punctuation (' and &)
+    formattedText = formattedText.replace("’","'")
+    formattedText = formattedText.replace(/\s&amp;\s/g, " & ");
     return formattedText;
 };
 
@@ -148,11 +150,8 @@ Template.ttcdisruption.helpers({
         // New
         var multipleRouteNoNames = /(\d{1,3}([,\s]|(&amp;))*(\s)*)+routes/g;
         var prefaceMulti = /routes\s(\d{1,3}(,*)\s)+(and)*((\s)*\d{1,3})/g;
-        console.log(this.description);
         var searchMulti = this.description.search(multipleRouteNoNames);
         var searchPreface = this.description.search(prefaceMulti);
-        console.log("searchmulti: " + searchMulti);
-        console.log("searchPreface: " + searchPreface);
         if (searchMulti > -1 || searchPreface > -1){
             if (searchMulti > -1){
                 searchMulti = this.description.match(multipleRouteNoNames);
@@ -205,8 +204,8 @@ Template.ttcdisruption.helpers({
         var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
         // Get text and search
         var text = this.description.replace("st.","st");
-        // Handle punctuation
-        text = text.replace("’","'");
+        // Format text
+        text = formatDescription(text);
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
