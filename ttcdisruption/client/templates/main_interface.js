@@ -2,6 +2,7 @@ function formatDescription (text) {
     var text = text;
     formattedText = text.replace(/http:\/\/.+/g, "");
     formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
+    formattedText = formattedText.replace("&amp;", "");
     return formattedText;
 };
 
@@ -188,7 +189,7 @@ Template.ttcdisruption.helpers({
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s\'\,]+((and)|(&amp;))*[\w\s\'\,]+)/g;
+        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&))\s[\w\s\'\,]+((and)|(&))*[\w\s\'\,]+)/g;
         var intersectionExpB = /(\s(on)\s[\w\s]+(at\s)[\w\s]+)/g;
         // Get text and search
         var text = this.description.replace("st.","st");
@@ -214,7 +215,7 @@ Template.ttcdisruption.helpers({
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
             } else {
-                crossStreets = entry.split(" &amp; ");
+                crossStreets = entry.split(" & ");
             }
             // return cross street array
             returnArray = crossStreets;
@@ -368,16 +369,33 @@ Template.ttcdisruption.helpers({
             }
             return matches.length > 0;
         });
-        // Remove at and due
+        // Sanity check, then split if there is a reason
+        if (result.length > 0){
+            if (result[0].search(" due ") > -1){
+                result = result[0].split(" due ");
+            }
+        }
+        // Remove at and between
+        // Additional processing needed 
         _.each(result, function (item, index){
             var initialText = item;
-            edited = initialText.replace("at ","");
+            // replace anything before "at", irrelevant
+            edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
             edited = edited.replace("between ","");
-            if (edited.search("to") > -1){
+            // Remove station, stations, stn or stns
+            edited = edited.replace(/((\sstn)s?|(\sstation)s?)/g,"");
+            console.log(edited);
+            if (edited.search(" to ") > -1){
                 edited = edited.split(" to ");
+                result[index] = edited;
+            } else if (edited.search(" and ") > -1){
+                edited = edited.split(" and ");
+                result[index] = edited;
+            } else {
+                result[index] = edited;
             }
-            result[index] = edited;
         });
+        console.log(result);
         return _.flatten(result);
     }
 
