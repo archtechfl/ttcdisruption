@@ -200,7 +200,8 @@ Template.ttcdisruption.helpers({
         // Get intersection method
         // Looks for common patterns and parses the intersection
         var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&))\s[\w\s\'\,]+((and)|(&))*[\w\s\'\,]+)/g;
-        var intersectionExpB = /(\s(on)\s[\w\s]+(at\s)[\w\s]+)/g;
+        // handle "on street near street" or "on street at street" combinations
+        var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
         var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
         // Get text and search
         var text = this.description.replace("st.","st");
@@ -234,7 +235,11 @@ Template.ttcdisruption.helpers({
             var entry = intersectionB[0];
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
-            var crossStreets = entry.split(" at ");
+            if (entry.search(" near ") > -1){
+                var crossStreets = entry.split(" near ");
+            } else {
+                var crossStreets = entry.split(" at "); 
+            }
             returnArray = crossStreets;
         } else if (text.search(intersectionExpC) > -1){
             // handle all clear messages with intersections lacking "At" or "on"
