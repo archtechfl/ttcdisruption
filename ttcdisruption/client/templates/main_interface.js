@@ -205,6 +205,8 @@ Template.ttcdisruption.helpers({
         var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
         // Get text and search
         var text = this.description.replace("st.","st");
+        // Handle punctuation
+        text = text.replace("’","'");
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
