@@ -1,10 +1,11 @@
 function formatDescription (text) {
     var text = text;
+    // Remove TTC mentions
     formattedText = text.replace(/http:\/\/.+/g, "");
     formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
     // handle punctuation (' and &)
     formattedText = formattedText.replace("’","'")
-    formattedText = formattedText.replace(/\s&amp;\s/g, " & ");
+    formattedText = formattedText.replace(/\s&amp;\s/g, " and ");
     return formattedText;
 };
 
@@ -203,6 +204,7 @@ Template.ttcdisruption.helpers({
         // handle "on street near street" or "on street at street" combinations
         var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
         var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
+        var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
         // Get text and search
         var text = this.description.replace("st.","st");
         // Format text
@@ -226,8 +228,6 @@ Template.ttcdisruption.helpers({
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
-            } else {
-                crossStreets = entry.split(" & ");
             }
             // return cross street array
             returnArray = crossStreets;
@@ -249,10 +249,17 @@ Template.ttcdisruption.helpers({
             entry = entry.replace(/(all clear:\s)/g,"");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
+            }
+            returnArray = crossStreets;
+        } else if (text.search(intersectionExpD) > -1) {
+            var intersection = text.match(intersectionExpD);
+            entry = intersection[0];
+            entry = entry.replace(/\s(on)\s/g, "");
+            if (entry.search(" and ") > -1){
+                crossStreets = entry.split(" and ");
             } else {
                 crossStreets = entry.split(" & ");
             }
-            // return blank if nothing satisfied
             returnArray = crossStreets;
         } else {
             returnArray = [];
@@ -266,6 +273,9 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/(shuttle).+/g, "");
             // Go through cross streets and remove unnecessary text not referring to streets
             streetToEdit = streetToEdit.replace(/\s((has)|(is)).*/g, "");
+            // Remove "at" and all text before
+            streetToEdit = streetToEdit.replace(/.*(at\s)/g, "");
+            // Remove "due" and everything after
             streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
             // handle presence of "full service has resumed"
             if (streetToEdit.search(/(full)\s(service)/g) == -1){
@@ -286,7 +296,7 @@ Template.ttcdisruption.helpers({
             "construction": ["construction", "repairs", "track"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "medical": ["medical"],
-            "reroute": ["diverting"],
+            "reroute": ["diverting", "divert"],
             "surface_stoppage": ["turning back"],
             "alarm": ["alarm"],
             "delay": ["holding", "longer"],
@@ -387,7 +397,7 @@ Template.ttcdisruption.helpers({
             "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g
         };
         // Alert text
-        var text = this.description;
+        var text = formatDescription(this.description);
         // Get result
         var result = [];
         var search = _.find(searches, function(search, index){
