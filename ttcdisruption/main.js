@@ -24,6 +24,7 @@ if (Meteor.isClient) {
           if (state != 4){
             if (state === 1){
               state = moment().subtract(3, 'hours').toISOString();
+              console.log(state);
             } else if (state === 2){
               state = moment().subtract(24, 'hours').toISOString();
             } else if (state === 3){

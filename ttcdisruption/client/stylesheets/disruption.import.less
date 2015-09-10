@@ -32,34 +32,40 @@
 			text-align: center;
 		}
 
-		// Time of day
-		.time-of-day {
-			font-weight: 700;
-			font-size: 1.1em;
-			min-width: 115px;
-			text-align: center;
-		}
-
 		.icon-pad {
 			padding: 1.1em;
 		}
 
-		.time-month-day {
+		.time-overall {
 
-			.time-month {
-				display: block;
-			}
+			min-width: 135px;
+			text-align: center;
 
-			.time-day {
+			.time-hour-minute {
 				font-size: 1.3em;
+				font-weight: 700;
 			}
 
-		}
+			.time-month-day {
 
-		// Uniform padding for text cells
-		.time-month-day,
-		.description {
-			padding: 1.2em;
+				&:after {
+					clear: both;
+				}
+
+				span {
+					display: inline-block;
+				}
+
+				.time-day {
+					font-size: 1.3em;
+				}
+
+				.time-month {
+					position: relative;
+    				top: -1px;
+				}
+			}
+
 		}
 
 		// Disruption icons

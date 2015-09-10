@@ -186,7 +186,9 @@ Template.ttcdisruption.helpers({
         DONE - 19 August 2015
 
         */
+        var today = moment().format("DD-MM-YYYY");
         var time = moment(this.time);
+        var timeComparison = time.format("DD-MM-YYYY");
         var month = time.format("MMM");
         var day = time.format("DD");
         var formattedTimeOfDay = time.format("hh:mm A");
@@ -194,7 +196,8 @@ Template.ttcdisruption.helpers({
         return {
             "day": day,
             "month": month,
-            "time": formattedTimeOfDay
+            "time": formattedTimeOfDay,
+            "isBeforeToday": today !== timeComparison
         };
     },
     getIntersection: function () {

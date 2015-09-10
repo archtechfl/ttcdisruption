@@ -1,7 +1,7 @@
 {
   "modules" : {
     "normalize"            : true,
-    "print"                : false,
+    "print"                : true,
     "glyphicons"           : false,
 
     "scaffolding"          : true,
@@ -28,16 +28,16 @@
     "thumbnails"           : false,
     "alerts"               : false,
     "progress-bars"        : false,
-    "media"                : false,
-    "list-group"           : false,
+    "media"                : true,
+    "list-group"           : true,
     "panels"               : false,
-    "responsive-embed"     : false,
+    "responsive-embed"     : true,
     "wells"                : false,
-    "close"                : false,
+    "close"                : true,
 
     "modals"               : false,
-    "tooltip"              : false,
-    "popovers"             : false,
+    "tooltip"              : true,
+    "popovers"             : true,
     "carousel"             : false,
 
     "affix"                : false,

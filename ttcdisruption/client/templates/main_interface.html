@@ -9,10 +9,14 @@
 					{{/each}}
 					</div>
 				</td>
-				<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
-				<td class="time-month-day">
-					<span class="time-month">{{ getDateTime.month }}</span>
-					<span class="time-day">{{ getDateTime.day }}</span>
+				<td class="time-overall time-of-day icon-pad">
+					<span class="time-hour-minute">{{ getDateTime.time }}</span>
+					{{#if getDateTime.isBeforeToday }}
+					<div class="time-month-day clearfix">
+						<span class="time-day">{{ getDateTime.day }}</span>
+						<span class="time-month">{{ getDateTime.month }}</span>
+					</div>
+					{{/if}}
 				</td>
 				<td class="type-involving icon-pad">
 					<span class="type-icon">
@@ -44,10 +48,14 @@
 				<td class="route-numbers">
 					<div class="subway-line-number">{{ subwayLine.number }}</div>
 				</td>
-				<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
-				<td class="time-month-day">
-					<span class="time-month">{{ getDateTime.month }}</span>
-					<span class="time-day">{{ getDateTime.day }}</span>
+				<td class="time-overall time-of-day icon-pad">
+					<span class="time-hour-minute">{{ getDateTime.time }}</span>
+					{{#if getDateTime.isBeforeToday }}
+					<div class="time-month-day clearfix">
+						<span class="time-day">{{ getDateTime.day }}</span>
+						<span class="time-month">{{ getDateTime.month }}</span>
+					</div>
+					{{/if}}
 				</td>
 				<td class="type-involving icon-pad">
 					<span class="type-icon">
@@ -80,10 +88,14 @@
 							{{/each}}
 						</div>
 					</td>
-					<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
-					<td class="time-month-day">
-						<span class="time-month">{{ getDateTime.month }}</span>
-						<span class="time-day">{{ getDateTime.day }}</span>
+					<td class="time-overall time-of-day icon-pad">
+						<span class="time-hour-minute">{{ getDateTime.time }}</span>
+						{{#if getDateTime.isBeforeToday }}
+						<div class="time-month-day clearfix">
+							<span class="time-day">{{ getDateTime.day }}</span>
+							<span class="time-month">{{ getDateTime.month }}</span>
+						</div>
+						{{/if}}
 					</td>
 					<td class="type-involving icon-pad">
 						<span class="type-icon">
