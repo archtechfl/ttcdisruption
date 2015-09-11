@@ -89,6 +89,12 @@ Template.ttcdisruption.helpers({
         4: "Sheppard",
         5: "no-line-provided"
       };
+      var ttcLineAbbreviations = [
+        {"line": 1, "abbr": /(\(yus\))/g},
+        {"line": 1, "abbr": /(\(yu\))/g},
+        {"line": 2, "abbr": /(\(bd\))/g},
+        {"line": 3, "abbr": /(\(rt\))/g}
+      ];
       // Check for the grouping of line and number, regex
       var searchTerms = /(line)\s?\d{1}/g;
       // Line number check
@@ -99,8 +105,21 @@ Template.ttcdisruption.helpers({
         // Get the actual line number, and make sure it is registered as a number
         var lineNumber = Number(lineBlock.match(lineCheck)[0]);
       } catch(err) {
-        // Line number not included, proceed to search through station databases
-        var lineNumber = 5;
+        // Line number not included, proceed to search for abbreviations
+        // station database search to come later
+        var lineNum = _.find(ttcLineAbbreviations, function(abbrs){
+            return text.search(abbrs.abbr) > -1; 
+        });
+        var lineNumber = 0;
+        if (lineNum){
+            if (lineNum.line < 5){
+                lineNumber = lineNum.line;
+            } else {
+                lineNumber = 5;
+            }
+        } else {
+            lineNumber = 5;
+        }
       }
       return {
             "name": ttcSubwayLines[lineNumber],
@@ -208,6 +227,7 @@ Template.ttcdisruption.helpers({
         var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
         var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
         var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
+        var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
         // Get text and search
         var text = this.description.replace("st.","st");
         // Format text
@@ -217,8 +237,23 @@ Template.ttcdisruption.helpers({
         var intersectionB = text.match(intersectionExpB);
         // Data to return
         var returnArray = [];
-        if (intersection){
-            var entry = intersection[0];
+        // entry storage
+        var entry = "";
+        if (text.search(intersectionExpE) > -1){
+            // Handle alert on road between cross streets, between condition
+            var intersection = text.match(intersectionExpE);
+            entry = intersection[0];
+            entry = entry.replace(/((between)|(btwn))\s/g, "");
+            var crossStreets = [];
+            // Get cross streets by splitting at "and" or "&"
+            if (entry.search(" and ") > -1){
+                crossStreets = entry.split(" and ");
+            }
+            // return cross street array
+            returnArray = crossStreets;
+        }
+        else if (intersection){
+            entry = intersection[0];
             // Check for multiple "at" and select the second group is present
             var multipleAtCheck = entry.match(/\s(at)\s/g).length;
             if (multipleAtCheck > 1){
@@ -235,7 +270,7 @@ Template.ttcdisruption.helpers({
             // return cross street array
             returnArray = crossStreets;
         } else if (intersectionB) {
-            var entry = intersectionB[0];
+            entry = intersectionB[0];
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" near ") > -1){
@@ -303,6 +338,7 @@ Template.ttcdisruption.helpers({
             "surface_stoppage": ["turning back"],
             "alarm": ["alarm"],
             "delay": ["holding", "longer"],
+            "increased": ["service increased", "increased"],
             "resolved": ["clear"]
         };
         var icons = {
@@ -317,6 +353,7 @@ Template.ttcdisruption.helpers({
             "alarm": "exclamation-triangle",
             "resolved": "thumbs-up",
             "surface_stoppage": "refresh",
+            "increased": "plus-square",
             "other": "question"
         }
         // Two level find to get the key with the first match to search terms
