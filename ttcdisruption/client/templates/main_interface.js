@@ -394,10 +394,10 @@ Template.ttcdisruption.helpers({
                 /(n\/b).+(s\/b)|(s\/b).+(n\/b)/g,
                 "both"
             ],
-            "east": ["e/b", "eastbound", "east"],
-            "west": ["w/b", "westbound", "west"],
-            "north": ["n/b", "northbound", "norhtbound", "north"],
-            "south": ["s/b", "southbound", "south"]
+            "east": ["e/b", "eastbound"],
+            "west": ["w/b", "westbound"],
+            "north": ["n/b", "northbound", "norhtbound"],
+            "south": ["s/b", "southbound"]
         };
         // Font awesome classes and letters
         var returnDict = {
