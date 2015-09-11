@@ -26,46 +26,61 @@
 		.bus-routes-affected,
 		.subway-line-number,
 		.streetcar-routes-affected {
-			font-weight: 700;
-			font-size: 1.3em;
+			font-weight: 500;
+			font-size: 1.7em;
 			margin: .3em 1em; 
 			text-align: center;
 		}
 
-		// Time of day
-		.time-of-day {
-			font-weight: 700;
-			font-size: 1.1em;
-			min-width: 115px;
-			text-align: center;
+		.subway-line-number {
+			border-width: 2px;
+			border-color: #fff;
+			border-style: solid;
+    		border-radius: 20px;
+    		width: 1.5em;
+    		margin: 0 auto;
 		}
 
 		.icon-pad {
 			padding: 1.1em;
 		}
 
-		.time-month-day {
+		.time-overall {
 
-			.time-month {
-				display: block;
-			}
+			min-width: 135px;
+			text-align: center;
 
-			.time-day {
+			.time-hour-minute {
 				font-size: 1.3em;
+				font-weight: 700;
 			}
 
-		}
+			.time-month-day {
 
-		// Uniform padding for text cells
-		.time-month-day,
-		.description {
-			padding: 1.2em;
+				&:after {
+					clear: both;
+				}
+
+				span {
+					display: inline-block;
+				}
+
+				.time-day {
+					font-size: 1.3em;
+				}
+
+				.time-month {
+					position: relative;
+    				top: -1px;
+				}
+			}
+
 		}
 
 		// Disruption icons
 		.type-involving {
 			min-width: 52px;
-			i, .icon-police {
+			i, .icon-non-fa {
 				margin: .1em .1em;
 			}
 			.type-text {
@@ -78,8 +93,12 @@
 				text-align: center;
 				float: left;
 			}
-			.icon-police {
+			.icon-non-fa {
 				font-size: 1.5em;
+			}
+
+			.icon-elevator {
+				font-size: 2em;
 			}
 		}
 
@@ -89,6 +108,7 @@
 
 			min-width: 15em;
 			padding: 0em 1em;
+			font-size: 1.2em;
 
 			i.fa {
 				margin: 0.2em 1em 0.2em 0em;

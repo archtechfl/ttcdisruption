@@ -1,7 +1,11 @@
 function formatDescription (text) {
     var text = text;
+    // Remove TTC mentions
     formattedText = text.replace(/http:\/\/.+/g, "");
     formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
+    // handle punctuation (' and &)
+    formattedText = formattedText.replace("’","'")
+    formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     return formattedText;
 };
 
@@ -20,14 +24,18 @@ Template.ttcdisruption.helpers({
             "station full": "station",
             "subway": "subway",
             "elevator": "elevator",
-            "platform": "platform"
+            "platform": "platform",
+            "track": "track"
         };
         // Check the text for either search term that might indicate subway
         tracker = _.filter(searchTerms, function(term, index){ 
             return text.search(term) > -1;
         });
         // Check to make sure that the reference isn't to a bus or go station
-        var sanityExclude = ["diverting", "go station"];
+        var sanityExclude = {
+            "diversion": "diverting",
+            "go_transit": "go station",
+        };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
         excludeTracker = _.filter(sanityExclude, function(term){ 
@@ -81,6 +89,12 @@ Template.ttcdisruption.helpers({
         4: "Sheppard",
         5: "no-line-provided"
       };
+      var ttcLineAbbreviations = [
+        {"line": 1, "abbr": /(\(yus\))/g},
+        {"line": 1, "abbr": /(\(yu\))/g},
+        {"line": 2, "abbr": /(\(bd\))/g},
+        {"line": 3, "abbr": /(\(rt\))/g}
+      ];
       // Check for the grouping of line and number, regex
       var searchTerms = /(line)\s?\d{1}/g;
       // Line number check
@@ -91,8 +105,21 @@ Template.ttcdisruption.helpers({
         // Get the actual line number, and make sure it is registered as a number
         var lineNumber = Number(lineBlock.match(lineCheck)[0]);
       } catch(err) {
-        // Line number not included, proceed to search through station databases
-        var lineNumber = 5;
+        // Line number not included, proceed to search for abbreviations
+        // station database search to come later
+        var lineNum = _.find(ttcLineAbbreviations, function(abbrs){
+            return text.search(abbrs.abbr) > -1; 
+        });
+        var lineNumber = 0;
+        if (lineNum){
+            if (lineNum.line < 5){
+                lineNumber = lineNum.line;
+            } else {
+                lineNumber = 5;
+            }
+        } else {
+            lineNumber = 5;
+        }
       }
       return {
             "name": ttcSubwayLines[lineNumber],
@@ -137,7 +164,11 @@ Template.ttcdisruption.helpers({
 
         25,51,53 routes
         */
-        var multipleRouteNoNames = /(\d{1,3}(,*)(\s)*)+routes/g;
+        // Old
+        // var multipleRouteNoNames = /(\d{1,3}[,\s]*(\s)*)+routes/g;
+        // updated to take "25 81 routes" into account
+        // New
+        var multipleRouteNoNames = /(\d{1,3}([,\s]|(&amp;))*(\s)*)+routes/g;
         var prefaceMulti = /routes\s(\d{1,3}(,*)\s)+(and)*((\s)*\d{1,3})/g;
         var searchMulti = this.description.search(multipleRouteNoNames);
         var searchPreface = this.description.search(prefaceMulti);
@@ -174,7 +205,9 @@ Template.ttcdisruption.helpers({
         DONE - 19 August 2015
 
         */
+        var today = moment().format("DD-MM-YYYY");
         var time = moment(this.time);
+        var timeComparison = time.format("DD-MM-YYYY");
         var month = time.format("MMM");
         var day = time.format("DD");
         var formattedTimeOfDay = time.format("hh:mm A");
@@ -182,25 +215,45 @@ Template.ttcdisruption.helpers({
         return {
             "day": day,
             "month": month,
-            "time": formattedTimeOfDay
+            "time": formattedTimeOfDay,
+            "isBeforeToday": today !== timeComparison
         };
     },
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&amp;))\s[\w\s\'\,]+((and)|(&amp;))*[\w\s\'\,]+)/g;
-        var intersectionExpB = /(\s(on)\s[\w\s]+(at\s)[\w\s]+)/g;
+        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&))\s[\w\s\'\,]+((and)|(&))*[\w\s\'\,]+)/g;
+        // handle "on street near street" or "on street at street" combinations
+        var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
+        var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
+        var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
+        var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
         // Get text and search
         var text = this.description.replace("st.","st");
+        // Format text
+        text = formatDescription(text);
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
         // Data to return
         var returnArray = [];
-        // Create an array of search terms for divisions 
-        var descriptionDividers = ["due", "has"];
-        if (intersection){
-            var entry = intersection[0];
+        // entry storage
+        var entry = "";
+        if (text.search(intersectionExpE) > -1){
+            // Handle alert on road between cross streets, between condition
+            var intersection = text.match(intersectionExpE);
+            entry = intersection[0];
+            entry = entry.replace(/((between)|(btwn))\s/g, "");
+            var crossStreets = [];
+            // Get cross streets by splitting at "and" or "&"
+            if (entry.search(" and ") > -1){
+                crossStreets = entry.split(" and ");
+            }
+            // return cross street array
+            returnArray = crossStreets;
+        }
+        else if (intersection){
+            entry = intersection[0];
             // Check for multiple "at" and select the second group is present
             var multipleAtCheck = entry.match(/\s(at)\s/g).length;
             if (multipleAtCheck > 1){
@@ -213,33 +266,61 @@ Template.ttcdisruption.helpers({
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
-            } else {
-                crossStreets = entry.split(" &amp; ");
             }
             // return cross street array
             returnArray = crossStreets;
         } else if (intersectionB) {
-            var entry = intersectionB[0];
+            entry = intersectionB[0];
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
-            var crossStreets = entry.split(" at ");
+            if (entry.search(" near ") > -1){
+                var crossStreets = entry.split(" near ");
+            } else {
+                var crossStreets = entry.split(" at "); 
+            }
+            returnArray = crossStreets;
+        } else if (text.search(intersectionExpC) > -1){
+            // handle all clear messages with intersections lacking "At" or "on"
+            // preface
+            var intersection = text.match(intersectionExpC);
+            entry = intersection[0];
+            entry = entry.replace(/(all clear:\s)/g,"");
+            if (entry.search(" and ") > -1){
+                crossStreets = entry.split(" and ");
+            }
+            returnArray = crossStreets;
+        } else if (text.search(intersectionExpD) > -1) {
+            var intersection = text.match(intersectionExpD);
+            entry = intersection[0];
+            entry = entry.replace(/\s(on)\s/g, "");
+            if (entry.search(" and ") > -1){
+                crossStreets = entry.split(" and ");
+            } else {
+                crossStreets = entry.split(" & ");
+            }
             returnArray = crossStreets;
         } else {
-            // return blank if nothing satisfied
             returnArray = [];
         }
         // Remove punctuation and shuttle bus mentions
+        var finalArray = [];
         // Also remove "due" or "has" condtions
         _.each(returnArray, function (item, index){
             var streetToEdit = item;
             streetToEdit = streetToEdit.replace(/[\.\,]+/g,"");
             streetToEdit = streetToEdit.replace(/(shuttle).+/g, "");
             // Go through cross streets and remove unnecessary text not referring to streets
-            streetToEdit = streetToEdit.replace(/(\s((has)|(is))\s.+)/g, "");
+            streetToEdit = streetToEdit.replace(/\s((has)|(is)).*/g, "");
+            // Remove "at" and all text before
+            streetToEdit = streetToEdit.replace(/.*(at\s)/g, "");
+            // Remove "due" and everything after
             streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
-            crossStreets[index] = streetToEdit;
+            // handle presence of "full service has resumed"
+            if (streetToEdit.search(/(full)\s(service)/g) == -1){
+                finalArray.push(streetToEdit);
+            }
         });
-        return returnArray;
+        return finalArray;
     },
     disruptionType: function () {
         // Disruption type reporting
@@ -250,17 +331,20 @@ Template.ttcdisruption.helpers({
             "police": ["tps", "security", "police", "unauthorized"],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
+            "elevator": ["elevator"],
             "construction": ["construction", "repairs", "track"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
-            "reroute": ["diverting"],
-            "surface_stoppage": ["turning back"],
             "medical": ["medical"],
+            "reroute": ["diverting", "divert"],
+            "surface_stoppage": ["turning back"],
             "alarm": ["alarm"],
             "delay": ["holding", "longer"],
+            "increased": ["service increased", "increased"],
             "resolved": ["clear"]
         };
         var icons = {
             "police": "police",
+            "elevator": "elevator",
             "fire": "fire",
             "mechanical": "cogs",
             "vehicular": "car",
@@ -271,6 +355,7 @@ Template.ttcdisruption.helpers({
             "alarm": "exclamation-triangle",
             "resolved": "thumbs-up",
             "surface_stoppage": "refresh",
+            "increased": "plus-square",
             "other": "question"
         }
         // Two level find to get the key with the first match to search terms
@@ -291,7 +376,7 @@ Template.ttcdisruption.helpers({
         var returnObj = {
             "icon": icons[type],
             "text": type,
-            "police": type === "police"
+            "custom": type === "police" || type === "elevator"
         };
         return returnObj;
     },
@@ -304,11 +389,15 @@ Template.ttcdisruption.helpers({
         var text =  this.description;
         // report the direction of delay, convert into icon for readability
         var directions = {
-            "east": ["e/b", "eastbound"],
-            "west": ["w/b", "westbound"],
-            "north": ["n/b", "northbound", "norhtbound"],
-            "south": ["s/b", "southbound"],
-            "both": ["both"]
+            "both": [
+                /(e\/b).+(w\/b)|(w\/b).+(e\/b)/g,
+                /(n\/b).+(s\/b)|(s\/b).+(n\/b)/g,
+                "both"
+            ],
+            "east": ["e/b", "eastbound", "east"],
+            "west": ["w/b", "westbound", "west"],
+            "north": ["n/b", "northbound", "norhtbound", "north"],
+            "south": ["s/b", "southbound", "south"]
         };
         // Font awesome classes and letters
         var returnDict = {
@@ -318,8 +407,6 @@ Template.ttcdisruption.helpers({
             "west": {"text": "W","icon": "long-arrow-left"},
             "both": {"text": "BD","icon": "exchange"}
         }
-        // get alert text and search for directions
-        var directionExp = /(([a-z]+(bound))|([nsew]\/b))/g;
         // Storage for direction
         var directionName = "";
         var search = _.find(directions, function(dir, index){
@@ -349,14 +436,17 @@ Template.ttcdisruption.helpers({
     stationNames: function () {
         // Get the station name(s) for an alert
         var searches = {
+            "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
             "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
-            "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g
+            "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
+            "from": /(from\s).+(due)/g
         };
         // Alert text
-        var text = this.description;
+        var text = formatDescription(this.description);
         // Get result
         var result = [];
+        var matchingSearch = "";
         var search = _.find(searches, function(search, index){
             // Determines which search to use based on results
             var matching = text.match(search);
@@ -366,19 +456,46 @@ Template.ttcdisruption.helpers({
             } else {
                 var matches = [];
             }
+            matchingSearch = index;
             return matches.length > 0;
         });
-        // Remove at and due
+        if (result.length == 0){
+            result = ["None specified"];
+        }
+        // Sanity check, then split if there is a reason
+        if (result.length > 0){
+            if (result[0].search(" due ") > -1){
+                result = result[0].split(" due ");
+            }
+        }
+        // Remove at and between
+        // Additional processing needed 
         _.each(result, function (item, index){
             var initialText = item;
-            edited = initialText.replace("at ","");
+            // replace anything before "at", irrelevant
+            edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
             edited = edited.replace("between ","");
-            if (edited.search("to") > -1){
-                edited = edited.split(" to ");
+            // remove "from" and "due"
+            edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
+            // Remove station, stations, stn or stns
+            edited = edited.replace(/((\sstn)s?|(\sstation)s?)/g,"");
+            if (matchingSearch === "elevator"){
+                edited = edited.replace(/.+:\s/g,""); 
             }
-            result[index] = edited;
+            // Remove periods
+            edited = edited.replace(/\./g,"");
+            if (edited.search(" to ") > -1){
+                edited = edited.split(" to ");
+                result[index] = edited;
+            } else if (edited.search(" and ") > -1){
+                edited = edited.split(" and ");
+                result[index] = edited;
+            } else {
+                result[index] = edited;
+            }
         });
-        return _.flatten(result);
+        var returnArray = _.flatten(result);
+        return returnArray;
     }
 
   });
