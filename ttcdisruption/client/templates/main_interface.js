@@ -5,7 +5,7 @@ function formatDescription (text) {
     formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
     // handle punctuation (' and &)
     formattedText = formattedText.replace("’","'")
-    formattedText = formattedText.replace(/\s&amp;\s/g, " and ");
+    formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     return formattedText;
 };
 
@@ -389,11 +389,15 @@ Template.ttcdisruption.helpers({
         var text =  this.description;
         // report the direction of delay, convert into icon for readability
         var directions = {
-            "east": ["e/b", "eastbound"],
-            "west": ["w/b", "westbound"],
-            "north": ["n/b", "northbound", "norhtbound"],
-            "south": ["s/b", "southbound"],
-            "both": ["both"]
+            "both": [
+                /(e\/b).+(w\/b)|(w\/b).+(e\/b)/g,
+                /(n\/b).+(s\/b)|(s\/b).+(n\/b)/g,
+                "both"
+            ],
+            "east": ["e/b", "eastbound", "east"],
+            "west": ["w/b", "westbound", "west"],
+            "north": ["n/b", "northbound", "norhtbound", "north"],
+            "south": ["s/b", "southbound", "south"]
         };
         // Font awesome classes and letters
         var returnDict = {
@@ -403,8 +407,6 @@ Template.ttcdisruption.helpers({
             "west": {"text": "W","icon": "long-arrow-left"},
             "both": {"text": "BD","icon": "exchange"}
         }
-        // get alert text and search for directions
-        var directionExp = /(([a-z]+(bound))|([nsew]\/b))/g;
         // Storage for direction
         var directionName = "";
         var search = _.find(directions, function(dir, index){
@@ -434,14 +436,17 @@ Template.ttcdisruption.helpers({
     stationNames: function () {
         // Get the station name(s) for an alert
         var searches = {
+            "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
             "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
-            "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g
+            "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
+            "from": /(from\s).+(due)/g
         };
         // Alert text
         var text = formatDescription(this.description);
         // Get result
         var result = [];
+        var matchingSearch = "";
         var search = _.find(searches, function(search, index){
             // Determines which search to use based on results
             var matching = text.match(search);
@@ -451,8 +456,12 @@ Template.ttcdisruption.helpers({
             } else {
                 var matches = [];
             }
+            matchingSearch = index;
             return matches.length > 0;
         });
+        if (result.length == 0){
+            result = ["None specified"];
+        }
         // Sanity check, then split if there is a reason
         if (result.length > 0){
             if (result[0].search(" due ") > -1){
@@ -466,8 +475,15 @@ Template.ttcdisruption.helpers({
             // replace anything before "at", irrelevant
             edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
             edited = edited.replace("between ","");
+            // remove "from" and "due"
+            edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
             // Remove station, stations, stn or stns
             edited = edited.replace(/((\sstn)s?|(\sstation)s?)/g,"");
+            if (matchingSearch === "elevator"){
+                edited = edited.replace(/.+:\s/g,""); 
+            }
+            // Remove periods
+            edited = edited.replace(/\./g,"");
             if (edited.search(" to ") > -1){
                 edited = edited.split(" to ");
                 result[index] = edited;
