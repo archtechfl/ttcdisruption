@@ -331,6 +331,7 @@ Template.ttcdisruption.helpers({
             "police": ["tps", "security", "police", "unauthorized"],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
+            "elevator": ["elevator"],
             "construction": ["construction", "repairs", "track"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "medical": ["medical"],
@@ -343,6 +344,7 @@ Template.ttcdisruption.helpers({
         };
         var icons = {
             "police": "police",
+            "elevator": "elevator",
             "fire": "fire",
             "mechanical": "cogs",
             "vehicular": "car",
@@ -374,7 +376,7 @@ Template.ttcdisruption.helpers({
         var returnObj = {
             "icon": icons[type],
             "text": type,
-            "police": type === "police"
+            "custom": type === "police" || type === "elevator"
         };
         return returnObj;
     },
@@ -476,7 +478,8 @@ Template.ttcdisruption.helpers({
                 result[index] = edited;
             }
         });
-        return _.flatten(result);
+        var returnArray = _.flatten(result);
+        return returnArray;
     }
 
   });
