@@ -6,6 +6,8 @@ function formatDescription (text) {
     // handle punctuation (' and &)
     formattedText = formattedText.replace("’","'")
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
+    // change saint (st.) to st
+    formattedText = formattedText.replace("st.","st");
     return formattedText;
 };
 
@@ -118,7 +120,9 @@ Template.ttcdisruption.helpers({
                 lineNumber = 5;
             }
         } else {
-            lineNumber = 5;
+            var alert = formatDescription(text);
+            // search through station name database
+            lineNumber = stationInfo.retrieveLineNumber(alert);
         }
       }
       return {
@@ -228,10 +232,8 @@ Template.ttcdisruption.helpers({
         var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
         var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
         var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
-        // Get text and search
-        var text = this.description.replace("st.","st");
         // Format text
-        text = formatDescription(text);
+        var text = formatDescription(this.description);
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
@@ -290,6 +292,7 @@ Template.ttcdisruption.helpers({
             }
             returnArray = crossStreets;
         } else if (text.search(intersectionExpD) > -1) {
+            // handle intersections with "on" and "and"
             var intersection = text.match(intersectionExpD);
             entry = intersection[0];
             entry = entry.replace(/\s(on)\s/g, "");
@@ -336,8 +339,8 @@ Template.ttcdisruption.helpers({
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "medical": ["medical"],
             "reroute": ["diverting", "divert"],
-            "surface_stoppage": ["turning back"],
             "alarm": ["alarm"],
+            "surface_stoppage": ["turning back"],
             "delay": ["holding", "longer"],
             "increased": ["service increased", "increased"],
             "resolved": ["clear"]
@@ -439,7 +442,8 @@ Template.ttcdisruption.helpers({
             "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
             "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
-            "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
+            "between_stations": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
+            "between_no_station_wording": /(between)\s[\w\s]+(?=\.)/g,
             "from": /(from\s).+(due)/g
         };
         // Alert text
