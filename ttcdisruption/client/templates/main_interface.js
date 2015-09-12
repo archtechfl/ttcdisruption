@@ -95,7 +95,8 @@ Template.ttcdisruption.helpers({
         {"line": 1, "abbr": /(\(yus\))/g},
         {"line": 1, "abbr": /(\(yu\))/g},
         {"line": 2, "abbr": /(\(bd\))/g},
-        {"line": 3, "abbr": /(\(rt\))/g}
+        {"line": 3, "abbr": /(\(rt\))/g},
+        {"line": 3, "abbr": /(\(srt\))/g}
       ];
       // Check for the grouping of line and number, regex
       var searchTerms = /(line)\s?\d{1}/g;
@@ -395,6 +396,8 @@ Template.ttcdisruption.helpers({
             "both": [
                 /(e\/b).+(w\/b)|(w\/b).+(e\/b)/g,
                 /(n\/b).+(s\/b)|(s\/b).+(n\/b)/g,
+                /(\seb\s).+(\swb\s)|(\swb\s).+(\seb\s)/g,
+                /(\snb\s).+(\ssb\s)|(\ssb\s).+(\snb\s)/g,
                 "both"
             ],
             "east": ["e/b", "eastbound"],
