@@ -110,7 +110,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "from": /(from\s).+(due)/g
     };
     // Alert text
-    var text = alert;
+    var text = alert + ".";
     // Get result
     var result = [];
     var matchingSearch = "";
