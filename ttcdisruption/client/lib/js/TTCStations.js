@@ -99,7 +99,7 @@ StationLibrary.prototype.compileDictionary = function() {
     });
 };
 
-StationLibrary.prototype.retrieveLineNumber = function(alert) {
+StationLibrary.prototype.retrieveStationListing = function(alert) {
     var self = this;
     var searches = {
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
@@ -162,8 +162,12 @@ StationLibrary.prototype.retrieveLineNumber = function(alert) {
         }
     });
     var returnArray = _.flatten(result);
+    return returnArray;
+};
+
+StationLibrary.prototype.retrieveLineNumber = function(stations) {
     var searchLineArray = [];
-    _.each(returnArray, function (item, index){
+    _.each(stations, function (item, index){
         searchLineArray.push(_.where(self.stationLineListing, {name: item}));
     });
     searchLineArray = _.flatten(searchLineArray);

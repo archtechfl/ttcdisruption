@@ -103,10 +103,13 @@ Template.ttcdisruption.helpers({
       // Line number check
       var lineCheck = /\d{1}/g;
       // Get the desired text block with the line number, if line number is present
+      var textForSearch = formatDescription(text);
       try {
         var lineBlock = text.match(searchTerms)[0];
         // Get the actual line number, and make sure it is registered as a number
         var lineNumber = Number(lineBlock.match(lineCheck)[0]);
+        // Get station list
+        var stationList = stationInfo.retrieveStationListing(textForSearch);
       } catch(err) {
         // Line number not included, proceed to search for abbreviations
         // station database search to come later
@@ -122,13 +125,16 @@ Template.ttcdisruption.helpers({
             }
         } else {
             var alert = formatDescription(text);
-            // search through station name database
-            lineNumber = stationInfo.retrieveLineNumber(alert);
+            // Get station list
+            var stationList = stationInfo.retrieveStationListing(textForSearch);
+            // search through station name database by passing station list
+            lineNumber = stationInfo.retrieveLineNumber(stationList);
         }
       }
       return {
             "name": ttcSubwayLines[lineNumber],
-            "number": lineNumber
+            "number": lineNumber,
+            "stations": stationList
         };
     },// End subway line identification
     getBus: function () {
@@ -454,74 +460,10 @@ Template.ttcdisruption.helpers({
                 "text": ""
             }
         }
-    },
-    stationNames: function () {
-        // Get the station name(s) for an alert
-        var searches = {
-            "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
-            "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
-            "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
-            "between_stations": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
-            "between_no_station_wording": /(between)\s[\w\s]+(?=\.)/g,
-            "from": /(from\s).+(due)/g
-        };
-        // Alert text
-        var text = formatDescription(this.description);
-        // Get result
-        var result = [];
-        var matchingSearch = "";
-        var search = _.find(searches, function(search, index){
-            // Determines which search to use based on results
-            var matching = text.match(search);
-            if (matching){
-                var matches = matching;
-                result = matches;
-            } else {
-                var matches = [];
-            }
-            matchingSearch = index;
-            return matches.length > 0;
-        });
-        if (result.length == 0){
-            result = ["None specified"];
-        }
-        // Sanity check, then split if there is a reason
-        if (result.length > 0){
-            if (result[0].search(" due ") > -1){
-                result = result[0].split(" due ");
-            }
-        }
-        // Remove at and between
-        // Additional processing needed 
-        _.each(result, function (item, index){
-            var initialText = item;
-            // replace anything before "at", irrelevant
-            edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
-            edited = edited.replace("between ","");
-            // remove "from" and "due"
-            edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
-            // Remove station, stations, stn or stns
-            edited = edited.replace(/((\sstn)s?|(\sstation)s?)/g,"");
-            if (matchingSearch === "elevator"){
-                edited = edited.replace(/.+:\s/g,""); 
-            }
-            // Remove periods
-            edited = edited.replace(/\./g,"");
-            if (edited.search(" to ") > -1){
-                edited = edited.split(" to ");
-                result[index] = edited;
-            } else if (edited.search(" and ") > -1){
-                edited = edited.split(" and ");
-                result[index] = edited;
-            } else {
-                result[index] = edited;
-            }
-        });
-        var returnArray = _.flatten(result);
-        return returnArray;
     }
 
   });
+// End helpers
 
 // After disruption template render
 // Handles the insert of the day dividers in the listing
@@ -543,6 +485,7 @@ Template.ttcdisruption.rendered = function(){
         var thisMonth = $(previousEntry).find('.time-overall').data("month");
         var thisDay = $(previousEntry).find('.time-overall').data("day");
         var dividerLabel = thisMonth + " " + thisDay;
+        // Render the day divider
         Blaze.renderWithData(Template.day_divider, {date: dividerLabel }, $('.disruption-list-body')[0], currentNode);
     }
 };
