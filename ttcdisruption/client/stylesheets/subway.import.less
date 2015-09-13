@@ -3,12 +3,29 @@
 .subway-entry {
 
 	&.Bloor-Danforth {
-		background-color: @ttc-green;
+		//background-color: @ttc-green;
+		td {
+			&.icon, &.route-numbers {
+				background-color: @ttc-green;
+			}
+			&.route-numbers {
+				background-color: @ttc-lighter-green;
+			}
+		}
 	}
 
 	&.Yonge-University-Spadina {
-		background-color: @ttc-yellow;
-		color: @std-text-dark-grey;
+		// background-color: @ttc-yellow;
+		td {
+			&.icon, &.route-numbers {
+				background-color: @ttc-yellow;
+				color: @std-text-dark-grey;
+			}
+			&.route-numbers {
+				background-color: @ttc-lighter-yellow;
+			}
+		}
+		// color: @std-text-dark-grey;
 
 		.subway-line-number {
 			border-color: @std-text-dark-grey;
@@ -17,11 +34,27 @@
 	}
 
 	&.Scarborough-RT {
-		background-color: @ttc-blue;	
+		// background-color: @ttc-blue;
+		td {
+			&.icon, &.route-numbers {
+				background-color: @ttc-blue;
+			}
+			&.route-numbers {
+				background-color: @ttc-lighter-blue;
+			}
+		}	
 	}
 
 	&.Sheppard {
-		background-color: @ttc-purple;
+		// background-color: @ttc-purple;
+		td {
+			&.icon, &.route-numbers {
+				background-color: @ttc-purple;
+			}
+			&.route-numbers {
+				background-color: @ttc-lighter-purple;
+			}
+		}
 	}
 
 	.station-location {

@@ -27,3 +27,7 @@ Handle multiple streetcars in same alert
 
 #### Phase 9
 Fill in unidentified subway lines and bus routes
+
+#### Phase 10
+Externalize station listing logic, list stations and identify lines based on 
+first identifying stations
