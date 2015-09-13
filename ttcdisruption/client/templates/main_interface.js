@@ -1,11 +1,13 @@
 function formatDescription (text) {
     var text = text;
     // Remove TTC mentions
-    formattedText = text.replace(/http:\/\/.+/g, "");
+    formattedText = text.replace(/(http)s?:\/\/.+/g, "");
     formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
     // handle punctuation (' and &)
     formattedText = formattedText.replace("’","'")
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
+    // change saint (st.) to st
+    formattedText = formattedText.replace("st.","st");
     return formattedText;
 };
 
@@ -93,17 +95,21 @@ Template.ttcdisruption.helpers({
         {"line": 1, "abbr": /(\(yus\))/g},
         {"line": 1, "abbr": /(\(yu\))/g},
         {"line": 2, "abbr": /(\(bd\))/g},
-        {"line": 3, "abbr": /(\(rt\))/g}
+        {"line": 3, "abbr": /(\(rt\))/g},
+        {"line": 3, "abbr": /(\(srt\))/g}
       ];
       // Check for the grouping of line and number, regex
       var searchTerms = /(line)\s?\d{1}/g;
       // Line number check
       var lineCheck = /\d{1}/g;
       // Get the desired text block with the line number, if line number is present
+      var textForSearch = formatDescription(text);
       try {
         var lineBlock = text.match(searchTerms)[0];
         // Get the actual line number, and make sure it is registered as a number
         var lineNumber = Number(lineBlock.match(lineCheck)[0]);
+        // Get station list
+        var stationList = stationInfo.retrieveStationListing(textForSearch);
       } catch(err) {
         // Line number not included, proceed to search for abbreviations
         // station database search to come later
@@ -118,12 +124,17 @@ Template.ttcdisruption.helpers({
                 lineNumber = 5;
             }
         } else {
-            lineNumber = 5;
+            var alert = formatDescription(text);
+            // Get station list
+            var stationList = stationInfo.retrieveStationListing(textForSearch);
+            // search through station name database by passing station list
+            lineNumber = stationInfo.retrieveLineNumber(stationList);
         }
       }
       return {
             "name": ttcSubwayLines[lineNumber],
-            "number": lineNumber
+            "number": lineNumber,
+            "stations": stationList
         };
     },// End subway line identification
     getBus: function () {
@@ -205,9 +216,16 @@ Template.ttcdisruption.helpers({
         DONE - 19 August 2015
 
         */
-        var today = moment().format("DD-MM-YYYY");
+
+        var today = moment();
+        var todayFormatted = today.format("DD-MM-YYYY");
         var time = moment(this.time);
         var timeComparison = time.format("DD-MM-YYYY");
+        // entry time in format for getting "from" in momentJS
+        var entryTimeFrom = moment([time.year(),time.month(),time.date()]);
+        // Get number of days between entry time and today
+        var todayTimeFrom = moment([today.year(),today.month(),today.date()]);
+        var difference = entryTimeFrom.diff(todayTimeFrom, 'days');
         var month = time.format("MMM");
         var day = time.format("DD");
         var formattedTimeOfDay = time.format("hh:mm A");
@@ -216,27 +234,28 @@ Template.ttcdisruption.helpers({
             "day": day,
             "month": month,
             "time": formattedTimeOfDay,
-            "isBeforeToday": today !== timeComparison
+            "isBeforeToday": todayFormatted !== timeComparison,
+            "difference": difference
         };
     },
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&))\s[\w\s\'\,]+((and)|(&))*[\w\s\'\,]+)/g;
+        var intersectionExpA = /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g;
         // handle "on street near street" or "on street at street" combinations
         var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
-        var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
+        var intersectionExpC = /(all clear:\s)[\w\s\.]+\s(has)\s((cleared)|(re-opened))/g;
         var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
         var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
-        // Get text and search
-        var text = this.description.replace("st.","st");
         // Format text
-        text = formatDescription(text);
+        var text = formatDescription(this.description);
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
         // Data to return
         var returnArray = [];
+        // Cross streets array
+        var crossStreets = [];
         // entry storage
         var entry = "";
         if (text.search(intersectionExpE) > -1){
@@ -244,7 +263,6 @@ Template.ttcdisruption.helpers({
             var intersection = text.match(intersectionExpE);
             entry = intersection[0];
             entry = entry.replace(/((between)|(btwn))\s/g, "");
-            var crossStreets = [];
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
@@ -262,10 +280,12 @@ Template.ttcdisruption.helpers({
             // End multiple at condition
             // replace "at" with blank text
             entry = entry.replace(" at ", "");
-            var crossStreets = [];
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
+            } else {
+                // If there is no "and" for splitting, assume single entry
+                crossStreets[0] = entry;
             }
             // return cross street array
             returnArray = crossStreets;
@@ -274,9 +294,9 @@ Template.ttcdisruption.helpers({
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" near ") > -1){
-                var crossStreets = entry.split(" near ");
+                crossStreets = entry.split(" near ");
             } else {
-                var crossStreets = entry.split(" at "); 
+                crossStreets = entry.split(" at "); 
             }
             returnArray = crossStreets;
         } else if (text.search(intersectionExpC) > -1){
@@ -287,9 +307,12 @@ Template.ttcdisruption.helpers({
             entry = entry.replace(/(all clear:\s)/g,"");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
+            } else {
+                crossStreets[0] = entry;
             }
             returnArray = crossStreets;
         } else if (text.search(intersectionExpD) > -1) {
+            // handle intersections with "on" and "and"
             var intersection = text.match(intersectionExpD);
             entry = intersection[0];
             entry = entry.replace(/\s(on)\s/g, "");
@@ -320,7 +343,10 @@ Template.ttcdisruption.helpers({
                 finalArray.push(streetToEdit);
             }
         });
-        return finalArray;
+        return {
+            "intersections": finalArray,
+            "hasIntersections": finalArray.length > 1
+        }
     },
     disruptionType: function () {
         // Disruption type reporting
@@ -336,8 +362,8 @@ Template.ttcdisruption.helpers({
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "medical": ["medical"],
             "reroute": ["diverting", "divert"],
-            "surface_stoppage": ["turning back"],
             "alarm": ["alarm"],
+            "surface_stoppage": ["turning back"],
             "delay": ["holding", "longer"],
             "increased": ["service increased", "increased"],
             "resolved": ["clear"]
@@ -392,12 +418,14 @@ Template.ttcdisruption.helpers({
             "both": [
                 /(e\/b).+(w\/b)|(w\/b).+(e\/b)/g,
                 /(n\/b).+(s\/b)|(s\/b).+(n\/b)/g,
+                /(\seb\s).+(\swb\s)|(\swb\s).+(\seb\s)/g,
+                /(\snb\s).+(\ssb\s)|(\ssb\s).+(\snb\s)/g,
                 "both"
             ],
-            "east": ["e/b", "eastbound", "east"],
-            "west": ["w/b", "westbound", "west"],
-            "north": ["n/b", "northbound", "norhtbound", "north"],
-            "south": ["s/b", "southbound", "south"]
+            "east": ["e/b", "eastbound"],
+            "west": ["w/b", "westbound"],
+            "north": ["n/b", "northbound", "norhtbound"],
+            "south": ["s/b", "southbound"]
         };
         // Font awesome classes and letters
         var returnDict = {
@@ -432,70 +460,32 @@ Template.ttcdisruption.helpers({
                 "text": ""
             }
         }
-    },
-    stationNames: function () {
-        // Get the station name(s) for an alert
-        var searches = {
-            "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
-            "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
-            "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
-            "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
-            "from": /(from\s).+(due)/g
-        };
-        // Alert text
-        var text = formatDescription(this.description);
-        // Get result
-        var result = [];
-        var matchingSearch = "";
-        var search = _.find(searches, function(search, index){
-            // Determines which search to use based on results
-            var matching = text.match(search);
-            if (matching){
-                var matches = matching;
-                result = matches;
-            } else {
-                var matches = [];
-            }
-            matchingSearch = index;
-            return matches.length > 0;
-        });
-        if (result.length == 0){
-            result = ["None specified"];
-        }
-        // Sanity check, then split if there is a reason
-        if (result.length > 0){
-            if (result[0].search(" due ") > -1){
-                result = result[0].split(" due ");
-            }
-        }
-        // Remove at and between
-        // Additional processing needed 
-        _.each(result, function (item, index){
-            var initialText = item;
-            // replace anything before "at", irrelevant
-            edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
-            edited = edited.replace("between ","");
-            // remove "from" and "due"
-            edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
-            // Remove station, stations, stn or stns
-            edited = edited.replace(/((\sstn)s?|(\sstation)s?)/g,"");
-            if (matchingSearch === "elevator"){
-                edited = edited.replace(/.+:\s/g,""); 
-            }
-            // Remove periods
-            edited = edited.replace(/\./g,"");
-            if (edited.search(" to ") > -1){
-                edited = edited.split(" to ");
-                result[index] = edited;
-            } else if (edited.search(" and ") > -1){
-                edited = edited.split(" and ");
-                result[index] = edited;
-            } else {
-                result[index] = edited;
-            }
-        });
-        var returnArray = _.flatten(result);
-        return returnArray;
     }
 
   });
+// End helpers
+
+// After disruption template render
+// Handles the insert of the day dividers in the listing
+
+Template.ttcdisruption.rendered = function(){
+    var daysAgoCheck = this.$('.disruption-entry .time-overall').data("days-ago");
+    // current node
+    var currentNode = this.$('.disruption-entry')[0];
+    // Get information on entry before this one
+    var previousEntry = this.$('.disruption-entry').prev();
+    previousEntry = previousEntry[0];
+    // Get month and day of entry above the current one if it corresponds to new day
+    previousDays = $(previousEntry).find('.time-overall').data("days-ago");
+    if (_.isUndefined(previousDays)){
+        previousDays = 0;
+    }
+    var boundaryCheck = (previousDays !== daysAgoCheck);
+    if (boundaryCheck){
+        var thisMonth = $(previousEntry).find('.time-overall').data("month");
+        var thisDay = $(previousEntry).find('.time-overall').data("day");
+        var dividerLabel = thisMonth + " " + thisDay;
+        // Render the day divider
+        Blaze.renderWithData(Template.day_divider, {date: dividerLabel }, $('.disruption-list-body')[0], currentNode);
+    }
+};

@@ -2,7 +2,7 @@
 
 .disruption-list {
 
-	border-spacing: 0.15em 0.4em;
+	border-spacing: 0em 0.5em;
 	border-collapse: separate;
 
 	tbody {
@@ -12,11 +12,36 @@
 			td {
 				border-top: none;
 				vertical-align: middle;
+				height: 5em;
+				// border-top: 1px solid #fff;
+    			// border-bottom: 1px solid #fff;
 			}
 
 		}
 
 	}
+
+	/* START Day Divider */
+
+	.day-divider {
+		height: 2.5em;
+		background-color: @std-black;
+		color: @std-text-white;
+		text-align: center;
+
+		i.fa {
+			margin: 0em 1.5em;
+			font-size: 1.2em;
+			font-weight: 400;
+		}
+
+		span {
+			font-size: 1.2em;
+			font-weight: 400;
+		}
+	}
+
+	/* END Day Divider*/
 
 	.disruption-entry {
 
@@ -27,17 +52,22 @@
 		.subway-line-number,
 		.streetcar-routes-affected {
 			font-weight: 500;
-			font-size: 1.7em;
-			margin: .3em 1em; 
+			font-size: 1.9em;
+			margin: .3em .5em; 
 			text-align: center;
+		}
+
+		.route-numbers {
+			min-width: 7em;
 		}
 
 		.subway-line-number {
 			border-width: 2px;
 			border-color: #fff;
 			border-style: solid;
-    		border-radius: 20px;
-    		width: 1.5em;
+    		border-radius: 30px;
+    		width: 1.7em;
+    		height: 1.7em;
     		margin: 0 auto;
 		}
 
@@ -51,8 +81,8 @@
 			text-align: center;
 
 			.time-hour-minute {
-				font-size: 1.3em;
-				font-weight: 700;
+				font-size: 1.4em;
+				font-weight: 600;
 			}
 
 			.time-month-day {
@@ -90,16 +120,24 @@
 			}
 			.type-icon {
 				width: 2.5em;
+				height: 2.3em;
 				text-align: center;
 				float: left;
 			}
+			/* Adjust icon sizes */
 			.icon-non-fa {
 				font-size: 1.5em;
 			}
-
-			.icon-elevator {
-				font-size: 2em;
+			.ico-elevator {
+				font-size: 2.6em;
 			}
+			.fa-clock-o {
+				font-size: 2.2em;
+			}
+			.ico-police {
+				font-size: 2.1em;
+			}
+			/* End icon sizes adjustment */
 		}
 
 		// Intersection 
@@ -117,12 +155,17 @@
 
 			span.cross-street, span.station-name {
 				display: block;
-			    margin: .5em;
+			    margin: .2em;
 			    padding: .1em .6em;
 			}
 
-			span.cross-street {
-				border: 1px solid #fff;
+			.ico-intersection, .cross-street-wrapper {
+				display: inline-block;
+			}
+
+			.ico-intersection {
+				font-size: 2.4em;
+				padding-left: .1em;
 			}
 
 		}
@@ -132,14 +175,30 @@
 		.direction {
 
 			text-align: center;
+			min-width: 6.5em;
 
 			i.fa {
 				margin: .2em .2em;
 			}
 			.letter {
-				font-weight: 700;
-				font-size: 1.2em;
+				font-weight: 600;
+				font-size: 1.3em;
 			}
+		}
+
+		// description
+		.description {
+			padding: 1.3em;
+		}
+
+		// alternating panel background color
+		.type-involving, .direction {
+			background-color: @panel-lighter-grey;
+		}
+
+		// Strong alternating panel background color 
+		.time-overall, .location-alert, .description {
+			background-color: @panel-grey;
 		}
 
 	}
