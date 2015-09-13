@@ -21,11 +21,32 @@
 
 	}
 
+	/* START Day Divider */
+
+	.day-divider {
+		height: 2.5em;
+		background-color: @std-black;
+		color: @std-text-white;
+		text-align: center;
+
+		i.fa {
+			margin: 0em 1.5em;
+			font-size: 1.2em;
+			font-weight: 400;
+		}
+
+		span {
+			font-size: 1.2em;
+			font-weight: 400;
+		}
+	}
+
+	/* END Day Divider*/
+
 	.disruption-entry {
 
 		list-style-type: none;
 		color: @std-text-white;
-		background-color: @panel-grey;
 
 		.bus-routes-affected,
 		.subway-line-number,
@@ -95,6 +116,7 @@
 			}
 			.type-icon {
 				width: 2.5em;
+				height: 2.3em;
 				text-align: center;
 				float: left;
 			}
@@ -107,6 +129,9 @@
 			}
 			.fa-clock-o {
 				font-size: 2.2em;
+			}
+			.ico-police {
+				font-size: 2.1em;
 			}
 			/* End icon sizes adjustment */
 		}
@@ -126,12 +151,17 @@
 
 			span.cross-street, span.station-name {
 				display: block;
-			    margin: .5em;
+			    margin: .2em;
 			    padding: .1em .6em;
 			}
 
-			span.cross-street {
-				border: 1px solid #fff;
+			.ico-intersection, .cross-street-wrapper {
+				display: inline-block;
+			}
+
+			.ico-intersection {
+				font-size: 2.4em;
+				padding-left: .1em;
 			}
 
 		}
@@ -160,6 +190,11 @@
 		// alternating panel background color
 		.type-involving, .direction {
 			background-color: @panel-lighter-grey;
+		}
+
+		// Strong alternating panel background color 
+		.time-overall, .location-alert, .description {
+			background-color: @panel-grey;
 		}
 
 	}

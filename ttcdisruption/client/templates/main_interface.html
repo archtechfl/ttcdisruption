@@ -9,7 +9,7 @@
 					{{/each}}
 					</div>
 				</td>
-				<td class="time-overall time-of-day icon-pad">
+				<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 					<span class="time-hour-minute">{{ getDateTime.time }}</span>
 					{{#if getDateTime.isBeforeToday }}
 					<div class="time-month-day clearfix">
@@ -28,10 +28,15 @@
 					</span>
 					<span class="type-text">{{ disruptionType.text }}</span>
 				</td>
-				<td class="intersection">
-				{{#each getIntersection}}
-					<span class="cross-street"><i class="fa fa-road"></i>{{.}}</span>
-				{{/each}}
+				<td class="location-alert intersection">
+					{{#if getIntersection.hasIntersections}}
+					<span class="ico-intersection icon-non-fa"></span>
+					{{/if}}
+					<div class="cross-street-wrapper">
+						{{#each getIntersection.intersections}}
+							<span class="cross-street">{{.}}</span>
+						{{/each}}
+					</div>
 				</td>
 				<td class="direction">
 					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
@@ -48,7 +53,7 @@
 				<td class="route-numbers">
 					<div class="subway-line-number">{{ subwayLine.number }}</div>
 				</td>
-				<td class="time-overall time-of-day icon-pad">
+				<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 					<span class="time-hour-minute">{{ getDateTime.time }}</span>
 					{{#if getDateTime.isBeforeToday }}
 					<div class="time-month-day clearfix">
@@ -67,7 +72,7 @@
 					</span>
 					<span class="type-text">{{ disruptionType.text }}</span>
 				</td>
-				<td class="station-location">
+				<td class="location-alert station-location">
 					{{#each stationNames}}
 						<span class="station-name"><i class="fa fa-subway"></i>{{.}}</span>
 					{{/each}}
@@ -88,7 +93,7 @@
 							{{/each}}
 						</div>
 					</td>
-					<td class="time-overall time-of-day icon-pad">
+					<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 						<span class="time-hour-minute">{{ getDateTime.time }}</span>
 						{{#if getDateTime.isBeforeToday }}
 						<div class="time-month-day clearfix">
@@ -107,10 +112,15 @@
 					</span>
 						<span class="type-text">{{ disruptionType.text }}</span>
 					</td>
-					<td class="intersection">
-					{{#each getIntersection}}
-						<span class="cross-street"><i class="fa fa-road"></i>{{.}}</span>
-					{{/each}}
+					<td class="location-alert intersection">
+						{{#if getIntersection.hasIntersections}}
+						<span class="ico-intersection icon-non-fa"></span>
+						{{/if}}
+						<div class="cross-street-wrapper">
+						{{#each getIntersection.intersections}}
+							<span class="cross-street">{{.}}</span>
+						{{/each}}
+						</div>
 					</td>
 					<td class="direction">
 						<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>

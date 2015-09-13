@@ -1,7 +1,7 @@
 function formatDescription (text) {
     var text = text;
     // Remove TTC mentions
-    formattedText = text.replace(/http:\/\/.+/g, "");
+    formattedText = text.replace(/(http)s?:\/\/.+/g, "");
     formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
     // handle punctuation (' and &)
     formattedText = formattedText.replace("’","'")
@@ -210,9 +210,16 @@ Template.ttcdisruption.helpers({
         DONE - 19 August 2015
 
         */
-        var today = moment().format("DD-MM-YYYY");
+
+        var today = moment();
+        var todayFormatted = today.format("DD-MM-YYYY");
         var time = moment(this.time);
         var timeComparison = time.format("DD-MM-YYYY");
+        // entry time in format for getting "from" in momentJS
+        var entryTimeFrom = moment([time.year(),time.month(),time.date()]);
+        // Get number of days between entry time and today
+        var todayTimeFrom = moment([today.year(),today.month(),today.date()]);
+        var difference = entryTimeFrom.diff(todayTimeFrom, 'days');
         var month = time.format("MMM");
         var day = time.format("DD");
         var formattedTimeOfDay = time.format("hh:mm A");
@@ -221,16 +228,17 @@ Template.ttcdisruption.helpers({
             "day": day,
             "month": month,
             "time": formattedTimeOfDay,
-            "isBeforeToday": today !== timeComparison
+            "isBeforeToday": todayFormatted !== timeComparison,
+            "difference": difference
         };
     },
     getIntersection: function () {
         // Get intersection method
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /(\s(at)\s[\w\s']+((and)|(&))\s[\w\s\'\,]+((and)|(&))*[\w\s\'\,]+)/g;
+        var intersectionExpA = /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g;
         // handle "on street near street" or "on street at street" combinations
         var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
-        var intersectionExpC = /(all clear:\s)[\w\s\.]+(\s(has))/g;
+        var intersectionExpC = /(all clear:\s)[\w\s\.]+\s(has)\s((cleared)|(re-opened))/g;
         var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
         var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
         // Format text
@@ -240,6 +248,8 @@ Template.ttcdisruption.helpers({
         var intersectionB = text.match(intersectionExpB);
         // Data to return
         var returnArray = [];
+        // Cross streets array
+        var crossStreets = [];
         // entry storage
         var entry = "";
         if (text.search(intersectionExpE) > -1){
@@ -247,7 +257,6 @@ Template.ttcdisruption.helpers({
             var intersection = text.match(intersectionExpE);
             entry = intersection[0];
             entry = entry.replace(/((between)|(btwn))\s/g, "");
-            var crossStreets = [];
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
@@ -265,10 +274,12 @@ Template.ttcdisruption.helpers({
             // End multiple at condition
             // replace "at" with blank text
             entry = entry.replace(" at ", "");
-            var crossStreets = [];
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
+            } else {
+                // If there is no "and" for splitting, assume single entry
+                crossStreets[0] = entry;
             }
             // return cross street array
             returnArray = crossStreets;
@@ -277,9 +288,9 @@ Template.ttcdisruption.helpers({
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" near ") > -1){
-                var crossStreets = entry.split(" near ");
+                crossStreets = entry.split(" near ");
             } else {
-                var crossStreets = entry.split(" at "); 
+                crossStreets = entry.split(" at "); 
             }
             returnArray = crossStreets;
         } else if (text.search(intersectionExpC) > -1){
@@ -290,6 +301,8 @@ Template.ttcdisruption.helpers({
             entry = entry.replace(/(all clear:\s)/g,"");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
+            } else {
+                crossStreets[0] = entry;
             }
             returnArray = crossStreets;
         } else if (text.search(intersectionExpD) > -1) {
@@ -324,7 +337,10 @@ Template.ttcdisruption.helpers({
                 finalArray.push(streetToEdit);
             }
         });
-        return finalArray;
+        return {
+            "intersections": finalArray,
+            "hasIntersections": finalArray.length > 1
+        }
     },
     disruptionType: function () {
         // Disruption type reporting
@@ -506,3 +522,27 @@ Template.ttcdisruption.helpers({
     }
 
   });
+
+// After disruption template render
+// Handles the insert of the day dividers in the listing
+
+Template.ttcdisruption.rendered = function(){
+    var daysAgoCheck = this.$('.disruption-entry .time-overall').data("days-ago");
+    // current node
+    var currentNode = this.$('.disruption-entry')[0];
+    // Get information on entry before this one
+    var previousEntry = this.$('.disruption-entry').prev();
+    previousEntry = previousEntry[0];
+    // Get month and day of entry above the current one if it corresponds to new day
+    previousDays = $(previousEntry).find('.time-overall').data("days-ago");
+    if (_.isUndefined(previousDays)){
+        previousDays = 0;
+    }
+    var boundaryCheck = (previousDays !== daysAgoCheck);
+    if (boundaryCheck){
+        var thisMonth = $(previousEntry).find('.time-overall').data("month");
+        var thisDay = $(previousEntry).find('.time-overall').data("day");
+        var dividerLabel = thisMonth + " " + thisDay;
+        Blaze.renderWithData(Template.day_divider, {date: dividerLabel }, $('.disruption-list-body')[0], currentNode);
+    }
+};
