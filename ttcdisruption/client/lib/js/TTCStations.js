@@ -166,6 +166,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
 };
 
 StationLibrary.prototype.retrieveLineNumber = function(stations) {
+    var self = this;
     var searchLineArray = [];
     _.each(stations, function (item, index){
         searchLineArray.push(_.where(self.stationLineListing, {name: item}));
