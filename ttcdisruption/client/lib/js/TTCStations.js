@@ -107,7 +107,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
         "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
-        "between_no_station_wording": /(between)\s[\w\s]+(?=\.)/g,
+        "between_no_station_wording": /((between)|(btwn))\s[\w\s]+(?=\.)/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "from": /(from\s).+(due)/g
     };
