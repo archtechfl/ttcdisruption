@@ -51,7 +51,9 @@
 					<i class="fa fa-subway"></i>
 				</td>
 				<td class="route-numbers">
-					<div class="subway-line-number">{{ subwayLine.number }}</div>
+					{{#each subwayLine.lines}}
+					<div class="subway-line-number subway-line-{{.}}-num">{{.}}</div>
+					{{/each}}
 				</td>
 				<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 					<span class="time-hour-minute">{{ getDateTime.time }}</span>

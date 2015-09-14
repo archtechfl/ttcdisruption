@@ -85,10 +85,10 @@ Template.ttcdisruption.helpers({
       var text  = this.description;
       // Line storage
       var ttcSubwayLines = {
-        1: "Yonge-University-Spadina",
-        2: "Bloor-Danforth",
-        3: "Scarborough-RT",
-        4: "Sheppard",
+        1: "YUS-Line",
+        2: "BD-Line",
+        3: "SRT-Line",
+        4: "Sheppard-Line",
         5: "no-line-provided"
       };
       var ttcLineAbbreviations = [
@@ -99,15 +99,29 @@ Template.ttcdisruption.helpers({
         {"line": 3, "abbr": /(\(srt\))/g}
       ];
       // Check for the grouping of line and number, regex
-      var searchTerms = /(line)\s?\d{1}/g;
+      var searchTermsLineEach = /(line)\s?\d{1}/g;
+      // Check for multiple line declaration with one preface, ie. Lines 1 and 2
+      var searchTermsOne = /(line)s?\s?\d{1}.+\d{1}/g;
       // Line number check
       var lineCheck = /\d{1}/g;
       // Get the desired text block with the line number, if line number is present
       var textForSearch = formatDescription(text);
+      // Prepare for line search capture
+      var lineBlocks = [];
+      // Final line numbers repository
+      var lineNumbers = [];
       try {
-        var lineBlock = text.match(searchTerms)[0];
-        // Get the actual line number, and make sure it is registered as a number
-        var lineNumber = Number(lineBlock.match(lineCheck)[0]);
+        lineBlocks = text.match(searchTermsLineEach);
+        if (_.isNull(lineBlocks)){
+            lineBlocks = text.match(searchTermsOne)[0];
+            lineNumbers = lineBlocks.match(lineCheck);
+        } else {
+            lineNumbers = [];
+            // Get the actual line number, and make sure it is registered as a number
+            _.each(lineBlocks, function (item, index) {
+                lineNumbers.push(Number(item.match(lineCheck)[0]));
+            });
+        }
         // Get station list
         var stationList = stationInfo.retrieveStationListing(textForSearch);
       } catch(err) {
@@ -131,9 +145,17 @@ Template.ttcdisruption.helpers({
             lineNumber = stationInfo.retrieveLineNumber(stationList);
         }
       }
+      // Set subway line color style
+      var subwayLineColorStyle = "";
+      _.each(lineNumbers, function (item, index) {
+        if (index > 0){
+            subwayLineColorStyle += "-";
+        }
+        subwayLineColorStyle += ttcSubwayLines[item];
+      });
       return {
-            "name": ttcSubwayLines[lineNumber],
-            "number": lineNumber,
+            "name": subwayLineColorStyle,
+            "lines": lineNumbers,
             "stations": stationList
         };
     },// End subway line identification
@@ -244,7 +266,8 @@ Template.ttcdisruption.helpers({
         var intersectionExpA = /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g;
         // handle "on street near street" or "on street at street" combinations
         var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
-        var intersectionExpC = /(all clear:\s)[\w\s\.]+\s(has)\s((cleared)|(re-opened))/g;
+        var inttersectionExpHasClear = /.+(clear:\s)[\w\s\.]+\s(has)\s((cleared)|(re-opened))/g;
+        var inttersectionExpIsClear = /.+(clear:\s)[\w\s\.]+\s(is\s)/g;
         var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
         var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
         // Format text
@@ -299,16 +322,27 @@ Template.ttcdisruption.helpers({
                 crossStreets = entry.split(" at "); 
             }
             returnArray = crossStreets;
-        } else if (text.search(intersectionExpC) > -1){
+        } else if (text.search(inttersectionExpHasClear) > -1){
             // handle all clear messages with intersections lacking "At" or "on"
             // preface
-            var intersection = text.match(intersectionExpC);
+            var intersection = text.match(inttersectionExpHasClear);
             entry = intersection[0];
-            entry = entry.replace(/(all clear:\s)/g,"");
+            entry = entry.replace(/.+(clear:\s)/g,"");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
             } else {
                 crossStreets[0] = entry;
+            }
+            returnArray = crossStreets;
+        } else if (text.search(inttersectionExpIsClear) > -1){
+            // Clear for all clear, is now clear condition
+            var intersection = text.match(inttersectionExpIsClear);
+            entry = intersection[0];
+            entry = entry.replace(/.+(clear:\s)/g,"");
+            if (entry.search(" and ") > -1){
+                crossStreets = entry.split(" and ");
+            } else {
+                crossStreets = entry.split(" at ");
             }
             returnArray = crossStreets;
         } else if (text.search(intersectionExpD) > -1) {
@@ -318,8 +352,6 @@ Template.ttcdisruption.helpers({
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
-            } else {
-                crossStreets = entry.split(" & ");
             }
             returnArray = crossStreets;
         } else {
@@ -338,8 +370,10 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/.*(at\s)/g, "");
             // Remove "due" and everything after
             streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
-            // handle presence of "full service has resumed"
-            if (streetToEdit.search(/(full)\s(service)/g) == -1){
+            // handle presence of "full service has resumed" or "onboard streetcar"
+            var fullServiceCheck = streetToEdit.search(/(full)\s(service)/g);
+            var onBoardCheck = streetToEdit.search(/(board)/g);
+            if (fullServiceCheck == -1 && onBoardCheck == -1){
                 finalArray.push(streetToEdit);
             }
         });
