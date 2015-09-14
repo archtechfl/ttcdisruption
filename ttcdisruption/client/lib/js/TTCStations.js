@@ -102,15 +102,17 @@ StationLibrary.prototype.compileDictionary = function() {
 StationLibrary.prototype.retrieveStationListing = function(alert) {
     var self = this;
     var searches = {
+        "clear": /.+(clear:\s)[\w\s\.]+((station)|(stn))/g,
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
         "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /(between)\s[\w\s]+(?=\.)/g,
+        "bypassing": /(bypassing\s).+((station|stn))/g,
         "from": /(from\s).+(due)/g
     };
     // Alert text
-    var text = alert;
+    var text = alert + ".";
     // Get result
     var result = [];
     var matchingSearch = "";
@@ -146,6 +148,11 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
         // Remove station, stations, stn or stns
         edited = edited.replace(/((\sstn)s?|(\sstation)s?)/g,"");
+        // remove bypassing language
+        edited = edited.replace("bypassing ","");
+        // Remove "all clear text"
+        edited = edited.replace(/.+(clear:\s)/g,"");
+        // Remove colon for elevator alert
         if (matchingSearch === "elevator"){
             edited = edited.replace(/.+:\s/g,""); 
         }
