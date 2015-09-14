@@ -143,7 +143,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         var initialText = item;
         // replace anything before "at", irrelevant
         edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
-        edited = edited.replace(/((between)|(btwn))/g,"");
+        edited = edited.replace(/((between\s)|(btwn\s))/g,"");
         // remove "from" and "due"
         edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
         // Remove station, stations, stn or stns
@@ -178,8 +178,11 @@ StationLibrary.prototype.retrieveLineNumber = function(stations) {
     _.each(stations, function (item, index){
         searchLineArray.push(_.where(self.stationLineListing, {name: item}));
     });
+    console.log("__________");
+    console.log(stations);
     searchLineArray = _.flatten(searchLineArray);
     var linesGrouping = _.groupBy(searchLineArray, 'line');
+    console.log(linesGrouping);
     if (searchLineArray.length === 1){
         return searchLineArray[0].line;
     } else {
@@ -187,6 +190,8 @@ StationLibrary.prototype.retrieveLineNumber = function(stations) {
             var maxLine = _.max(linesGrouping, function(group){
                 return group.length;
             });
+            console.log(maxLine[0]);
+            console.log("__________");
             return maxLine[0].line;
         } else {
             return 5;
