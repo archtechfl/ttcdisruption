@@ -143,7 +143,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         var initialText = item;
         // replace anything before "at", irrelevant
         edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
-        edited = edited.replace(/((between)|(btwn))/g,"");
+        edited = edited.replace(/((between\s)|(btwn\s))/g,"");
         // remove "from" and "due"
         edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
         // Remove station, stations, stn or stns

@@ -116,7 +116,6 @@ Template.ttcdisruption.helpers({
             lineBlocks = text.match(searchTermsOne)[0];
             lineNumbers = lineBlocks.match(lineCheck);
         } else {
-            lineNumbers = [];
             // Get the actual line number, and make sure it is registered as a number
             _.each(lineBlocks, function (item, index) {
                 lineNumbers.push(Number(item.match(lineCheck)[0]));
@@ -143,6 +142,7 @@ Template.ttcdisruption.helpers({
             var stationList = stationInfo.retrieveStationListing(textForSearch);
             // search through station name database by passing station list
             lineNumber = stationInfo.retrieveLineNumber(stationList);
+            lineNumbers.push(lineNumber);
         }
       }
       // Set subway line color style
