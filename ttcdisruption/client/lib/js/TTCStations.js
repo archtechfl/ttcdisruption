@@ -106,7 +106,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
-        "between": /((between)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
+        "between": /(((between)|(btwn))\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s]+(?=\.)/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "from": /(from\s).+(due)/g
@@ -143,7 +143,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         var initialText = item;
         // replace anything before "at", irrelevant
         edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
-        edited = edited.replace("between ","");
+        edited = edited.replace(/((between)|(btwn))/g,"");
         // remove "from" and "due"
         edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
         // Remove station, stations, stn or stns
