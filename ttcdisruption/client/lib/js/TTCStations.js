@@ -178,11 +178,8 @@ StationLibrary.prototype.retrieveLineNumber = function(stations) {
     _.each(stations, function (item, index){
         searchLineArray.push(_.where(self.stationLineListing, {name: item}));
     });
-    console.log("__________");
-    console.log(stations);
     searchLineArray = _.flatten(searchLineArray);
     var linesGrouping = _.groupBy(searchLineArray, 'line');
-    console.log(linesGrouping);
     if (searchLineArray.length === 1){
         return searchLineArray[0].line;
     } else {
@@ -190,8 +187,6 @@ StationLibrary.prototype.retrieveLineNumber = function(stations) {
             var maxLine = _.max(linesGrouping, function(group){
                 return group.length;
             });
-            console.log(maxLine[0]);
-            console.log("__________");
             return maxLine[0].line;
         } else {
             return 5;
