@@ -62,9 +62,31 @@
 		td {
 			&.icon {
 				background: linear-gradient(0deg, @ttc-green 50%, @ttc-yellow 50%);
+				.fa-subway {
+					color: @std-text-dark-grey;
+				}
 			}
 			&.route-numbers {
 				background: linear-gradient(0deg, @ttc-lighter-green 50%, @ttc-lighter-yellow 50%);
+
+				.subway-line-1-num {
+					color: @std-text-dark-grey;
+					border-color: @std-text-dark-grey;
+				}
+			}
+		}
+	}
+
+	&.YUS-Line-Sheppard-Line {
+		td {
+			&.icon {
+				background: linear-gradient(0deg, @ttc-purple 50%, @ttc-yellow 50%);
+				.fa-subway {
+					color: @std-text-dark-grey;
+				}
+			}
+			&.route-numbers {
+				background: linear-gradient(0deg, @ttc-lighter-purple 50%, @ttc-lighter-yellow 50%);
 
 				.subway-line-1-num {
 					color: @std-text-dark-grey;

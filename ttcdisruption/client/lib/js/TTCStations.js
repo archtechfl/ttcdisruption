@@ -87,6 +87,50 @@ function StationLibrary () {
         3: lineThree,
         4: lineFour
     };
+    // Any non-standard occurences of interchange station names need to be
+    // matched with their standardized equivalent
+    this.interchangeStations = {
+        "Sheppard-Yonge": [
+            "sheppard",
+            "yonge sheppard",
+            "sheppard yonge",
+            "yonge and sheppard",
+            "sheppard and yonge"
+        ],
+        "Bloor-Yonge": [
+            "yonge and bloor",
+            "bloor and yonge",
+            "bloor yonge",
+            "yonge bloor"
+        ]
+    };
+};
+
+StationLibrary.prototype.interchangeLookup = function (name) {
+    var self = this;
+    // get name
+    var originalStationName = name;
+    // Standardize interchange station names
+    // Get the formatted station name
+    // Create a holder for station name
+    var formattedName = "";
+    var search = _.find(self.interchangeStations, function (standardStation, index){
+        // returns true for the first station array that contains a name match
+        return _.find(standardStation, function(station){
+            if (name.search(station) > -1){
+                formattedName = index;
+            } else {
+                // Return original station name if there is no match
+                formattedName = originalStationName;
+            }
+            // return true if the station name is found in the station array
+            return name.search(station) > -1; 
+        }); 
+    });
+    return {
+        "name": formattedName,
+        "hasChanged": formattedName !== originalStationName
+    }
 };
 
 StationLibrary.prototype.compileDictionary = function() {
@@ -106,9 +150,11 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
+        "at_station_line": /((at)\s[\w\.\s\,]+(?=\sdue))/g,
         "between": /(((between)|(btwn))\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s]+(?=\.)/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
+        "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
         "from": /(from\s).+(due)/g
     };
     // Alert text
@@ -116,12 +162,15 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
     // Get result
     var result = [];
     var matchingSearch = "";
+    // The search being used, to be stored later in this var
+    var searchUsed = "";
     var search = _.find(searches, function(search, index){
         // Determines which search to use based on results
         var matching = text.match(search);
         if (matching){
             var matches = matching;
             result = matches;
+            searchUsed = index;
         } else {
             var matches = [];
         }
@@ -156,16 +205,37 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         if (matchingSearch === "elevator"){
             edited = edited.replace(/.+:\s/g,""); 
         }
+        // handle comma and line number reference
+        if (searchUsed == "at_station_line"){
+            edited = edited.replace(/\,.+/g,""); 
+        }
+        // handle station name range with dash
+        if (searchUsed == "between_stations_dash"){
+            edited = edited.replace(/(operating\s)/g,""); 
+        } 
         // Remove periods
         edited = edited.replace(/\./g,"");
-        if (edited.search(" to ") > -1){
-            edited = edited.split(" to ");
-            result[index] = edited;
-        } else if (edited.search(" and ") > -1){
-            edited = edited.split(" and ");
-            result[index] = edited;
+        // Check for interchange stations at this stage
+        var interchange = self.interchangeLookup(edited);
+        if (interchange.hasChanged){
+            result[index] = interchange.name;
         } else {
-            result[index] = edited;
+            // Perform regular splitting operations to obtains stations
+            // if no interchange found
+            // Perform station listing splits
+            if (edited.search(" to ") > -1){
+                edited = edited.split(" to ");
+                result[index] = edited;
+            } else if (edited.search(" and ") > -1){
+                // Check for interchange stations at this stage
+                edited = edited.split(" and ");
+                result[index] = edited;
+            } else if (edited.search("-") > -1){
+                edited = edited.split("-");
+                result[index] = edited;
+            } else {
+                result[index] = edited;
+            }
         }
     });
     var returnArray = _.flatten(result);
