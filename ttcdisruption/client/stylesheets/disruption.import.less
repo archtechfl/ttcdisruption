@@ -13,8 +13,9 @@
 				border-top: none;
 				vertical-align: middle;
 				height: 5em;
-				// border-top: 1px solid #fff;
-    			// border-bottom: 1px solid #fff;
+				.mobile-all({
+				    height: 8em;
+				});
 			}
 
 		}
@@ -193,6 +194,38 @@
 		// description
 		.description {
 			padding: 1.3em;
+
+			.toggle-cons {
+				display: none;
+				text-align: center;
+
+				.fa {
+					margin: 0em 0em;
+				}
+
+				.mobile-all({
+				    display: block;
+				});
+
+			}
+
+			.desc-text {
+
+				.mobile-all({
+				    display: none;
+				});
+
+			}
+
+		}
+
+		// Mobile description
+
+		.mobile-description {
+			padding-left: 3em;
+    		padding-right: 3em;
+    		font-size: 1.7em;
+    		background-color: @panel-lighter-grey;
 		}
 
 		// alternating panel background color

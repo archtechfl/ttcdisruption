@@ -499,6 +499,34 @@ Template.ttcdisruption.helpers({
   });
 // End helpers
 
+// Event for showing alert drawer
+Template.ttcdisruption.events({
+    // UI events go here
+    "click .toggle-cons": function (event) {
+        // get tray status
+        var getTrayStatus = Session.get("trayOpen");
+        // get description container
+        var descriptionContainer = $(event.currentTarget).parent('.description')[0];
+        // get parent row
+        var parentRow = $(descriptionContainer).parent()[0];
+        if (getTrayStatus){
+            var renderedAlert = Blaze.getView($('.mobile-description')[0]);
+            Blaze.remove(renderedAlert);
+            $(parentRow).find('.mobile-ui-viz').toggle();
+            Session.set("trayOpen", false);
+        } else {
+            var formattedAlert = formatDescription(this.description);
+            var renderedAlert = Blaze.renderWithData(
+                Template.alert_drawer,
+                {"description": formattedAlert},
+                parentRow
+            );
+            $(parentRow).find('.mobile-ui-viz').toggle();
+            Session.set("trayOpen", true);
+        }
+    }
+});
+
 // After disruption template render
 // Handles the insert of the day dividers in the listing
 
