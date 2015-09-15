@@ -409,7 +409,7 @@ Template.ttcdisruption.helpers({
             "mechanical": "cogs",
             "vehicular": "car",
             "construction": "wrench",
-            "reroute": "long-arrow-right",
+            "reroute": "level-up",
             "medical": "medkit",
             "delay": "clock-o",
             "alarm": "exclamation-triangle",
