@@ -215,6 +215,10 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         } 
         // Remove periods
         edited = edited.replace(/\./g,"");
+        // Remove SRT (Scarborough RT) reference if present
+        if (edited.search(/\s(srt)/g) > -1){
+            edited = edited.replace(/\s(srt)/g,"");
+        } 
         // Check for interchange stations at this stage
         var interchange = self.interchangeLookup(edited);
         if (interchange.hasChanged){
