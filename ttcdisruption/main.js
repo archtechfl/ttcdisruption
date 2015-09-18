@@ -13,7 +13,7 @@ if (Meteor.isClient) {
     setInterval(clock, 1000);
   });
 
-  Template.body.helpers({
+  Template.listing.helpers({
     // Helpers go here
     // Get a list of TTC notices into the browser
     notices: function () {
@@ -23,7 +23,6 @@ if (Meteor.isClient) {
           if (state != 4){
             if (state === 1){
               state = moment().subtract(3, 'hours').toISOString();
-              console.log(state);
             } else if (state === 2){
               state = moment().subtract(24, 'hours').toISOString();
             } else if (state === 3){
@@ -57,7 +56,10 @@ if (Meteor.isClient) {
             });
           return data;
         }
-    },
+    }
+  });
+
+  Template.body.helpers({
     currentTime: function () {
         // Get the current time
         var current = Session.get("currentTime");
@@ -70,6 +72,13 @@ if (Meteor.isClient) {
     // UI events go here
     "change .ui-control select": function (event) {
       Session.set("displayState", event.target.value);
+      // Check for end of day entries
+      // var endOfDay = $('.end-of-day-entry');
+      // // Remove day dividers if there are no end of day entries
+      // if (!_.isEmpty(endOfDay)){
+      //   var dayDividerRendered = Blaze.getView($('.day-divider')[0]);
+      //   Blaze.remove(dayDividerRendered);
+      // }
     }
   });
 
