@@ -153,6 +153,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "at_station_line": /((at)\s[\w\.\s\,]+(?=\sdue))/g,
         "between": /(((between)|(btwn))\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s]+(?=\.)/g,
+        "between_due": /((between)|(btwn))\s[\w\s\,]+(due)/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
         "from": /(from\s).+(due)/g
@@ -213,12 +214,12 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         if (searchUsed == "between_stations_dash"){
             edited = edited.replace(/(operating\s)/g,""); 
         } 
-        // Remove periods
-        edited = edited.replace(/\./g,"");
         // Remove SRT (Scarborough RT) reference if present
         if (edited.search(/\s(srt)/g) > -1){
             edited = edited.replace(/\s(srt)/g,"");
         } 
+        // Remove punctuation
+        edited = edited.replace(/(\.|\,)/g,"");
         // Check for interchange stations at this stage
         var interchange = self.interchangeLookup(edited);
         if (interchange.hasChanged){
