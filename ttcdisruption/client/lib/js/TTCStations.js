@@ -214,6 +214,10 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         if (searchUsed == "between_stations_dash"){
             edited = edited.replace(/(operating\s)/g,""); 
         } 
+        // Remove SRT (Scarborough RT) reference if present
+        if (edited.search(/\s(srt)/g) > -1){
+            edited = edited.replace(/\s(srt)/g,"");
+        } 
         // Remove punctuation
         edited = edited.replace(/(\.|\,)/g,"");
         // Check for interchange stations at this stage
