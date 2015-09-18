@@ -277,6 +277,7 @@ Template.ttcdisruption.helpers({
         var inttersectionExpIsClear = /.+(clear:\s)[\w\s\.]+\s(is\s)/g;
         var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
         var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
+        var intersectionDirOf = /(due).+(on).+((south|north)|(east|west)).+/g;
         // Format text
         var text = formatDescription(this.description);
         // Check for intersection patterns
@@ -361,6 +362,14 @@ Template.ttcdisruption.helpers({
                 crossStreets = entry.split(" and ");
             }
             returnArray = crossStreets;
+        } else if (text.search(intersectionDirOf) > -1){
+            // Handle directional reference, i.e. broadview south of danforth
+            // Intrepret to intersection, remove vaguness
+            var intersection = text.match(intersectionDirOf);
+            entry = intersection[0];
+            entry = entry.replace(/(due).+(on)\s/g, "");
+            crossStreets = entry.split(/((north|south)|(east|west))(\sof\s)/g);
+            returnArray = [crossStreets[0], crossStreets[5]];
         } else {
             returnArray = [];
         }
