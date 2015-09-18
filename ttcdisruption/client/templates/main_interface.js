@@ -261,6 +261,13 @@ Template.ttcdisruption.helpers({
         };
     },
     getIntersection: function () {
+        // List of terms to search for in intersections,
+        // remove as invalid if present
+        var messageBlacklist = [
+            /(full)\s(service)/g,
+            /(board)/g,
+            /(longer\sthan\snormal)/g
+        ];
         // Get intersection method
         // Looks for common patterns and parses the intersection
         var intersectionExpA = /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g;
@@ -371,9 +378,11 @@ Template.ttcdisruption.helpers({
             // Remove "due" and everything after
             streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
             // handle presence of "full service has resumed" or "onboard streetcar"
-            var fullServiceCheck = streetToEdit.search(/(full)\s(service)/g);
-            var onBoardCheck = streetToEdit.search(/(board)/g);
-            if (fullServiceCheck == -1 && onBoardCheck == -1){
+            var excludeCheck = _.find(messageBlacklist, function(excludeItem){ 
+                return streetToEdit.search(excludeItem) > -1 
+            });
+            var excludeFlag = _.isUndefined(excludeCheck);
+            if (excludeFlag){
                 finalArray.push(streetToEdit);
             }
         });
@@ -398,9 +407,9 @@ Template.ttcdisruption.helpers({
             "reroute": ["diverting", "divert"],
             "alarm": ["alarm"],
             "surface_stoppage": ["turning back"],
+            "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
             "increased": ["service increased", "increased"],
-            "resolved": ["clear"]
         };
         var icons = {
             "police": "police",
