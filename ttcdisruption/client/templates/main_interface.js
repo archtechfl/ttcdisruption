@@ -391,7 +391,7 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
             // handle presence of "full service has resumed" or "onboard streetcar"
             var excludeCheck = _.find(messageBlacklist, function(excludeItem){ 
-                return streetToEdit.search(excludeItem) > -1 
+                return streetToEdit.search(excludeItem) > -1; 
             });
             var excludeFlag = _.isUndefined(excludeCheck);
             if (excludeFlag){
