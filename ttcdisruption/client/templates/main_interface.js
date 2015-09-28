@@ -289,7 +289,7 @@ Template.ttcdisruption.helpers({
             "had cleared": "has cleared"
         };
         _.each(tenseErrors, function (replacement, original) {
-            text.replace(original, replacement);
+            text = text.replace(original, replacement);
         });
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
