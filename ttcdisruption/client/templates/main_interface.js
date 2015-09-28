@@ -8,6 +8,13 @@ function formatDescription (text) {
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     // change saint (st.) to st
     formattedText = formattedText.replace("st.","st");
+    // Spelling errors, correct them
+    var spellingErrors = {
+        "bwtn": "btwn"
+    };
+    _.each(spellingErrors, function (replacement, original) {
+        formattedText = formattedText.replace(original, replacement);
+    });
     return formattedText;
 };
 
