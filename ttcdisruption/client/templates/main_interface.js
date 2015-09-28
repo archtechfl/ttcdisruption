@@ -283,6 +283,16 @@ Template.ttcdisruption.helpers({
         var intersectionDirOf = /(due).+(on).+((south|north)|(east|west)).+/g;
         // Format text
         var text = formatDescription(this.description);
+        // Correct any tense errors
+        // replace "known tense errors", such as "had" instead of "has"
+        var tenseErrors = {
+            "had": "has"
+        };
+        _.each(tenseErrors, function (replacement, original) {
+            var originalString = " " + original + " ";
+            var replacementString = " " + replacement + " ";
+            text.replace(originalString, replacementString);
+        });
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
