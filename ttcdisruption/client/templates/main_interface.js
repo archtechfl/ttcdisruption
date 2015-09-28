@@ -286,12 +286,10 @@ Template.ttcdisruption.helpers({
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
         var tenseErrors = {
-            "had": "has"
+            "had cleared": "has cleared"
         };
         _.each(tenseErrors, function (replacement, original) {
-            var originalString = " " + original + " ";
-            var replacementString = " " + replacement + " ";
-            text.replace(originalString, replacementString);
+            text.replace(original, replacement);
         });
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
