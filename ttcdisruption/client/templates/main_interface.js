@@ -41,9 +41,11 @@ Template.ttcdisruption.helpers({
             return text.search(term) > -1;
         });
         // Check to make sure that the reference isn't to a bus or go station
+        // Also make sure there are no landmarks with "track" in the name
         var sanityExclude = {
             "diversion": "diverting",
             "go_transit": "go station",
+            "racing_venue": /(race)\s?(track)/g
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
