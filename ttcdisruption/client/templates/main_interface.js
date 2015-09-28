@@ -147,6 +147,9 @@ Template.ttcdisruption.helpers({
       }
       // Set subway line color style
       var subwayLineColorStyle = "";
+      // Organize line numbers in ascending order, from 1 to 4
+      lineNumbers = _.sortBy(lineNumbers, function(num){ return num * 1; });
+      // Create line color style
       _.each(lineNumbers, function (item, index) {
         if (index > 0){
             subwayLineColorStyle += "-";
