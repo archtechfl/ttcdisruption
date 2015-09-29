@@ -11,7 +11,7 @@ function StationLibrary () {
         "Spadina",
         "St George",
         "Museum",
-        "Queen's Park",
+        "Queens Park",
         "St Patrick",
         "Osgoode",
         "St Andrew",
@@ -291,6 +291,7 @@ StationLibrary.prototype.retrieveLineNumber = function(stations) {
     var self = this;
     var searchLineArray = [];
     _.each(stations, function (item, index){
+        // Standardize station name, removing punctuation
         searchLineArray.push(_.where(self.stationLineListing, {name: item}));
     });
     searchLineArray = _.flatten(searchLineArray);
