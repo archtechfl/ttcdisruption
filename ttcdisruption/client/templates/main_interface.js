@@ -10,6 +10,13 @@ function formatDescription (text) {
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     // change saint (st.) to st
     formattedText = formattedText.replace("st.","st");
+    // Spelling errors, correct them
+    var spellingErrors = {
+        "bwtn": "btwn"
+    };
+    _.each(spellingErrors, function (replacement, original) {
+        formattedText = formattedText.replace(original, replacement);
+    });
     return formattedText;
 };
 
@@ -36,9 +43,11 @@ Template.ttcdisruption.helpers({
             return text.search(term) > -1;
         });
         // Check to make sure that the reference isn't to a bus or go station
+        // Also make sure there are no landmarks with "track" in the name
         var sanityExclude = {
             "diversion": "diverting",
             "go_transit": "go station",
+            "racing_venue": /(race)\s?(track)/g
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
@@ -149,6 +158,9 @@ Template.ttcdisruption.helpers({
       }
       // Set subway line color style
       var subwayLineColorStyle = "";
+      // Organize line numbers in ascending order, from 1 to 4
+      lineNumbers = _.sortBy(lineNumbers, function(num){ return num * 1; });
+      // Create line color style
       _.each(lineNumbers, function (item, index) {
         if (index > 0){
             subwayLineColorStyle += "-";
@@ -282,6 +294,14 @@ Template.ttcdisruption.helpers({
         var intersectionDirOf = /(due).+(on).+((south|north)|(east|west)).+/g;
         // Format text
         var text = formatDescription(this.description);
+        // Correct any tense errors
+        // replace "known tense errors", such as "had" instead of "has"
+        var tenseErrors = {
+            "had cleared": "has cleared"
+        };
+        _.each(tenseErrors, function (replacement, original) {
+            text = text.replace(original, replacement);
+        });
         // Check for intersection patterns
         var intersection = text.match(intersectionExpA);
         var intersectionB = text.match(intersectionExpB);
@@ -398,6 +418,10 @@ Template.ttcdisruption.helpers({
                 finalArray.push(streetToEdit);
             }
         });
+        // handle blank situation
+        if (finalArray.length == 0){
+            finalArray = ["No Intersection Specified"];
+        }
         return {
             "intersections": finalArray,
             "hasIntersections": finalArray.length > 1
@@ -413,7 +437,7 @@ Template.ttcdisruption.helpers({
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
             "elevator": ["elevator"],
-            "construction": ["construction", "repairs", "track"],
+            "construction": ["construction", "repair", "track", "upgrade"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "medical": ["medical"],
             "reroute": ["diverting", "divert"],
