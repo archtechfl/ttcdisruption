@@ -415,6 +415,10 @@ Template.ttcdisruption.helpers({
                 finalArray.push(streetToEdit);
             }
         });
+        // handle blank situation
+        if (finalArray.length == 0){
+            finalArray = ["No Intersection Specified"];
+        }
         return {
             "intersections": finalArray,
             "hasIntersections": finalArray.length > 1
