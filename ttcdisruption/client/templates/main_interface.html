@@ -33,9 +33,15 @@
 					<span class="ico-intersection icon-non-fa"></span>
 					{{/if}}
 					<div class="cross-street-wrapper">
+					{{#if getIntersection.isSubwayLocation}}
+						{{#each getIntersection.intersections}}
+							<span class="location-station"><i class="fa fa-subway"></i>{{.}}</span>
+						{{/each}}
+					{{else}}
 						{{#each getIntersection.intersections}}
 							<span class="cross-street">{{.}}</span>
 						{{/each}}
+					{{/if}}
 					</div>
 				</td>
 				<td class="direction">
@@ -119,9 +125,15 @@
 						<span class="ico-intersection icon-non-fa"></span>
 						{{/if}}
 						<div class="cross-street-wrapper">
-						{{#each getIntersection.intersections}}
-							<span class="cross-street">{{.}}</span>
-						{{/each}}
+						{{#if getIntersection.isSubwayLocation}}
+							{{#each getIntersection.intersections}}
+								<span class="surface-disruption-station"><i class="fa fa-subway"></i>{{.}}</span>
+							{{/each}}
+						{{else}}
+							{{#each getIntersection.intersections}}
+								<span class="cross-street">{{.}}</span>
+							{{/each}}
+						{{/if}}
 						</div>
 					</td>
 					<td class="direction">

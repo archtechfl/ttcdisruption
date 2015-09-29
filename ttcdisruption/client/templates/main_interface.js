@@ -277,6 +277,8 @@ Template.ttcdisruption.helpers({
         };
     },
     getIntersection: function () {
+        // Format text
+        var text = formatDescription(this.description);
         // List of terms to search for in intersections,
         // remove as invalid if present
         var messageBlacklist = [
@@ -284,6 +286,25 @@ Template.ttcdisruption.helpers({
             /(board)/g,
             /(longer\sthan\snormal)/g
         ];
+        // List of intersection expressions
+        // Looks for common patterns and parses the intersection
+        var searches = {
+            // Between intersection combination
+            "between_and": /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g,
+            // Handle "at" street "and" street reference
+            "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
+            // handle "on street near street" or "on street at street" combinations
+            "on_at_near": /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g,
+            // All clear combinations
+            "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s((cleared)|(re-opened))/g,
+            "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
+            // On and intersection combination
+            "on_and": /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g,
+            // Direction relative to intersection combination
+            "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
+            // Check for subway station reference as location of disruption
+            "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g
+        };
         // Get intersection method
         // Looks for common patterns and parses the intersection
         var intersectionExpA = /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g;
@@ -294,8 +315,6 @@ Template.ttcdisruption.helpers({
         var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
         var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
         var intersectionDirOf = /(due).+(on).+((south|north)|(east|west)).+/g;
-        // Format text
-        var text = formatDescription(this.description);
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
         var tenseErrors = {
@@ -304,19 +323,36 @@ Template.ttcdisruption.helpers({
         _.each(tenseErrors, function (replacement, original) {
             text = text.replace(original, replacement);
         });
-        // Check for intersection patterns
-        var intersection = text.match(intersectionExpA);
-        var intersectionB = text.match(intersectionExpB);
+        // entry storage
+        var entry = "";
+        // Store the search used
+        var searchUsed = "";
+        // Check for intersection patterns, stop at the first one that matches
+        var search = _.find(searches, function(search, index){
+            // Perform each search, stop at the one that is good
+            var matching = text.match(search);
+            if (matching){
+                var matches = matching;
+                entry = matches;
+                searchUsed = index;
+            } else {
+                var matches = [];
+            }
+            return matches.length > 0;
+        });
         // Data to return
         var returnArray = [];
         // Cross streets array
         var crossStreets = [];
-        // entry storage
-        var entry = "";
-        if (text.search(intersectionExpE) > -1){
+        // Only used first match if present for now
+        if (_.isArray(entry)){
+            entry = entry[0];
+        } else {
+            entry = [];
+        }
+        // Processing conditions based on search returned
+        if (searchUsed == "between_and"){
             // Handle alert on road between cross streets, between condition
-            var intersection = text.match(intersectionExpE);
-            entry = intersection[0];
             entry = entry.replace(/((between)|(btwn))\s/g, "");
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
@@ -324,9 +360,7 @@ Template.ttcdisruption.helpers({
             }
             // return cross street array
             returnArray = crossStreets;
-        }
-        else if (intersection){
-            entry = intersection[0];
+        } else if (searchUsed == "at_and"){
             // Check for multiple "at" and select the second group is present
             var multipleAtCheck = entry.match(/\s(at)\s/g).length;
             if (multipleAtCheck > 1){
@@ -344,8 +378,7 @@ Template.ttcdisruption.helpers({
             }
             // return cross street array
             returnArray = crossStreets;
-        } else if (intersectionB) {
-            entry = intersectionB[0];
+        } else if (searchUsed == "on_at_near") {
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" near ") > -1){
@@ -354,11 +387,9 @@ Template.ttcdisruption.helpers({
                 crossStreets = entry.split(" at "); 
             }
             returnArray = crossStreets;
-        } else if (text.search(inttersectionExpHasClear) > -1){
+        } else if (searchUsed == "has_cleared_reopened"){
             // handle all clear messages with intersections lacking "At" or "on"
             // preface
-            var intersection = text.match(inttersectionExpHasClear);
-            entry = intersection[0];
             entry = entry.replace(/.+(clear:\s)/g,"");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
@@ -366,10 +397,8 @@ Template.ttcdisruption.helpers({
                 crossStreets[0] = entry;
             }
             returnArray = crossStreets;
-        } else if (text.search(inttersectionExpIsClear) > -1){
+        } else if (searchUsed == "is_clear"){
             // Clear for all clear, is now clear condition
-            var intersection = text.match(inttersectionExpIsClear);
-            entry = intersection[0];
             entry = entry.replace(/.+(clear:\s)/g,"");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
@@ -377,24 +406,23 @@ Template.ttcdisruption.helpers({
                 crossStreets = entry.split(" at ");
             }
             returnArray = crossStreets;
-        } else if (text.search(intersectionExpD) > -1) {
+        } else if (searchUsed == "on_and") {
             // handle intersections with "on" and "and"
-            var intersection = text.match(intersectionExpD);
-            entry = intersection[0];
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
             }
             returnArray = crossStreets;
-        } else if (text.search(intersectionDirOf) > -1){
+        } else if (searchUsed == "direction_relative"){
             // Handle directional reference, i.e. broadview south of danforth
             // Intrepret to intersection, remove vaguness
-            var intersection = text.match(intersectionDirOf);
-            entry = intersection[0];
             entry = entry.replace(/(due).+(on)\s/g, "");
             crossStreets = entry.split(/((north|south)|(east|west))(\sof\s)/g);
             // Get the first and last entry in the array corresponding to the actual streets
             returnArray = [_.first(crossStreets), _.last(crossStreets)];
+        } else if (searchUsed == "at_station"){
+            // Handle reference to disruption at a station
+            returnArray = [entry];
         } else {
             returnArray = [];
         }
@@ -426,7 +454,8 @@ Template.ttcdisruption.helpers({
         }
         return {
             "intersections": finalArray,
-            "hasIntersections": finalArray.length > 1
+            "hasIntersections": finalArray.length > 1,
+            "isSubwayLocation": searchUsed === "at_station"
         }
     },
     disruptionType: function () {
