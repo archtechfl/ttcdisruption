@@ -253,7 +253,6 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
             // handle "have" occurences
             edited = edited.replace(/\s?(have).*/g,"");
             // Remove everything before delay and certain words after
-            console.log(edited);
             edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
         }  
         // Remove SRT (Scarborough RT) reference if present
