@@ -434,7 +434,7 @@ Template.ttcdisruption.helpers({
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
             "elevator": ["elevator"],
-            "construction": ["construction", "repairs", "track"],
+            "construction": ["construction", "repair", "track", "upgrade"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "medical": ["medical"],
             "reroute": ["diverting", "divert"],
