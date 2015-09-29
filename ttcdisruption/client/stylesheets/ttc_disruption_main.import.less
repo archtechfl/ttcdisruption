@@ -5,7 +5,16 @@
 1.0 Variables
 	1.1 TTC colors
 	1.2 framework colors
-2.0 Main styles
+	1.3 Font Size and Styles
+2.0 Overall styles
+	2.1 Disruption
+	2.2 Subway
+	2.3 Streetcar
+	2.4 Bus
+3.0 Custom icons
+4.0 Mobile
+	4.1 Mobile Mixin
+	4.2 Mobile Style
 
 */
 
@@ -13,7 +22,19 @@
 @import (reference) "variables/_ttc_colors.import.less";
 // 1.2 General framework colors
 @import	(reference) "variables/_colors.import.less";
+// 1.3 Font Size and Styles
+@import (reference) "variables/_font.import.less";
 // 2.0 main LESS file
-@import "ttc_disruption.import.less";
+@import "overall.import.less";
+// 2.1 Disruption LESS file
+@import "disruption.import.less";
+// 2.2 Subway LESS file
+@import "subway.import.less";
+// 2.3 Streetcar LESS file
+@import "streetcar.import.less";
+// 2.4 Bus LESS file
+@import "bus.import.less";
 // 3.0 custom icons
 @import "ttc_custom_icons.import.less";
+// 4.1 Mobile mixin
+@import "mobile.mixin.less";

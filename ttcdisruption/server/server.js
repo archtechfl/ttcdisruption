@@ -3,7 +3,7 @@ if (Meteor.isServer) {
         // BEGIN meteor methods
         Meteor.methods({
           getTweets: function (latest_tweet_id) {
-            console.log("Getting Tweets");
+            console.log("Latest ID: " + latest_tweet_id);
             var Twit = Meteor.npmRequire('twit');
 
             // Create new twitter access object
@@ -35,7 +35,7 @@ if (Meteor.isServer) {
                         // First, turn to lowercase
                         var itemText = item.text;
                         var latestSanity = "";
-                        if (latestTweetId){
+                        if (latest_tweet_id){
                             var sanityCheckLatestTweet = (item.id === latest_tweet_id);
                             if (sanityCheckLatestTweet == true){
                                 latestSanity = false;
@@ -103,39 +103,43 @@ if (Meteor.isServer) {
     // BEGIN SERVER CODE
     // Establish initial state
     var checkStateStorage = Meteor.call("getStateInfo");
+    // CRON JOB
+    var newestTweetsCron = function () {
+        var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
+        var latestTweetId = getLatestTweet.newest_id;
+        Meteor.call("getTweets", latestTweetId);
+    };
+    SyncedCron.add({
+          name: 'Update feed',
+          schedule: function(parser) {
+            // parser is a later.parse object
+            return parser.text('every 2 minutes');
+          },
+          job: function() {
+            var refresher = newestTweetsCron();
+            return refresher;
+          }
+        });
+    // END CRON JOB
     if (checkStateStorage.count == 0){
         State.insert({
             newest_id: 0,
             purpose: "tracking",
             state_time: new Date()
         });
-        // begin tweet retrieval cycle for user TTCalerts
+        // begin tweet retrieval cycle for user TTCalerts, for first time
+        // This would only occur with a fresh database
         Meteor.call("getTweets", false);
+        SyncedCron.start();
     } else {
         // begin tweet retrieval cycle for user TTCalerts starting with newest
-
-        // SyncedCron.add({
-        //   name: 'Get newest tweets',
-        //   schedule: function(parser) {
-        //     // parser is a later.parse object
-        //     return parser.text('every 5 minutes');
-        //   },
-        //   job: function() {
-        //     var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
-        //     var latestTweetId = getLatestTweet.newest_id;
-        //     return Meteor.call("getTweets", latestTweetId);
-        //   }
-        // });
-        var getLatestTweet = State.findOne({}, {sort:{$natural:1}})
-        var latestTweetId = getLatestTweet.newest_id;
-        console.log(latestTweetId);
-        return Meteor.call("getTweets", latestTweetId);
+        // Update the tweet database every 2 minutes
+        // Start CRON job
+        SyncedCron.start();
     }
-    // This code only runs on the server
+    // Publish the notices collection to client
     Meteor.publish("notices", function () {
         return Notices.find();
     });// End meteor publish
-    // Start CRON job
-    // SyncedCron.start();
   });// End meteor server startup function
 }; // End is server condition

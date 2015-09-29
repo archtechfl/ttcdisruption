@@ -1,0 +1,103 @@
+// Subway disruption colors
+
+.subway-entry {
+
+	&.BD-Line {
+		//background-color: @ttc-green;
+		td {
+			&.icon {
+				background-color: @ttc-green;
+			}
+			&.route-numbers {
+				background-color: @ttc-lighter-green;
+			}
+		}
+	}
+
+	&.YUS-Line {
+		// background-color: @ttc-yellow;
+		td {
+			&.icon, &.route-numbers {
+				background-color: @ttc-yellow;
+				color: @std-text-dark-grey;
+			}
+			&.route-numbers {
+				background-color: @ttc-lighter-yellow;
+			}
+		}
+		// color: @std-text-dark-grey;
+
+		.subway-line-number {
+			border-color: @std-text-dark-grey;
+		}
+
+	}
+
+	&.SRT-Line {
+		// background-color: @ttc-blue;
+		td {
+			&.icon {
+				background-color: @ttc-blue;
+			}
+			&.route-numbers {
+				background-color: @ttc-lighter-blue;
+			}
+		}	
+	}
+
+	&.Sheppard-Line {
+		// background-color: @ttc-purple;
+		td {
+			&.icon {
+				background-color: @ttc-purple;
+			}
+			&.route-numbers {
+				background-color: @ttc-lighter-purple;
+			}
+		}
+	}
+
+	/* Multiple line combinations */
+	&.YUS-Line-BD-Line {
+		td {
+			&.icon {
+				background: linear-gradient(0deg, @ttc-green 50%, @ttc-yellow 50%);
+				.fa-subway {
+					color: @std-text-dark-grey;
+				}
+			}
+			&.route-numbers {
+				background: linear-gradient(0deg, @ttc-lighter-green 50%, @ttc-lighter-yellow 50%);
+
+				.subway-line-1-num {
+					color: @std-text-dark-grey;
+					border-color: @std-text-dark-grey;
+				}
+			}
+		}
+	}
+
+	&.YUS-Line-Sheppard-Line {
+		td {
+			&.icon {
+				background: linear-gradient(0deg, @ttc-purple 50%, @ttc-yellow 50%);
+				.fa-subway {
+					color: @std-text-dark-grey;
+				}
+			}
+			&.route-numbers {
+				background: linear-gradient(0deg, @ttc-lighter-purple 50%, @ttc-lighter-yellow 50%);
+
+				.subway-line-1-num {
+					color: @std-text-dark-grey;
+					border-color: @std-text-dark-grey;
+				}
+			}
+		}
+	}
+
+	.station-location {
+		font-size: 1.3em;
+	}
+
+}

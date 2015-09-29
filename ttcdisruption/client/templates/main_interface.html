@@ -3,27 +3,46 @@
 		<tr class="disruption-entry streetcar-entry">
 				<td class="icon"><i class="fa fa-train"></i></td>
 				<td class="route-numbers">
-					<div class="streetcar-line-number">{{ streetcarNumber }}</div>
+					<div class="streetcar-routes-affected">
+					{{#each streetcarNumber}}
+						<div class="streetcar-line-number">{{.}}</div>
+					{{/each}}
+					</div>
 				</td>
-				<td class="time-month-day">
-					<span class="time-month">{{ getDateTime.month }}</span>
-					<span class="time-day">{{ getDateTime.day }}</span>
+				<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+					<span class="time-hour-minute">{{ getDateTime.time }}</span>
+					{{#if getDateTime.isBeforeToday }}
+					<div class="time-month-day clearfix">
+						<span class="time-day">{{ getDateTime.day }}</span>
+						<span class="time-month">{{ getDateTime.month }}</span>
+					</div>
+					{{/if}}
 				</td>
-				<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
 				<td class="type-involving icon-pad">
 					<span class="type-icon">
-						{{#if disruptionType.police }}
-							<span class="icon-police"></span>
+						{{#if disruptionType.custom }}
+							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
 						{{else}}
 							<i class="fa fa-{{ disruptionType.icon }}"></i>
 						{{/if}}
 					</span>
 					<span class="type-text">{{ disruptionType.text }}</span>
 				</td>
+				<td class="location-alert intersection">
+					{{#if getIntersection.hasIntersections}}
+					<span class="ico-intersection icon-non-fa"></span>
+					{{/if}}
+					<div class="cross-street-wrapper">
+						{{#each getIntersection.intersections}}
+							<span class="cross-street">{{.}}</span>
+						{{/each}}
+					</div>
+				</td>
+				<td class="direction">
+					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
+					<span class="letter">{{ direction.text }}</span>
+				</td>
 				<td class="description">{{{ formattedDescription }}}</td>
-				<!-- {{#each getIntersection}}
-					<td class="cross-street">{{.}}</td>
-				{{/each}} -->
 			</tr>
 		{{else}}
 			{{#if isSubway }}
@@ -32,22 +51,37 @@
 					<i class="fa fa-subway"></i>
 				</td>
 				<td class="route-numbers">
-					<div class="subway-line-number">{{ subwayLine.number }}</div>
+					{{#each subwayLine.lines}}
+					<div class="subway-line-number subway-line-{{.}}-num">{{.}}</div>
+					{{/each}}
 				</td>
-				<td class="time-month-day">
-					<span class="time-month">{{ getDateTime.month }}</span>
-					<span class="time-day">{{ getDateTime.day }}</span>
+				<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+					<span class="time-hour-minute">{{ getDateTime.time }}</span>
+					{{#if getDateTime.isBeforeToday }}
+					<div class="time-month-day clearfix">
+						<span class="time-day">{{ getDateTime.day }}</span>
+						<span class="time-month">{{ getDateTime.month }}</span>
+					</div>
+					{{/if}}
 				</td>
-				<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
 				<td class="type-involving icon-pad">
 					<span class="type-icon">
-						{{#if disruptionType.police }}
-							<span class="icon-police"></span>
+						{{#if disruptionType.custom }}
+							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
 						{{else}}
 							<i class="fa fa-{{ disruptionType.icon }}"></i>
 						{{/if}}
 					</span>
 					<span class="type-text">{{ disruptionType.text }}</span>
+				</td>
+				<td class="location-alert station-location">
+					{{#each subwayLine.stations}}
+						<span class="station-name"><i class="fa fa-subway"></i>{{.}}</span>
+					{{/each}}
+				</td>
+				<td class="direction">
+					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
+					<span class="letter">{{ direction.text }}</span>
 				</td>
 				<td class="description">{{{ formattedDescription }}}</td>
 			</tr>
@@ -61,25 +95,40 @@
 							{{/each}}
 						</div>
 					</td>
-					<td class="time-month-day">
-						<span class="time-month">{{ getDateTime.month }}</span>
-						<span class="time-day">{{ getDateTime.day }}</span>
+					<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+						<span class="time-hour-minute">{{ getDateTime.time }}</span>
+						{{#if getDateTime.isBeforeToday }}
+						<div class="time-month-day clearfix">
+							<span class="time-day">{{ getDateTime.day }}</span>
+							<span class="time-month">{{ getDateTime.month }}</span>
+						</div>
+						{{/if}}
 					</td>
-					<td class="time-of-day icon-pad">{{ getDateTime.time }}</td>
 					<td class="type-involving icon-pad">
 						<span class="type-icon">
-						{{#if disruptionType.police }}
-							<span class="icon-police"></span>
+						{{#if disruptionType.custom }}
+							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
 						{{else}}
 							<i class="fa fa-{{ disruptionType.icon }}"></i>
 						{{/if}}
 					</span>
 						<span class="type-text">{{ disruptionType.text }}</span>
 					</td>
+					<td class="location-alert intersection">
+						{{#if getIntersection.hasIntersections}}
+						<span class="ico-intersection icon-non-fa"></span>
+						{{/if}}
+						<div class="cross-street-wrapper">
+						{{#each getIntersection.intersections}}
+							<span class="cross-street">{{.}}</span>
+						{{/each}}
+						</div>
+					</td>
+					<td class="direction">
+						<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
+						<span class="letter">{{ direction.text }}</span>
+					</td>
 					<td class="description">{{{ formattedDescription }}}</td>
-					<!-- {{#each getIntersection}}
-						<td class="cross-street">{{.}}</td>
-					{{/each}} -->
 				</tr>
 			{{/if}}
 		{{/if}}

@@ -1,0 +1,84 @@
+/* Open Sans Font */
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('fonts/OpenSans-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('fonts/OpenSans-ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('fonts/OpenSans-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('fonts/OpenSans-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('fonts/OpenSans-Semibold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+/* Body */
+
+body {
+	background-color: @body-background;
+	font-family: 'Open Sans', sans-serif;
+}
+
+.container {
+
+	.mobile-all({
+	    width: 100%;
+	});
+
+}
+
+.ui-control {
+	margin: 1em 0 1em 0;
+	clear: both;
+}
+
+.current-time {
+	p {
+		float: left;
+	}
+	.time-display {
+		margin-left: 2em;
+	}
+	clear: both;
+	font-size: 1.4em;
+}
+
+/* End body */
+
+i.fa {
+	margin: .5em 1em;
+	font-weight: 500;
+	font-size: 1.8em;
+}
+
+.disruption-table-header {
+	background-color: @std-black;
+	color: @std-text-white;
+	th {
+		text-align: center;
+		font-weight: 700;
+	}
+}

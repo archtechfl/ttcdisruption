@@ -7,35 +7,35 @@
 	  	<h1>TTC Twitter Notice App</h1>
 	  	<p>Easy to read display of the latest Twitter notices with enhanced visuals showing vehicle type,
 	  	location, and type of disruption</p>
+	  	<p>Note: this application is currently in development. No guarantee is made regarding accuracy.</p>
 	  	<div class="current-time">
-	  		<span>Last refreshed: </span>
-	  		<p>{{ currentTime }}</p>
+	  		<p>Current Time: </p>
+	  		<p class="time-display">{{ currentTime }}</p>
 	  	</div>
 	  	<div class="ui-control">
 		  	<select>
-			  	<option value="{{timeAgo '3' 'hours'}}" selected>Last 3 Hours</option>
-			  	<option value="{{timeAgo '24' 'hours'}}">Last 24 Hours</option>
-			  	<option value="{{timeAgo '1' 'week'}}">Last Week</option>
-			  	<option value="all">All alerts</option>
+			  	<option value="1" selected>Last 3 Hours</option>
+			  	<option value="2">Last 24 Hours</option>
+			  	<option value="3">Last Week</option>
+			  	<option value="4">All alerts</option>
 			</select>
 		</div>
-	  	<table class="table table-bordered disruption-list">
+	  	<table class="table disruption-list">
 	  		<!-- 
 	  		Police icon courtesy OCHA Visual Information Unit, Public Domain
 	  		https://thenounproject.com/ochaavmu/
 	  		-->
-		  	<tbody>
+		  	<tbody class="disruption-list-body">
 		  		<tr class="disruption-table-header">
 					<th class="icon-header">Mode</th>
 					<th class="route-numbers-header">Routes</th>
-					<th class="time-month-day-header">Date</th>
 					<th class="time-of-day-header">Time</th>
 					<th class="type-involving-header">Type</th>
+					<th class="intersection-header">Location</th>
+					<th class="direction-header">Direction</th>
 					<th class="description-header">Description</th>
 				</tr>
-		  	{{#each notices}}
-				{{> ttcdisruption}}
-			{{/each}}
+		  	{{> listing }}
 			</tbody>
 		</table>
 	</div>
