@@ -48,7 +48,8 @@ Template.ttcdisruption.helpers({
             "diversion": "diverting",
             "go_transit": "go station",
             "racing_venue": /(race)\s?(track)/g,
-            "bus_routes": "routes"
+            "bus_routes": /(routes)/g,
+            "street_level": "street"
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
