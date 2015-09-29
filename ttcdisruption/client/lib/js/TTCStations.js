@@ -146,7 +146,7 @@ StationLibrary.prototype.compileDictionary = function() {
 StationLibrary.prototype.retrieveStationListing = function(alert) {
     var self = this;
     var searches = {
-        "clear": /.+(clear:\s)[\w\s\.]+((station)|(stn))/g,
+        "clear": /.+(clear:\s)[\w\s\.]+((station)|(stn))?(has|is)/g,
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_due": /((at)\s[\w\.\s]+(?=\sdue))/g,
@@ -156,6 +156,10 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "between_due": /((between)|(btwn))\s[\w\s\,]+(due)/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
+        "near_station": /(near)\s.+(stn|station)/g,
+        "line_stations_direction_commas": /(line)\s\d{1},?.+(?=,)/g,
+        "from_for": /(from).+(for)/g,
+        "from_stn": /(from).+((station)|(stn))/g,
         "from": /(from\s).+(due)/g
     };
     // Alert text
@@ -213,7 +217,40 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         // handle station name range with dash
         if (searchUsed == "between_stations_dash"){
             edited = edited.replace(/(operating\s)/g,""); 
+        }
+        // handle station name near reference
+        if (searchUsed == "near_station"){
+            edited = edited.replace(/(near\s)/g,""); 
+        }
+        // handle station from -- for reference
+        if (searchUsed == "from_for"){
+            edited = edited.replace(/(\sfor)/g,""); 
+        }
+        // handle line followed by station reference, commas
+        // ex line 2, woodbine to warden, eastbound
+        if (searchUsed == "line_stations_direction_commas"){
+            // Remove "Line 1, " instances
+            edited = edited.replace(/(line)\s\d{1},\s/g,"");
+            // Remove SRT instances, ex "Line 3 (SRT) "
+            edited = edited.replace(/(line)\s\d{1},?.+\)\s/g, "");
+            // Remove any information trailing second comma 
+            edited = edited.replace(/,\s.+/g,"");
+            // Remove direction if it comes before station names
+            if (edited.search(/.+(bound)/g) > -1){
+                edited = edited.replace(/.+(bound)/g,"");
+            }
         } 
+        if (searchUsed == "clear"){
+            // Remove everything after station names
+            edited = edited.replace(/\s(has).*/g,"");
+            // This step is required because of islington station name
+            edited = edited.replace(/\s(is).*/g,"");
+            // handle "have" occurences
+            edited = edited.replace(/\s?(have).*/g,"");
+            // Remove everything before delay and certain words after
+            console.log(edited);
+            edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
+        }  
         // Remove SRT (Scarborough RT) reference if present
         if (edited.search(/\s(srt)/g) > -1){
             edited = edited.replace(/\s(srt)/g,"");
@@ -227,7 +264,6 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         } else {
             // Perform regular splitting operations to obtains stations
             // if no interchange found
-            // Perform station listing splits
             if (edited.search(" to ") > -1){
                 edited = edited.split(" to ");
                 result[index] = edited;
