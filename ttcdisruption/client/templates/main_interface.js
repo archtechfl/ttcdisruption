@@ -47,7 +47,8 @@ Template.ttcdisruption.helpers({
         var sanityExclude = {
             "diversion": "diverting",
             "go_transit": "go station",
-            "racing_venue": /(race)\s?(track)/g
+            "racing_venue": /(race)\s?(track)/g,
+            "bus_routes": "routes"
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
@@ -437,7 +438,7 @@ Template.ttcdisruption.helpers({
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
             "elevator": ["elevator"],
-            "construction": ["construction", "repair", "track", "upgrade"],
+            "construction": ["construction", "repair", " track ", "upgrade"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "medical": ["medical"],
             "reroute": ["diverting", "divert"],

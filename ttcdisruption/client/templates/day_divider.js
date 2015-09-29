@@ -29,8 +29,19 @@ if (Meteor.isClient) {
 
     Template.ttcdisruption.destroyed = function() {
       // Check for day dividers to remove
-      console.log(this);
-      console.log("Template removed");
+      var dayDividerElement = this.$('.disruption-entry').prev();
+      var currentNode = this.$('.disruption-entry')[0];
+      // Check if end of day entry
+      console.log(currentNode);
+      var endOfDay = $(currentNode).hasClass("end-of-day-entry");
+      dayDividerElement = $(dayDividerElement)[0];
+      var isDayDivider = $(dayDividerElement).hasClass("day-divider");
+      if (isDayDivider && endOfDay){
+        // Remove the day divider if the day after it is removed, since there is no longer a need
+        // to mark a new day there
+        var view = Blaze.getView(dayDividerElement);
+        Blaze.remove(view);
+      }
     };
 
 }
