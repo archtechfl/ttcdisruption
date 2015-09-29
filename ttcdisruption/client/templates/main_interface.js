@@ -1,3 +1,5 @@
+if (Meteor.isClient) {
+
 function formatDescription (text) {
     var text = text;
     // Remove TTC mentions
@@ -45,7 +47,8 @@ Template.ttcdisruption.helpers({
         var sanityExclude = {
             "diversion": "diverting",
             "go_transit": "go station",
-            "racing_venue": /(race)\s?(track)/g
+            "racing_venue": /(race)\s?(track)/g,
+            "bus_routes": "routes"
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
@@ -389,7 +392,8 @@ Template.ttcdisruption.helpers({
             entry = intersection[0];
             entry = entry.replace(/(due).+(on)\s/g, "");
             crossStreets = entry.split(/((north|south)|(east|west))(\sof\s)/g);
-            returnArray = [crossStreets[0], crossStreets[5]];
+            // Get the first and last entry in the array corresponding to the actual streets
+            returnArray = [_.first(crossStreets), _.last(crossStreets)];
         } else {
             returnArray = [];
         }
@@ -408,7 +412,7 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
             // handle presence of "full service has resumed" or "onboard streetcar"
             var excludeCheck = _.find(messageBlacklist, function(excludeItem){ 
-                return streetToEdit.search(excludeItem) > -1 
+                return streetToEdit.search(excludeItem) > -1; 
             });
             var excludeFlag = _.isUndefined(excludeCheck);
             if (excludeFlag){
@@ -434,7 +438,7 @@ Template.ttcdisruption.helpers({
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
             "elevator": ["elevator"],
-            "construction": ["construction", "repair", "track", "upgrade"],
+            "construction": ["construction", "repair", " track ", "upgrade"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
             "medical": ["medical"],
             "reroute": ["diverting", "divert"],
@@ -540,28 +544,4 @@ Template.ttcdisruption.helpers({
 
   });
 // End helpers
-
-// After disruption template render
-// Handles the insert of the day dividers in the listing
-
-Template.ttcdisruption.rendered = function(){
-    var daysAgoCheck = this.$('.disruption-entry .time-overall').data("days-ago");
-    // current node
-    var currentNode = this.$('.disruption-entry')[0];
-    // Get information on entry before this one
-    var previousEntry = this.$('.disruption-entry').prev();
-    previousEntry = previousEntry[0];
-    // Get month and day of entry above the current one if it corresponds to new day
-    previousDays = $(previousEntry).find('.time-overall').data("days-ago");
-    if (_.isUndefined(previousDays)){
-        previousDays = 0;
-    }
-    var boundaryCheck = (previousDays !== daysAgoCheck);
-    if (boundaryCheck){
-        var thisMonth = $(previousEntry).find('.time-overall').data("month");
-        var thisDay = $(previousEntry).find('.time-overall').data("day");
-        var dividerLabel = thisMonth + " " + thisDay;
-        // Render the day divider
-        Blaze.renderWithData(Template.day_divider, {date: dividerLabel }, $('.disruption-list-body')[0], currentNode);
-    }
-};
+}
