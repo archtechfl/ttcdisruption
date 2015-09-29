@@ -154,6 +154,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "between": /(((between)|(btwn))\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s]+(?=\.)/g,
         "between_due": /((between)|(btwn))\s[\w\s\,]+(due)/g,
+        "between_abbr_bw": /((b\/w)\s[\w\s\.]+)(?=\s((station))|(?=\s(stn)))/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
         "near_station": /(near)\s.+(stn|station)/g,
@@ -217,6 +218,10 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         // handle station name range with dash
         if (searchUsed == "between_stations_dash"){
             edited = edited.replace(/(operating\s)/g,""); 
+        }
+        // handle station with between b/w abbreviation
+        if (searchUsed == "between_abbr_bw"){
+            edited = edited.replace(/(b\/w)\s/g,""); 
         }
         // handle station name near reference
         if (searchUsed == "near_station"){
