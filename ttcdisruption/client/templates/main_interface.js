@@ -441,7 +441,7 @@ Template.ttcdisruption.helpers({
             "elevator": ["elevator"],
             "construction": ["construction", "repair", " track ", "upgrade"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
-            "medical": ["medical"],
+            "medical": ["medical", "personal injury"],
             "reroute": ["diverting", "divert"],
             "alarm": ["alarm"],
             "surface_stoppage": ["turning back"],
