@@ -10,6 +10,11 @@ if (Meteor.isClient) {
         // Get information on entry before this one
         var previousEntry = this.$('.disruption-entry').prev();
         previousEntry = previousEntry[0];
+        // Update time to current time if the entry is the newest one,
+        // to indicate how old the records are
+        if ($(previousEntry).hasClass("disruption-table-header")){
+            Session.set("currentTime", moment().toISOString());
+        }
         // Get month and day of entry above the current one if it corresponds to new day
         previousDays = $(previousEntry).find('.time-overall').data("days-ago");
         if (_.isUndefined(previousDays)){

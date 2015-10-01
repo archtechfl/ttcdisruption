@@ -262,9 +262,6 @@ Template.ttcdisruption.helpers({
 
         These are the only allowable formats now, must convert current format
         "Mon Aug 17 20:53:23 +0000 2015" to standard ISO
-
-        DONE - 19 August 2015
-
         */
 
         var today = moment();
