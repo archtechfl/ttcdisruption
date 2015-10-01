@@ -207,6 +207,10 @@ function BusRoutesLibrary () {
         "community_routes": this.community_routes,
         "downtown_exp_routes": this.downtown_exp_routes
     };
+    this.alternateNames = {
+        103: ["mount pleasant","mount pleasant north", "mt. pleasant"],
+        191: ["highway 27 rocket"]
+    }
     this.createIndexes();
 };
 
@@ -229,43 +233,61 @@ BusRoutesLibrary.prototype.createIndexes = function() {
 BusRoutesLibrary.prototype.retrieveRouteName = function(routeNumber) {
     var self = this;
     var route = Number(routeNumber);
+    // Storage for return
+    var returnValue = "";
     if (route >= 400){
         var checkIndex = _.contains(self.indexes["community_routes"], route);
         // Community route
         if (checkIndex){
-            return this.community_routes[route];
+            if (!_.isUndefined(this.alternateNames[route])){
+                returnValue = [this.community_routes[route],this.alternateNames[route]];
+            } else {
+                returnValue = this.community_routes[route];
+            }
         } else {
-            return "invalid";
+            returnValue = "invalid";
         }
     } else if (route >= 300 && route < 400){
         // Night route
         var checkIndex = _.contains(self.indexes["night_routes"], route);
         // Community route
         if (checkIndex){
-            return this.night_routes[route];
+            if (!_.isUndefined(this.alternateNames[route])){
+                returnValue = [this.night_routes[route],this.alternateNames[route]];
+            } else {
+                returnValue = this.night_routes[route];
+            }
         } else {
-            return "invalid";
+            returnValue = "invalid";
         }
     } else if (route > 140 && route < 146){
         // Downtown express
         var checkIndex = _.contains(self.indexes["downtown_exp_routes"], route);
         // Community route
         if (checkIndex){
-            return this.downtown_exp_routes[route];
+            if (!_.isUndefined(this.alternateNames[route])){
+                returnValue = [this.downtown_exp_routes[route],this.alternateNames[route]];
+            } else {
+                returnValue = this.downtown_exp_routes[route];
+            }
         } else {
-            return "invalid";
+            returnValue = "invalid";
         }
     } else {
         // Regular routes
         var checkIndex = _.contains(self.indexes["standard_routes"], route);
         // Community route
         if (checkIndex){
-            // console.log(this.standard_routes[route]);
-            return this.standard_routes[route];
+            if (!_.isUndefined(this.alternateNames[route])){
+                returnValue = [this.standard_routes[route],this.alternateNames[route]];
+            } else {
+                returnValue = this.standard_routes[route];
+            }
         } else {
-            return "invalid";
+            returnValue = "invalid";
         }
     }
+    return returnValue;
 };
 
 busInfo = new BusRoutesLibrary();
