@@ -46,10 +46,11 @@ Template.ttcdisruption.helpers({
         // Also make sure there are no landmarks with "track" in the name
         var sanityExclude = {
             "diversion": "diverting",
+            "diverted": "diverted",
             "go_transit": "go station",
             "racing_venue": /(race)\s?(track)/g,
-            "bus_routes": /(routes)/g,
-            "street_level": "street"
+            "surface_routes": /(surface\sroutes)/g,
+            "street_level": "street level"
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
@@ -68,10 +69,18 @@ Template.ttcdisruption.helpers({
     isStreetcar: function () {
         // Get the text
         var text = this.description;
-        // Check for mention of a streetcar line number, ex "501"
-        var streetcarCheck = text.search(/(5{1}\d{2})/g);
+
+        // Check for mention of a streetcar line number, ex "501", first
+        // Then check other terms
+        var searchTerms = {
+            "line_search": /(5{1}\d{2})/g
+        };
+        // Check the text for either search term that might indicate subway
+        var streetcarCheck = _.filter(searchTerms, function(term, index){ 
+            return text.search(term) > -1;
+        });
         // If there is a stretcar line number, results will be 0 or greater
-        if (streetcarCheck != -1){
+        if (streetcarCheck.length > 0){
           return true;
         } else {
           return false;
@@ -445,11 +454,13 @@ Template.ttcdisruption.helpers({
             "reroute": ["diverting", "divert"],
             "alarm": ["alarm"],
             "surface_stoppage": ["turning back"],
+            "suspension": ["alternative", "suspended"],
             "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
             "increased": ["service increased", "increased"],
         };
         var icons = {
+            "suspension": "stop",
             "police": "police",
             "elevator": "elevator",
             "fire": "fire",
