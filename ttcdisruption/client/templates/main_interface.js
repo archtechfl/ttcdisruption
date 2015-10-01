@@ -274,7 +274,6 @@ Template.ttcdisruption.helpers({
         }
         // Organize line numbers in ascending order
         returnArray = _.sortBy(returnArray, function(num){ return num * 1; });
-        console.log(returnArray.length == 0);
         return returnArray;
     }, // End getBus method
     getDateTime: function () {
