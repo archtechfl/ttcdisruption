@@ -189,6 +189,8 @@ Template.ttcdisruption.helpers({
         var findBus = /\d{1,3}[a-f]?\s+[a-zA-Z']+/g;
         // bus matches
         var busMatch = this.description.match(findBus);
+        // Store the full text for additional searching
+        var text = this.description;
         // Create an array to store the route numbers that are found
         var routesListing = [];
         // Go through possible routes
@@ -199,18 +201,40 @@ Template.ttcdisruption.helpers({
             var busMatchEntry = item;
             var numberMatched = busMatchEntry.match(routeNumberExp)[0];
             // compare bus route name to the pairing retrived before
-            var routeName = busInfo.retrieveRouteName(numberMatched).toLowerCase().split(" ")[0];
+            var routeName = busInfo.retrieveRouteName(numberMatched)
+            // If single name, do a splitting operation and compare first word, otherwise add
+            // entire alternate list for searching
+            if (_.isString(routeName)){
+                routeName = routeName.toLowerCase().split(" ")[0];
+            }
             // Check to see if bus route is actually a bus route (sanity check)
             var searchArray = [routeName, "bus", "route"];
-            // Check the text for either search term that might indicate subway
+            // Create a tracker for counting matches
             var tracker = [];
-            _.each(searchArray, function (item) {
-                var result = busMatchEntry.search(item);
-                // If there is a valid search term, add it to the tracker
-                if (result != -1){
-                    tracker.push(result);
-                }
-            });
+            // flatten searchArray if routeName variable returned alternate spelling list instead
+            // of single entry
+            if (_.isArray(routeName)){
+                searchArray = _.flatten(searchArray);
+                // Lowercase all entries
+                searchArray = _.map(searchArray, function(entry){
+                    return entry.toLowerCase();
+                });
+                _.each(searchArray, function (item) {
+                    var result = text.search(item);
+                    // If there is a valid search term, add it to the tracker
+                    if (result != -1){
+                        tracker.push(result);
+                    }
+                });
+            } else {
+                _.each(searchArray, function (item) {
+                    var result = busMatchEntry.search(item);
+                    // If there is a valid search term, add it to the tracker
+                    if (result != -1){
+                        tracker.push(result);
+                    }
+                });
+            }
             // If the tracker is greater than 0, there are matches
             if (tracker.length > 0){
                 routesListing.push(numberMatched);
