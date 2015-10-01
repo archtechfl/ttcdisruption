@@ -244,10 +244,13 @@ Template.ttcdisruption.helpers({
                     var combined = _.union(additionalRoutes, routesListing);
                 }
             }
-            return combined;
+            var returnArray = combined;
         } else {
-            return routesListing;
+            var returnArray = routesListing;
         }
+        // Organize line numbers in ascending order
+        returnArray = _.sortBy(returnArray, function(num){ return num * 1; });
+        return returnArray;
     }, // End getBus method
     getDateTime: function () {
         // Get the month and day for display
