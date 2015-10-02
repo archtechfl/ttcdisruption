@@ -325,7 +325,7 @@ Template.ttcdisruption.helpers({
             // Between intersection combination
             "between_and": /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g,
             // Handle "at" street "and" street reference
-            "at_and": /((at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
+            "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
             // handle "on street near street" or "on street at street" combinations
             "on_at_near": /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g,
             // All clear combinations
@@ -338,9 +338,9 @@ Template.ttcdisruption.helpers({
             // Check for subway station reference as location of disruption
             "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             // Single "At" condition followed by "due"
-            "at_due": /(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
+            "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
             // Intersection "at" street "and" street, end of alert
-            "at_end_alert": /(\sat\s)[\w\s\.]+(?=.)/g
+            "at_end_alert": /\s(at)\s[\w\s\.]+(?=.)/g
         };
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
@@ -388,17 +388,14 @@ Template.ttcdisruption.helpers({
             // return cross street array
             returnArray = crossStreets;
         } else if (searchUsed == "at_and" || searchUsed == "at_due" || searchUsed == "at_end_alert"){
-            if (searchUsed == "at_end_alert"){
-                console.log(entry);
-            }
             // Check for multiple "at" and select the second group is present
-            var multipleAtCheck = entry.match(/(at)\s/g).length;
+            var multipleAtCheck = entry.match(/\s(at)\s/g).length;
             if (multipleAtCheck > 1){
-                entry = entry.split("at ")[2];
+                entry = entry.split(" at ")[2];
             }
             // End multiple at condition
             // replace "at" with blank text
-            entry = entry.replace("at ", "");
+            entry = entry.replace(/\s(at)\s/g, "");
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
