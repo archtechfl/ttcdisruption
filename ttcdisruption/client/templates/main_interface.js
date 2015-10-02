@@ -174,7 +174,6 @@ Template.ttcdisruption.helpers({
                 lineNumber = 5;
             }
         } else {
-            var alert = formatDescription(text);
             // Get station list
             var stationList = stationInfo.retrieveStationListing(textForSearch);
             // search through station name database by passing station list

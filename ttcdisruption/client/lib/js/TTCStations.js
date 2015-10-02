@@ -91,12 +91,12 @@ function StationLibrary () {
     // matched with their standardized equivalent
     this.interchangeStations = {
         "Sheppard-Yonge": [
-            "sheppard",
             "yonge sheppard",
             "yonge-sheppard",
             "sheppard yonge",
             "yonge and sheppard",
-            "sheppard and yonge"
+            "sheppard and yonge",
+            /\s?(sheppard)\s?/g
         ],
         "Bloor-Yonge": [
             "yonge and bloor",
@@ -109,8 +109,10 @@ function StationLibrary () {
 
 StationLibrary.prototype.interchangeLookup = function (name) {
     var self = this;
-    // get name
-    var originalStationName = name;
+    // get text
+    var originalText = name;
+    // Original station name
+    var originalName = "";
     // Standardize interchange station names
     // Get the formatted station name
     // Create a holder for station name
@@ -118,19 +120,21 @@ StationLibrary.prototype.interchangeLookup = function (name) {
     var search = _.find(self.interchangeStations, function (standardStation, index){
         // returns true for the first station array that contains a name match
         return _.find(standardStation, function(station){
-            if (name.search(station) > -1){
+            if (originalText.search(station) > -1){
                 formattedName = index;
+                originalName = station;
             } else {
                 // Return original station name if there is no match
-                formattedName = originalStationName;
+                formattedName = originalText;
             }
             // return true if the station name is found in the station array
-            return name.search(station) > -1; 
+            return originalText.search(station) > -1; 
         }); 
     });
     return {
-        "name": formattedName,
-        "hasChanged": formattedName !== originalStationName
+        "revisedInterchange": formattedName,
+        "originalInterchange": originalName,
+        "hasChanged": formattedName !== originalText
     }
 };
 
@@ -148,6 +152,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
     var self = this;
     var searches = {
         "clear": /.+(clear:\s)[\w\s\.\-]+((station)|(stn))?(has|is)/g,
+        "delay_cleared": /(delay)\s.+(cleared)/g,
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "at_station": /((at)\s[\w\.\s\-]+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_due": /((at)\s[\w\.\s\-]+(?=\sdue))/g,
@@ -246,15 +251,22 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
                 edited = edited.replace(/.+(bound)/g,"");
             }
         } 
-        if (searchUsed == "clear"){
-            // Remove everything after station names
+        if (searchUsed == "clear" || searchUsed == "delay_cleared"){
+            // Remove everything after station names, either has, is or are
             edited = edited.replace(/\s(has).*/g,"");
             // This step is required because of islington station name
             edited = edited.replace(/\s(is).*/g,"");
             // handle "have" occurences
             edited = edited.replace(/\s?(have).*/g,"");
-            // Remove everything before delay and certain words after
-            edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
+            // handle "are" occurences
+            edited = edited.replace(/(\s?are).*/g,"");
+            if (searchUsed == "clear"){
+                // Remove everything before delay and certain words after
+                edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
+            } else {
+                edited = edited.replace(/(delay)\s?/g,"");
+                edited = edited.replace(/\s?(at)\s/g,"");
+            }
         }  
         // Remove SRT (Scarborough RT) reference if present
         if (edited.search(/\s(srt)/g) > -1){
@@ -265,23 +277,22 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         // Check for interchange stations at this stage
         var interchange = self.interchangeLookup(edited);
         if (interchange.hasChanged){
-            result[index] = interchange.name;
+            result[index] = interchange.revisedInterchange;
+        }
+        // Perform regular splitting operations to obtains stations
+        // if no interchange found
+        if (edited.search(" to ") > -1){
+            edited = edited.split(" to ");
+            result[index] = edited;
+        } else if (edited.search(" and ") > -1){
+            // Check for interchange stations at this stage
+            edited = edited.split(" and ");
+            result[index] = edited;
+        } else if (edited.search("-") > -1){
+            edited = edited.split("-");
+            result[index] = edited;
         } else {
-            // Perform regular splitting operations to obtains stations
-            // if no interchange found
-            if (edited.search(" to ") > -1){
-                edited = edited.split(" to ");
-                result[index] = edited;
-            } else if (edited.search(" and ") > -1){
-                // Check for interchange stations at this stage
-                edited = edited.split(" and ");
-                result[index] = edited;
-            } else if (edited.search("-") > -1){
-                edited = edited.split("-");
-                result[index] = edited;
-            } else {
-                result[index] = edited;
-            }
+            result[index] = edited;
         }
     });
     var returnArray = _.flatten(result);
