@@ -10,17 +10,20 @@ if (Meteor.isClient) {
         // Get information on entry before this one
         var previousEntry = this.$('.disruption-entry').prev();
         previousEntry = previousEntry[0];
+        var afterHeader = false;
         // Update time to current time if the entry is the newest one,
         // to indicate how old the records are
         if ($(previousEntry).hasClass("disruption-table-header")){
             Session.set("currentTime", moment().toISOString());
+            afterHeader = true;
         }
-        // Get month and day of entry above the current one if it corresponds to new day
-        previousDays = $(previousEntry).find('.time-overall').data("days-ago");
-        if (_.isUndefined(previousDays)){
-            previousDays = 0;
+        var previousDays = 0;
+        var boundaryCheck = false;
+        if (!afterHeader){
+            // Get month and day of entry above the current one if it corresponds to new day
+            previousDays = $(previousEntry).find('.time-overall').data("days-ago");
+            boundaryCheck = (previousDays !== daysAgoCheck);
         }
-        var boundaryCheck = (previousDays !== daysAgoCheck);
         if (boundaryCheck){
             var thisMonth = $(previousEntry).find('.time-overall').data("month");
             var thisDay = $(previousEntry).find('.time-overall').data("day");
@@ -37,7 +40,6 @@ if (Meteor.isClient) {
       var dayDividerElement = this.$('.disruption-entry').prev();
       var currentNode = this.$('.disruption-entry')[0];
       // Check if end of day entry
-      console.log(currentNode);
       var endOfDay = $(currentNode).hasClass("end-of-day-entry");
       dayDividerElement = $(dayDividerElement)[0];
       var isDayDivider = $(dayDividerElement).hasClass("day-divider");
