@@ -9,7 +9,7 @@ function formatDescription (text) {
     formattedText = formattedText.replace("’","'")
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     // change saint (st.) to st
-    formattedText = formattedText.replace("st.","st");
+    formattedText = formattedText.replace(/(st\.)/g,"st");
     // Spelling errors, correct them
     var spellingErrors = {
         "bwtn": "btwn"
@@ -49,7 +49,7 @@ Template.ttcdisruption.helpers({
             "diverted": "diverted",
             "go_transit": "go station",
             "racing_venue": /(race)\s?(track)/g,
-            "surface_routes": /(surface\sroutes)/g,
+            "surface_routes": /(surface\sroutes)|(night\sbus)/g,
             "street_level": "street level"
         };
         var excludeTracker = [];
@@ -325,29 +325,23 @@ Template.ttcdisruption.helpers({
             // Between intersection combination
             "between_and": /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g,
             // Handle "at" street "and" street reference
-            "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
+            "at_and": /((at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
             // handle "on street near street" or "on street at street" combinations
             "on_at_near": /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g,
             // All clear combinations
-            "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s((cleared)|(re-opened))/g,
+            "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
             "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
             // On and intersection combination
             "on_and": /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g,
             // Direction relative to intersection combination
             "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
             // Check for subway station reference as location of disruption
-            "at_station": /((at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g
+            "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
+            // Single "At" condition followed by "due"
+            "at_due": /(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
+            // Intersection "at" street "and" street, end of alert
+            "at_end_alert": /(\sat\s)[\w\s\.]+(?=.)/g
         };
-        // Get intersection method
-        // Looks for common patterns and parses the intersection
-        var intersectionExpA = /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g;
-        // handle "on street near street" or "on street at street" combinations
-        var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
-        var inttersectionExpHasClear = /.+(clear:\s)[\w\s\.]+\s(has)\s((cleared)|(re-opened))/g;
-        var inttersectionExpIsClear = /.+(clear:\s)[\w\s\.]+\s(is\s)/g;
-        var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
-        var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
-        var intersectionDirOf = /(due).+(on).+((south|north)|(east|west)).+/g;
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
         var tenseErrors = {
@@ -393,15 +387,18 @@ Template.ttcdisruption.helpers({
             }
             // return cross street array
             returnArray = crossStreets;
-        } else if (searchUsed == "at_and"){
+        } else if (searchUsed == "at_and" || searchUsed == "at_due" || searchUsed == "at_end_alert"){
+            if (searchUsed == "at_end_alert"){
+                console.log(entry);
+            }
             // Check for multiple "at" and select the second group is present
-            var multipleAtCheck = entry.match(/\s(at)\s/g).length;
+            var multipleAtCheck = entry.match(/(at)\s/g).length;
             if (multipleAtCheck > 1){
-                entry = entry.split( "at ")[2];
+                entry = entry.split("at ")[2];
             }
             // End multiple at condition
             // replace "at" with blank text
-            entry = entry.replace(" at ", "");
+            entry = entry.replace("at ", "");
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
@@ -455,6 +452,14 @@ Template.ttcdisruption.helpers({
             returnArray = [_.first(crossStreets), _.last(crossStreets)];
         } else if (searchUsed == "at_station"){
             // Handle reference to disruption at a station
+            var atSanityCheck = entry.match(/(\sat\s)/g);
+            // If there are multiple at conditions, the station
+            // will be the last entry in the array since it should come before
+            // "station" text captured at end of regex
+            if (atSanityCheck.length == 2){
+                var entrySplitAt = entry.split(/\sat\s/g);
+                entry = _.last(entrySplitAt);
+            }
             returnArray = [entry];
         } else {
             returnArray = [];
@@ -471,7 +476,7 @@ Template.ttcdisruption.helpers({
             // Remove "at" and all text before
             streetToEdit = streetToEdit.replace(/.*(at\s)/g, "");
             // Remove "due" and everything after
-            streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
+            streetToEdit = streetToEdit.replace(/(\s(due)\s.*)/g, "");
             // handle presence of "full service has resumed" or "onboard streetcar"
             var excludeCheck = _.find(messageBlacklist, function(excludeItem){ 
                 return streetToEdit.search(excludeItem) > -1; 
@@ -504,7 +509,7 @@ Template.ttcdisruption.helpers({
             "medical": ["medical", "personal injury"],
             "construction": ["construction", "repair", " track ", "upgrade"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
-            "reroute": ["diverting", "divert"],
+            "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
             "surface_stoppage": ["turning back"],
             "suspension": ["alternative", "suspended"],
