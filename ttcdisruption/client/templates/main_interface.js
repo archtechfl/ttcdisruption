@@ -20,6 +20,21 @@ function formatDescription (text) {
     return formattedText;
 };
 
+Template.ttcdisruption.events({
+    // Talking to Google goes here
+    // "click .location-alert": function (event) {
+    //     var resources = {};
+    //     Meteor.call("googleMapRetrieve", function(error, data) {
+    //         if (!error) {
+    //             resources = data;
+    //             console.log(resources);
+    //         } else {
+    //             console.log(error);
+    //         }
+    //     });
+    // }
+  });
+
 Template.ttcdisruption.helpers({
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
@@ -505,7 +520,7 @@ Template.ttcdisruption.helpers({
             "elevator": ["elevator"],
             "medical": ["medical", "personal injury"],
             "construction": ["construction", "repair", " track ", "upgrade"],
-            "mechanical": ["mechanical", "stalled", "signal", "disabled"],
+            "mechanical": ["mechanical", "stalled", "signal", "disabled", "switch"],
             "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
             "surface_stoppage": ["turning back"],
