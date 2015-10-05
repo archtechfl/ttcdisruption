@@ -9,10 +9,12 @@ function formatDescription (text) {
     formattedText = formattedText.replace("’","'")
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     // change saint (st.) to st
-    formattedText = formattedText.replace("st.","st");
+    formattedText = formattedText.replace(/(st\.)/g,"st");
     // Spelling errors, correct them
     var spellingErrors = {
-        "bwtn": "btwn"
+        "bwtn": "btwn",
+        "srn": "stn",
+        "queens park": "queen's park"
     };
     _.each(spellingErrors, function (replacement, original) {
         formattedText = formattedText.replace(original, replacement);
@@ -46,10 +48,11 @@ Template.ttcdisruption.helpers({
         // Also make sure there are no landmarks with "track" in the name
         var sanityExclude = {
             "diversion": "diverting",
+            "diverted": "diverted",
             "go_transit": "go station",
             "racing_venue": /(race)\s?(track)/g,
-            "bus_routes": /(routes)/g,
-            "street_level": "street"
+            "surface_routes": /(surface\sroutes)|(night\sbus)/g,
+            "street_level": "street level"
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
@@ -68,10 +71,18 @@ Template.ttcdisruption.helpers({
     isStreetcar: function () {
         // Get the text
         var text = this.description;
-        // Check for mention of a streetcar line number, ex "501"
-        var streetcarCheck = text.search(/(5{1}\d{2})/g);
+
+        // Check for mention of a streetcar line number, ex "501", first
+        // Then check other terms
+        var searchTerms = {
+            "line_search": /(5{1}\d{2})/g
+        };
+        // Check the text for either search term that might indicate subway
+        var streetcarCheck = _.filter(searchTerms, function(term, index){ 
+            return text.search(term) > -1;
+        });
         // If there is a stretcar line number, results will be 0 or greater
-        if (streetcarCheck != -1){
+        if (streetcarCheck.length > 0){
           return true;
         } else {
           return false;
@@ -180,6 +191,8 @@ Template.ttcdisruption.helpers({
         var findBus = /\d{1,3}[a-f]?\s+[a-zA-Z']+/g;
         // bus matches
         var busMatch = this.description.match(findBus);
+        // Store the full text for additional searching
+        var text = this.description;
         // Create an array to store the route numbers that are found
         var routesListing = [];
         // Go through possible routes
@@ -190,18 +203,40 @@ Template.ttcdisruption.helpers({
             var busMatchEntry = item;
             var numberMatched = busMatchEntry.match(routeNumberExp)[0];
             // compare bus route name to the pairing retrived before
-            var routeName = busInfo.retrieveRouteName(numberMatched).toLowerCase().split(" ")[0];
+            var routeName = busInfo.retrieveRouteName(numberMatched)
+            // If single name, do a splitting operation and compare first word, otherwise add
+            // entire alternate list for searching
+            if (_.isString(routeName)){
+                routeName = routeName.toLowerCase().split(" ")[0];
+            }
             // Check to see if bus route is actually a bus route (sanity check)
             var searchArray = [routeName, "bus", "route"];
-            // Check the text for either search term that might indicate subway
+            // Create a tracker for counting matches
             var tracker = [];
-            _.each(searchArray, function (item) {
-                var result = busMatchEntry.search(item);
-                // If there is a valid search term, add it to the tracker
-                if (result != -1){
-                    tracker.push(result);
-                }
-            });
+            // flatten searchArray if routeName variable returned alternate spelling list instead
+            // of single entry
+            if (_.isArray(routeName)){
+                searchArray = _.flatten(searchArray);
+                // Lowercase all entries
+                searchArray = _.map(searchArray, function(entry){
+                    return entry.toLowerCase();
+                });
+                _.each(searchArray, function (item) {
+                    var result = text.search(item);
+                    // If there is a valid search term, add it to the tracker
+                    if (result != -1){
+                        tracker.push(result);
+                    }
+                });
+            } else {
+                _.each(searchArray, function (item) {
+                    var result = busMatchEntry.search(item);
+                    // If there is a valid search term, add it to the tracker
+                    if (result != -1){
+                        tracker.push(result);
+                    }
+                });
+            }
             // If the tracker is greater than 0, there are matches
             if (tracker.length > 0){
                 routesListing.push(numberMatched);
@@ -235,10 +270,13 @@ Template.ttcdisruption.helpers({
                     var combined = _.union(additionalRoutes, routesListing);
                 }
             }
-            return combined;
+            var returnArray = combined;
         } else {
-            return routesListing;
+            var returnArray = routesListing;
         }
+        // Organize line numbers in ascending order
+        returnArray = _.sortBy(returnArray, function(num){ return num * 1; });
+        return returnArray;
     }, // End getBus method
     getDateTime: function () {
         // Get the month and day for display
@@ -250,9 +288,6 @@ Template.ttcdisruption.helpers({
 
         These are the only allowable formats now, must convert current format
         "Mon Aug 17 20:53:23 +0000 2015" to standard ISO
-
-        DONE - 19 August 2015
-
         */
 
         var today = moment();
@@ -277,25 +312,40 @@ Template.ttcdisruption.helpers({
         };
     },
     getIntersection: function () {
+        // Format text
+        var text = formatDescription(this.description);
         // List of terms to search for in intersections,
         // remove as invalid if present
         var messageBlacklist = [
             /(full)\s(service)/g,
             /(board)/g,
-            /(longer\sthan\snormal)/g
+            /(longer\sthan\snormal)/g,
+            // Service time update
+            /(\d{1}(\:?)\d{2}(am|pm))/g
         ];
-        // Get intersection method
+        // List of intersection expressions
         // Looks for common patterns and parses the intersection
-        var intersectionExpA = /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g;
-        // handle "on street near street" or "on street at street" combinations
-        var intersectionExpB = /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g;
-        var inttersectionExpHasClear = /.+(clear:\s)[\w\s\.]+\s(has)\s((cleared)|(re-opened))/g;
-        var inttersectionExpIsClear = /.+(clear:\s)[\w\s\.]+\s(is\s)/g;
-        var intersectionExpD = /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g;
-        var intersectionExpE = /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g;
-        var intersectionDirOf = /(due).+(on).+((south|north)|(east|west)).+/g;
-        // Format text
-        var text = formatDescription(this.description);
+        var searches = {
+            // Between intersection combination
+            "between_and": /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g,
+            // Handle "at" street "and" street reference
+            "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
+            // handle "on street near street" or "on street at street" combinations
+            "on_at_near": /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g,
+            // All clear combinations
+            "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
+            "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
+            // On and intersection combination
+            "on_and": /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g,
+            // Direction relative to intersection combination
+            "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
+            // Check for subway station reference as location of disruption
+            "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
+            // Single "At" condition followed by "due"
+            "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
+            // Intersection "at" street "and" street, end of alert
+            "at_end_alert": /\s(at)\s[\w\s\.]+(?=.)/g
+        };
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
         var tenseErrors = {
@@ -304,19 +354,36 @@ Template.ttcdisruption.helpers({
         _.each(tenseErrors, function (replacement, original) {
             text = text.replace(original, replacement);
         });
-        // Check for intersection patterns
-        var intersection = text.match(intersectionExpA);
-        var intersectionB = text.match(intersectionExpB);
+        // entry storage
+        var entry = "";
+        // Store the search used
+        var searchUsed = "";
+        // Check for intersection patterns, stop at the first one that matches
+        var search = _.find(searches, function(search, index){
+            // Perform each search, stop at the one that is good
+            var matching = text.match(search);
+            if (matching){
+                var matches = matching;
+                entry = matches;
+                searchUsed = index;
+            } else {
+                var matches = [];
+            }
+            return matches.length > 0;
+        });
         // Data to return
         var returnArray = [];
         // Cross streets array
         var crossStreets = [];
-        // entry storage
-        var entry = "";
-        if (text.search(intersectionExpE) > -1){
+        // Only used first match if present for now
+        if (_.isArray(entry)){
+            entry = entry[0];
+        } else {
+            entry = [];
+        }
+        // Processing conditions based on search returned
+        if (searchUsed == "between_and"){
             // Handle alert on road between cross streets, between condition
-            var intersection = text.match(intersectionExpE);
-            entry = intersection[0];
             entry = entry.replace(/((between)|(btwn))\s/g, "");
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
@@ -324,17 +391,15 @@ Template.ttcdisruption.helpers({
             }
             // return cross street array
             returnArray = crossStreets;
-        }
-        else if (intersection){
-            entry = intersection[0];
+        } else if (searchUsed == "at_and" || searchUsed == "at_due" || searchUsed == "at_end_alert"){
             // Check for multiple "at" and select the second group is present
             var multipleAtCheck = entry.match(/\s(at)\s/g).length;
             if (multipleAtCheck > 1){
-                entry = entry.split( "at ")[2];
+                entry = entry.split(" at ")[2];
             }
             // End multiple at condition
             // replace "at" with blank text
-            entry = entry.replace(" at ", "");
+            entry = entry.replace(/\s(at)\s/g, "");
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
@@ -344,8 +409,7 @@ Template.ttcdisruption.helpers({
             }
             // return cross street array
             returnArray = crossStreets;
-        } else if (intersectionB) {
-            entry = intersectionB[0];
+        } else if (searchUsed == "on_at_near") {
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" near ") > -1){
@@ -354,11 +418,9 @@ Template.ttcdisruption.helpers({
                 crossStreets = entry.split(" at "); 
             }
             returnArray = crossStreets;
-        } else if (text.search(inttersectionExpHasClear) > -1){
+        } else if (searchUsed == "has_cleared_reopened"){
             // handle all clear messages with intersections lacking "At" or "on"
             // preface
-            var intersection = text.match(inttersectionExpHasClear);
-            entry = intersection[0];
             entry = entry.replace(/.+(clear:\s)/g,"");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
@@ -366,10 +428,8 @@ Template.ttcdisruption.helpers({
                 crossStreets[0] = entry;
             }
             returnArray = crossStreets;
-        } else if (text.search(inttersectionExpIsClear) > -1){
+        } else if (searchUsed == "is_clear"){
             // Clear for all clear, is now clear condition
-            var intersection = text.match(inttersectionExpIsClear);
-            entry = intersection[0];
             entry = entry.replace(/.+(clear:\s)/g,"");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
@@ -377,24 +437,31 @@ Template.ttcdisruption.helpers({
                 crossStreets = entry.split(" at ");
             }
             returnArray = crossStreets;
-        } else if (text.search(intersectionExpD) > -1) {
+        } else if (searchUsed == "on_and") {
             // handle intersections with "on" and "and"
-            var intersection = text.match(intersectionExpD);
-            entry = intersection[0];
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
             }
             returnArray = crossStreets;
-        } else if (text.search(intersectionDirOf) > -1){
+        } else if (searchUsed == "direction_relative"){
             // Handle directional reference, i.e. broadview south of danforth
             // Intrepret to intersection, remove vaguness
-            var intersection = text.match(intersectionDirOf);
-            entry = intersection[0];
             entry = entry.replace(/(due).+(on)\s/g, "");
             crossStreets = entry.split(/((north|south)|(east|west))(\sof\s)/g);
             // Get the first and last entry in the array corresponding to the actual streets
             returnArray = [_.first(crossStreets), _.last(crossStreets)];
+        } else if (searchUsed == "at_station"){
+            // Handle reference to disruption at a station
+            var atSanityCheck = entry.match(/(\sat\s)/g);
+            // If there are multiple at conditions, the station
+            // will be the last entry in the array since it should come before
+            // "station" text captured at end of regex
+            if (atSanityCheck.length == 2){
+                var entrySplitAt = entry.split(/\sat\s/g);
+                entry = _.last(entrySplitAt);
+            }
+            returnArray = [entry];
         } else {
             returnArray = [];
         }
@@ -410,7 +477,7 @@ Template.ttcdisruption.helpers({
             // Remove "at" and all text before
             streetToEdit = streetToEdit.replace(/.*(at\s)/g, "");
             // Remove "due" and everything after
-            streetToEdit = streetToEdit.replace(/(\s(due)\s.+)/g, "");
+            streetToEdit = streetToEdit.replace(/(\s(due)\s.*)/g, "");
             // handle presence of "full service has resumed" or "onboard streetcar"
             var excludeCheck = _.find(messageBlacklist, function(excludeItem){ 
                 return streetToEdit.search(excludeItem) > -1; 
@@ -426,7 +493,8 @@ Template.ttcdisruption.helpers({
         }
         return {
             "intersections": finalArray,
-            "hasIntersections": finalArray.length > 1
+            "hasIntersections": finalArray.length > 1,
+            "isSubwayLocation": searchUsed === "at_station"
         }
     },
     disruptionType: function () {
@@ -434,26 +502,35 @@ Template.ttcdisruption.helpers({
         var text = formatDescription(this.description);
         // Track the disruption type
         var type = "";
+        // Disruption regexes
+        var disruptionRegexes = {
+            "unauthorized track level": /[authorized]{4,10}\s(person\sat\strack\slevel)/g,
+            "extended hours": /(running)\s(from)\s(\d{1}:\d{2}(am|pm)).+(\d{1}:\d{2}(am|pm))/g
+        }
         var disruptionTypes = {
-            "police": ["tps", "security", "police", "unauthorized"],
+            "police": ["tps", "security", "police", disruptionRegexes["unauthorized track level"]],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
             "elevator": ["elevator"],
+            "medical": ["medical", "personal injury"],
+            "power": ["power off"],
             "construction": ["construction", "repair", " track ", "upgrade"],
             "mechanical": ["mechanical", "stalled", "signal", "disabled"],
-            "medical": ["medical", "personal injury"],
-            "reroute": ["diverting", "divert"],
+            "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
             "surface_stoppage": ["turning back"],
+            "suspension": ["alternative", "suspended"],
             "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
-            "increased": ["service increased", "increased"],
+            "increased": ["service increased", "increased", disruptionRegexes["extended hours"]],
         };
         var icons = {
+            "suspension": "stop",
             "police": "police",
             "elevator": "elevator",
             "fire": "fire",
             "mechanical": "cogs",
+            "power": "power-off",
             "vehicular": "car",
             "construction": "wrench",
             "reroute": "level-up",

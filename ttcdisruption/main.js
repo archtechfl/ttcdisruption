@@ -5,12 +5,13 @@ if (Meteor.isClient) {
 
   Meteor.subscribe("notices");
 
-  var clock = function () {
-    Session.set("currentTime", moment().toISOString());
-  };
+  // var clock = function () {
+  //   Session.set("currentTime", moment().toISOString());
+  // };
 
   Meteor.startup(function () {
-    setInterval(clock, 1000);
+    // setInterval(clock, 1000);
+    Session.set("currentTime", moment().toISOString());
   });
 
   Template.listing.helpers({
@@ -72,13 +73,6 @@ if (Meteor.isClient) {
     // UI events go here
     "change .ui-control select": function (event) {
       Session.set("displayState", event.target.value);
-      // Check for end of day entries
-      // var endOfDay = $('.end-of-day-entry');
-      // // Remove day dividers if there are no end of day entries
-      // if (!_.isEmpty(endOfDay)){
-      //   var dayDividerRendered = Blaze.getView($('.day-divider')[0]);
-      //   Blaze.remove(dayDividerRendered);
-      // }
     }
   });
 
