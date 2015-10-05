@@ -12,7 +12,8 @@ function formatDescription (text) {
     formattedText = formattedText.replace(/(st\.)/g,"st");
     // Spelling errors, correct them
     var spellingErrors = {
-        "bwtn": "btwn"
+        "bwtn": "btwn",
+        "srn": "stn"
     };
     _.each(spellingErrors, function (replacement, original) {
         formattedText = formattedText.replace(original, replacement);
