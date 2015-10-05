@@ -1,8 +1,8 @@
 <template name="ttcdisruption">
 		{{#if isStreetcar }}
 		<tr class="disruption-entry streetcar-entry">
-				<td class="icon mobile-ui-viz"><i class="fa fa-train"></i></td>
-				<td class="route-numbers mobile-ui-viz">
+				<td class="icon"><i class="fa fa-train"></i></td>
+				<td class="route-numbers">
 					<div class="streetcar-routes-affected">
 					{{#each streetcarNumber}}
 						<div class="streetcar-line-number">{{.}}</div>
@@ -59,10 +59,10 @@
 		{{else}}
 			{{#if isSubway }}
 			<tr class="disruption-entry subway-entry {{subwayLine.name}}">
-				<td class="icon mobile-ui-viz">
+				<td class="icon">
 					<i class="fa fa-subway"></i>
 				</td>
-				<td class="route-numbers mobile-ui-viz">
+				<td class="route-numbers">
 					{{#each subwayLine.lines}}
 					<div class="subway-line-number subway-line-{{.}}-num">{{.}}</div>
 					{{/each}}
@@ -105,8 +105,8 @@
 			</tr>
 			{{else}}
 				<tr class="disruption-entry bus-entry">
-					<td class="icon mobile-ui-viz"><i class="fa fa-bus"></i></td>
-					<td class="route-numbers mobile-ui-viz">
+					<td class="icon"><i class="fa fa-bus"></i></td>
+					<td class="route-numbers">
 						<div class="bus-routes-affected">
 							{{#each getBus}}
 								<div class="individual-route">{{.}}</div>
