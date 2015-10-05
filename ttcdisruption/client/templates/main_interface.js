@@ -319,7 +319,9 @@ Template.ttcdisruption.helpers({
         var messageBlacklist = [
             /(full)\s(service)/g,
             /(board)/g,
-            /(longer\sthan\snormal)/g
+            /(longer\sthan\snormal)/g,
+            // Service time update
+            /(\d{1}(\:?)\d{2}(am|pm))/g
         ];
         // List of intersection expressions
         // Looks for common patterns and parses the intersection
@@ -503,6 +505,7 @@ Template.ttcdisruption.helpers({
         // Disruption regexes
         var disruptionRegexes = {
             "unauthorized track level": /[authorized]{4,10}\s(person\sat\strack\slevel)/g,
+            "extended hours": /(running)\s(from)\s(\d{1}:\d{2}(am|pm)).+(\d{1}:\d{2}(am|pm))/g
         }
         var disruptionTypes = {
             "police": ["tps", "security", "police", disruptionRegexes["unauthorized track level"]],
@@ -519,7 +522,7 @@ Template.ttcdisruption.helpers({
             "suspension": ["alternative", "suspended"],
             "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
-            "increased": ["service increased", "increased"],
+            "increased": ["service increased", "increased", disruptionRegexes["extended hours"]],
         };
         var icons = {
             "suspension": "stop",

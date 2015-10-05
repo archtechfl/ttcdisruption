@@ -285,6 +285,24 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         }
     });
     var returnArray = _.flatten(result);
+    // remove as invalid if present
+    var messageBlacklist = [
+        // Service time update
+        /(\d{1}:\d{2}(am|pm))/g
+    ];
+    _.each(returnArray, function (station, index){
+        var test = _.find(messageBlacklist, function (item, index) {
+            return station.search(item) > -1;
+        });
+        if (!_.isUndefined(test)){
+            returnArray = returnArray.slice(index, 1);
+        }
+    });
+    // Sanity check if array is empty
+    if (_.isEmpty(returnArray)){
+        // This will probably change later
+        returnArray = ["All Stations"];
+    }
     return returnArray;
 };
 
