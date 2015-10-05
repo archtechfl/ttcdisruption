@@ -13,7 +13,8 @@ function formatDescription (text) {
     // Spelling errors, correct them
     var spellingErrors = {
         "bwtn": "btwn",
-        "srn": "stn"
+        "srn": "stn",
+        "queens park": "queen's park"
     };
     _.each(spellingErrors, function (replacement, original) {
         formattedText = formattedText.replace(original, replacement);
