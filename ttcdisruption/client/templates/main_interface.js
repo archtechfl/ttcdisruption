@@ -500,8 +500,12 @@ Template.ttcdisruption.helpers({
         var text = formatDescription(this.description);
         // Track the disruption type
         var type = "";
+        // Disruption regexes
+        var disruptionRegexes = {
+            "unauthorized track level": /[authorized]{4,10}\s(person\sat\strack\slevel)/g,
+        }
         var disruptionTypes = {
-            "police": ["tps", "security", "police", "unauthorized"],
+            "police": ["tps", "security", "police", disruptionRegexes["unauthorized track level"]],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
             "elevator": ["elevator"],
