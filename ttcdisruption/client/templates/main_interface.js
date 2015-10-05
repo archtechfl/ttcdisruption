@@ -621,5 +621,42 @@ Template.ttcdisruption.helpers({
     }
 
   });
-// End helpers
+
+// Event for showing alert drawer
+Template.ttcdisruption.events({
+    // UI events go here
+    "click .toggle-cons": function (event) {
+        // get description container
+        var descriptionContainer = $(event.currentTarget).parent('.description')[0];
+        // get parent row
+        var parentRow = $(descriptionContainer).parent()[0];
+        // get tray status
+        var getTrayStatus = $(parentRow).hasClass("drawerOpen");
+        // If drawer is open
+        if (getTrayStatus){
+            // Get current mobile description
+            var mobileDescriptionCurrent = $(parentRow).find('.mobile-description')[0];
+            var renderedAlert = Blaze.getView(mobileDescriptionCurrent);
+            Blaze.remove(renderedAlert);
+            $(parentRow).find('.mobile-ui-viz').toggle();
+            // Transition arrow back
+            $(parentRow).find('.toggle-cons .fa-chevron-right').removeClass("fa-chevron-right").addClass("fa-chevron-left");
+            $(parentRow).removeClass("drawerOpen");
+        } else {
+            var formattedAlert = formatDescription(this.description);
+            var renderedAlert = Blaze.renderWithData(
+                Template.alert_drawer,
+                {"description": formattedAlert},
+                parentRow
+            );
+            $(parentRow).find('.mobile-ui-viz').toggle();
+            // add drawerOpen class
+            $(parentRow).addClass("drawerOpen");
+            // Change arrow from point left to pointing right to indicate
+            // it closes in that direction
+            $(parentRow).find('.toggle-cons .fa-chevron-left').removeClass("fa-chevron-left").addClass("fa-chevron-right");
+        }
+    }
+});
+
 }
