@@ -623,17 +623,22 @@ Template.ttcdisruption.helpers({
 Template.ttcdisruption.events({
     // UI events go here
     "click .toggle-cons": function (event) {
-        // get tray status
-        var getTrayStatus = Session.get("trayOpen");
         // get description container
         var descriptionContainer = $(event.currentTarget).parent('.description')[0];
         // get parent row
         var parentRow = $(descriptionContainer).parent()[0];
+        // get tray status
+        var getTrayStatus = $(parentRow).hasClass("drawerOpen");
+        // If drawer is open
         if (getTrayStatus){
-            var renderedAlert = Blaze.getView($('.mobile-description')[0]);
+            // Get current mobile description
+            var mobileDescriptionCurrent = $(parentRow).find('.mobile-description')[0];
+            var renderedAlert = Blaze.getView(mobileDescriptionCurrent);
             Blaze.remove(renderedAlert);
             $(parentRow).find('.mobile-ui-viz').toggle();
-            Session.set("trayOpen", false);
+            // Transition arrow back
+            $(parentRow).find('.toggle-cons .fa-chevron-right').removeClass("fa-chevron-right").addClass("fa-chevron-left");
+            $(parentRow).removeClass("drawerOpen");
         } else {
             var formattedAlert = formatDescription(this.description);
             var renderedAlert = Blaze.renderWithData(
@@ -642,7 +647,11 @@ Template.ttcdisruption.events({
                 parentRow
             );
             $(parentRow).find('.mobile-ui-viz').toggle();
-            Session.set("trayOpen", true);
+            // add drawerOpen class
+            $(parentRow).addClass("drawerOpen");
+            // Change arrow from point left to pointing right to indicate
+            // it closes in that direction
+            $(parentRow).find('.toggle-cons .fa-chevron-left').removeClass("fa-chevron-left").addClass("fa-chevron-right");
         }
     }
 });
