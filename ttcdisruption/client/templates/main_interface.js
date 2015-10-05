@@ -513,13 +513,13 @@ Template.ttcdisruption.helpers({
         // Track the disruption type
         var type = "";
         var disruptionTypes = {
-            "police": ["tps", "security", "police", "unauthorized"],
+            "police": ["tps", "security", "police", "unauthorized", "person at track level"],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
             "elevator": ["elevator"],
             "medical": ["medical", "personal injury"],
             "construction": ["construction", "repair", " track ", "upgrade"],
-            "mechanical": ["mechanical", "stalled", "signal", "disabled", "switch"],
+            "mechanical": ["mechanical", "stalled", "signal", "disabled", "switch", "power off"],
             "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
             "surface_stoppage": ["turning back"],
