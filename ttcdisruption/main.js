@@ -5,15 +5,16 @@ if (Meteor.isClient) {
 
   Meteor.subscribe("notices");
 
-  var clock = function () {
-    Session.set("currentTime", moment().toISOString());
-  };
+  // var clock = function () {
+  //   Session.set("currentTime", moment().toISOString());
+  // };
 
   Meteor.startup(function () {
-    setInterval(clock, 1000);
+    // setInterval(clock, 1000);
+    Session.set("currentTime", moment().toISOString());
   });
 
-  Template.body.helpers({
+  Template.listing.helpers({
     // Helpers go here
     // Get a list of TTC notices into the browser
     notices: function () {
@@ -23,7 +24,6 @@ if (Meteor.isClient) {
           if (state != 4){
             if (state === 1){
               state = moment().subtract(3, 'hours').toISOString();
-              console.log(state);
             } else if (state === 2){
               state = moment().subtract(24, 'hours').toISOString();
             } else if (state === 3){
@@ -57,7 +57,10 @@ if (Meteor.isClient) {
             });
           return data;
         }
-    },
+    }
+  });
+
+  Template.body.helpers({
     currentTime: function () {
         // Get the current time
         var current = Session.get("currentTime");

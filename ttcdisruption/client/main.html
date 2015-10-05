@@ -9,7 +9,7 @@
 	  	location, and type of disruption</p>
 	  	<p>Note: this application is currently in development. No guarantee is made regarding accuracy.</p>
 	  	<div class="current-time">
-	  		<p>Current Time: </p>
+	  		<p>Last updated: </p>
 	  		<p class="time-display">{{ currentTime }}</p>
 	  	</div>
 	  	<div class="ui-control">
@@ -35,9 +35,7 @@
 					<th class="direction-header">Direction</th>
 					<th class="description-header">Description</th>
 				</tr>
-		  	{{#each notices}}
-				{{> ttcdisruption}}
-			{{/each}}
+		  	{{> listing }}
 			</tbody>
 		</table>
 	</div>
