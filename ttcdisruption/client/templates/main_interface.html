@@ -19,14 +19,18 @@
 					{{/if}}
 				</td>
 				<td class="type-involving icon-pad mobile-ui-viz">
-					<span class="type-icon">
-						{{#if disruptionType.custom }}
-							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
-						{{else}}
-							<i class="fa fa-{{ disruptionType.icon }}"></i>
-						{{/if}}
-					</span>
-					<span class="type-text">{{ disruptionType.text }}</span>
+					<div class="icons-listing">
+						{{#each disruptionType.icons}}
+						<span class="type-icon">
+							{{#if custom }}
+								<span class="ico-{{icon}} icon-non-fa"></span>
+							{{else}}
+								<i class="fa fa-{{icon}}"></i>
+							{{/if}}
+						</span>
+						{{/each}}
+					</div>
+					<span class="type-text">{{ disruptionType.alert_type }}</span>
 				</td>
 				<td class="location-alert intersection mobile-ui-viz">
 					{{#if getIntersection.hasIntersections}}
@@ -46,7 +50,7 @@
 				</td>
 				<td class="direction mobile-ui-viz">
 					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
-					<span class="letter">{{ direction.text }}</span>
+					<span class="letter">{{ direction.alert_type }}</span>
 				</td>
 				<td class="description">
 					<span class="toggle-cons">
@@ -77,14 +81,18 @@
 					{{/if}}
 				</td>
 				<td class="type-involving icon-pad mobile-ui-viz">
-					<span class="type-icon">
-						{{#if disruptionType.custom }}
-							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
-						{{else}}
-							<i class="fa fa-{{ disruptionType.icon }}"></i>
-						{{/if}}
-					</span>
-					<span class="type-text">{{ disruptionType.text }}</span>
+					<div class="icons-listing">
+						{{#each disruptionType.icons}}
+						<span class="type-icon">
+							{{#if custom }}
+								<span class="ico-{{icon}} icon-non-fa"></span>
+							{{else}}
+								<i class="fa fa-{{icon}}"></i>
+							{{/if}}
+						</span>
+						{{/each}}
+					</div>
+					<span class="type-text">{{ disruptionType.alert_type }}</span>
 				</td>
 				<td class="location-alert station-location mobile-ui-viz">
 					{{#each subwayLine.stations}}
@@ -123,13 +131,17 @@
 						{{/if}}
 					</td>
 					<td class="type-involving icon-pad mobile-ui-viz">
-						<span class="type-icon">
-						{{#if disruptionType.custom }}
-							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
-						{{else}}
-							<i class="fa fa-{{ disruptionType.icon }}"></i>
-						{{/if}}
-					</span>
+						<div class="icons-listing">
+							{{#each disruptionType.icons}}
+							<span class="type-icon">
+								{{#if custom }}
+									<span class="ico-{{icon}} icon-non-fa"></span>
+								{{else}}
+									<i class="fa fa-{{icon}}"></i>
+								{{/if}}
+							</span>
+							{{/each}}
+						</div>
 						<span class="type-text">{{ disruptionType.text }}</span>
 					</td>
 					<td class="location-alert intersection mobile-ui-viz">

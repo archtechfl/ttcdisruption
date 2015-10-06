@@ -502,6 +502,8 @@ Template.ttcdisruption.helpers({
     disruptionType: function () {
         // Disruption type reporting
         var text = formatDescription(this.description);
+        // Split at due if present
+        var splitAlert = text.split(" due ");
         // Track the disruption type
         var type = "";
         // Disruption regexes
@@ -559,10 +561,34 @@ Template.ttcdisruption.helpers({
                 return text.search(entry) > -1; 
             }); 
         });
+        // Store all of the alert types
+        var alertsStorage = [];
+        _.each(splitAlert, function (alert, index) {
+            // Two level find to get the key with the first match to search terms
+            var searchSplit = _.find(disruptionTypes, function(category, index){
+                // returns true for the first disruption array that contains a term match
+                // to the twitter alert
+                // - This is used to retrieve index or disruption type 
+                return _.find(category, function(entry){
+                    if (alert.search(entry) > -1){
+                        alertsStorage.push({
+                            "icon": icons[index],
+                            "custom": index === "police" || index === "elevator"
+                        });
+                    }
+                    // return true if the disruptuon type is found in the alert
+                    return alert.search(entry) > -1; 
+                }); 
+            });
+        });
+        console.log("____________");
+        console.log(alertsStorage);
+        console.log(text);
+        console.log("____________");
+        // Create return object
         var returnObj = {
-            "icon": icons[type],
-            "text": type,
-            "custom": type === "police" || type === "elevator"
+            "icons": alertsStorage,
+            "text": type
         };
         return returnObj;
     },
