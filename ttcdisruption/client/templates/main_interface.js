@@ -330,8 +330,8 @@ Template.ttcdisruption.helpers({
             "between_and": /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g,
             // Handle "at" street "and" street reference
             "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
-            // handle "on street near street" or "on street at street" combinations
-            "on_at_near": /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g,
+            // handle "on street near street" or "on street at street" combinations or "on-and"
+            "on_at_near_and": /(\s(on)\s[\w\s]+(((at\s)|(near\s))|(and))[\w\s]+)/g,
             // All clear combinations
             "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
             "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
@@ -409,11 +409,13 @@ Template.ttcdisruption.helpers({
             }
             // return cross street array
             returnArray = crossStreets;
-        } else if (searchUsed == "on_at_near") {
+        } else if (searchUsed == "on_at_near_and") {
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" near ") > -1){
                 crossStreets = entry.split(" near ");
+            } else if (entry.search(" and ") > -1) {
+                crossStreets = entry.split(" and "); 
             } else {
                 crossStreets = entry.split(" at "); 
             }
