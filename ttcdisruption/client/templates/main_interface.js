@@ -10,6 +10,8 @@ function formatDescription (text) {
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     // change saint (st.) to st
     formattedText = formattedText.replace(/(st\.)/g,"st");
+    // Correct any missing spaces around commas
+    formattedText = formattedText.replace(/\,(?=[a-zA-z])/g,", ");
     // Spelling errors, correct them
     var spellingErrors = {
         "bwtn": "btwn",
@@ -519,14 +521,19 @@ Template.ttcdisruption.helpers({
             "medical": ["medical", "personal injury"],
             "power": ["power off"],
             "construction": ["construction", "repair", " track ", "upgrade"],
-            "mechanical": ["mechanical", "stalled", "signal", "disabled"],
+            "mechanical": ["mechanical", "stalled", "signal", "disabled", "switch", "overhead"],
             "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
-            "surface_stoppage": ["turning back"],
-            "suspension": ["alternative", "suspended"],
+            "surface_stoppage": ["turning back", "turn back"],
+            "suspension": ["alternative", "suspended", "no train"],
             "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
-            "increased": ["service increased", "increased", disruptionRegexes["extended hours"]],
+            "increased": [
+                "service increased",
+                "increased",
+                disruptionRegexes["extended hours"],
+                "supplementary"
+            ]
         };
         var icons = {
             "suspension": "stop",
