@@ -20,7 +20,7 @@
 				</td>
 				<td class="type-involving icon-pad mobile-ui-viz">
 					<div class="icons-listing">
-						{{#each disruptionType.icons}}
+						{{#each disruptionType.alerts}}
 						<span class="type-icon">
 							{{#if custom }}
 								<span class="ico-{{icon}} icon-non-fa"></span>
@@ -50,7 +50,7 @@
 				</td>
 				<td class="direction mobile-ui-viz">
 					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
-					<span class="letter">{{ direction.alert_type }}</span>
+					<span class="letter">{{ direction.text }}</span>
 				</td>
 				<td class="description">
 					<span class="toggle-cons">
@@ -82,7 +82,7 @@
 				</td>
 				<td class="type-involving icon-pad mobile-ui-viz">
 					<div class="icons-listing">
-						{{#each disruptionType.icons}}
+						{{#each disruptionType.alerts}}
 						<span class="type-icon">
 							{{#if custom }}
 								<span class="ico-{{icon}} icon-non-fa"></span>
@@ -132,7 +132,7 @@
 					</td>
 					<td class="type-involving icon-pad mobile-ui-viz">
 						<div class="icons-listing">
-							{{#each disruptionType.icons}}
+							{{#each disruptionType.alerts}}
 							<span class="type-icon">
 								{{#if custom }}
 									<span class="ico-{{icon}} icon-non-fa"></span>

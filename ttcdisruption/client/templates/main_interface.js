@@ -334,6 +334,8 @@ Template.ttcdisruption.helpers({
             "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
             // handle "on street near street" or "on street at street" combinations or "on-and"
             "on_at_near_and": /(\s(on)\s[\w\s]+(((at\s)|(near\s))|(and))[\w\s]+)/g,
+            // Check for subway station reference as location of disruption
+            "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             // All clear combinations
             "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
             "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
@@ -341,8 +343,6 @@ Template.ttcdisruption.helpers({
             "on_and": /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g,
             // Direction relative to intersection combination
             "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
-            // Check for subway station reference as location of disruption
-            "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             // Single "At" condition followed by "due"
             "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
             // Intersection "at" street "and" street, end of alert
@@ -553,23 +553,9 @@ Template.ttcdisruption.helpers({
             "increased": "plus-square",
             "other": "question"
         }
-        // Two level find to get the key with the first match to search terms
-        var search = _.find(disruptionTypes, function(category, index){
-            // returns true for the first disruption array that contains a term match
-            // to the twitter alert
-            // - This is used to retrieve index or disruption type 
-            return _.find(category, function(entry){
-                if (text.search(entry) > -1){
-                    type = index;
-                } else {
-                    type = "other";
-                }
-                // return true if the disruptuon type is found in the alert
-                return text.search(entry) > -1; 
-            }); 
-        });
         // Store all of the alert types
         var alertsStorage = [];
+        // Search through each part of the alert for the disruptions
         _.each(splitAlert, function (alert, index) {
             // Two level find to get the key with the first match to search terms
             var searchSplit = _.find(disruptionTypes, function(category, index){
@@ -580,6 +566,7 @@ Template.ttcdisruption.helpers({
                     if (alert.search(entry) > -1){
                         alertsStorage.push({
                             "icon": icons[index],
+                            "type": index,
                             "custom": index === "police" || index === "elevator"
                         });
                     }
@@ -590,8 +577,7 @@ Template.ttcdisruption.helpers({
         });
         // Create return object
         var returnObj = {
-            "icons": alertsStorage,
-            "text": type
+            "alerts": alertsStorage,
         };
         return returnObj;
     },
