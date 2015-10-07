@@ -7,6 +7,8 @@ if (Meteor.isClient) {
         var daysAgoCheck = this.$('.disruption-entry .time-overall').data("days-ago");
         // current node
         var currentNode = this.$('.disruption-entry')[0];
+        // Enabled tooltip
+        $(currentNode).find('[data-toggle="tooltip"]').tooltip();
         // Get information on entry before this one
         var previousEntry = this.$('.disruption-entry').prev();
         previousEntry = previousEntry[0];
@@ -16,7 +18,6 @@ if (Meteor.isClient) {
         if ($(previousEntry).hasClass("disruption-table-header")){
             Session.set("currentTime", moment().toISOString());
             afterHeader = true;
-            $('[data-toggle="tooltip"]').tooltip();
         }
         var previousDays = 0;
         var boundaryCheck = false;

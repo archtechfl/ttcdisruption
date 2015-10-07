@@ -96,7 +96,7 @@ function StationLibrary () {
             "sheppard yonge",
             "yonge and sheppard",
             "sheppard and yonge",
-            /\s(sheppard)\s?/g
+            /\s?(sheppard)\s?/g
         ],
         "Bloor-Yonge": [
             "yonge and bloor",
@@ -104,7 +104,7 @@ function StationLibrary () {
             "bloor yonge",
             "yonge bloor",
             "bloor",
-            /(yonge)\s?(?!university)/g
+            /(yonge)(?!\suniversity)/g
         ]
     };
 };
@@ -134,7 +134,7 @@ StationLibrary.prototype.interchangeLookup = function (name) {
         }); 
     });
     // Sheppard regex for "Sheppard" station alone
-    var sanityRegexCheck = /\s(sheppard)\s?/g;
+    var sanityRegexCheck = /\s?(sheppard)\s?/g;
     if (originalName.toString() == sanityRegexCheck.toString()){
         formattedName = " " + formattedName;
     }
