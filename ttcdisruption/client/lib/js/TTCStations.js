@@ -102,7 +102,9 @@ function StationLibrary () {
             "yonge and bloor",
             "bloor and yonge",
             "bloor yonge",
-            "yonge bloor"
+            "yonge bloor",
+            "bloor",
+            "yonge"
         ]
     };
 };
@@ -330,7 +332,7 @@ StationLibrary.prototype.retrieveLineNumber = function(stations, description) {
     var searchLineArray = [];
     _.each(stations, function (item, index){
         // Standardize station name, removing punctuation
-        searchLineArray.push(_.where(self.stationLineListing, {name: item}));
+        searchLineArray.push(_.where(self.stationLineListing, {name: item.toLowerCase()}));
     });
     searchLineArray = _.flatten(searchLineArray);
     var linesGrouping = _.groupBy(searchLineArray, 'line');
@@ -341,7 +343,35 @@ StationLibrary.prototype.retrieveLineNumber = function(stations, description) {
             var maxLine = _.max(linesGrouping, function(group){
                 return group.length;
             });
-            return maxLine[0].line;
+            if (maxLine[0].name == "bloor-yonge" && maxLine.length == 1){
+                var directions = {
+                    "east/west": ["e/b", "eastbound", "w/b", "westbound"],
+                    "north/south": ["n/b", "northbound", "norhtbound", "s/b", "southbound"]
+                };
+                // Storage for direction
+                var directionName = "";
+                var search = _.find(directions, function(dir, index){
+                    // returns true for the first array that contains a term match
+                    // to the direction
+                    // - this is used to retrive index (direction)
+                    return _.find(dir, function(entry){
+                        if (description.search(entry) > -1){
+                            directionName = index;
+                        } else {
+                            directionName = "other";
+                        }
+                        // return true if the direction is found in the alert
+                        return description.search(entry) > -1; 
+                    }); 
+                });
+                if (directionName == "east/west"){
+                    return 2;
+                } else {
+                    return 1;
+                }
+            } else {
+                return maxLine[0].line;
+            }
         } else {
             return 5;
         }
