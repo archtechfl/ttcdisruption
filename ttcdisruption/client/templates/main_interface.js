@@ -220,7 +220,7 @@ Template.ttcdisruption.helpers({
             var busMatchEntry = item;
             var numberMatched = busMatchEntry.match(routeNumberExp)[0];
             // compare bus route name to the pairing retrived before
-            var routeName = busInfo.retrieveRouteName(numberMatched)
+            var routeName = busInfo.retrieveRouteName(numberMatched);
             // If single name, do a splitting operation and compare first word, otherwise add
             // entire alternate list for searching
             if (_.isString(routeName)){
