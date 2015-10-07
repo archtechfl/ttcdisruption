@@ -11,7 +11,7 @@ function StationLibrary () {
         "Spadina",
         "St George",
         "Museum",
-        "Queens Park",
+        "Queen's Park",
         "St Patrick",
         "Osgoode",
         "St Andrew",
@@ -159,13 +159,13 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "clear": /.+(clear:\s)[\w\s\.\-]+((station)|(stn))?(has|is)/g,
         "delay_cleared": /(delay)\s.+(cleared)/g,
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
-        "at_station": /((at)\s[\w\.\s\-]+(?=\s((station))|(?=\s(stn))))/g,
-        "at_station_due": /((at)\s[\w\.\s\-]+(?=\sdue))/g,
-        "at_station_line": /((at)\s[\w\.\s\,\-]+(?=\sdue))/g,
-        "between": /(((between)|(btwn))\s[\w\s\.\-]+)(?=\s((station))|(?=\s(stn)))/g,
-        "between_no_station_wording": /((between)|(btwn))\s[\w\s\-]+(?=\.)/g,
-        "between_due": /((between)|(btwn))\s[\w\s\,\-]+(due)/g,
-        "between_abbr_bw": /((b\/w)\s[\w\s\.\-]+)(?=\s((station))|(?=\s(stn)))/g,
+        "at_station": /((at)\s[\w\.\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
+        "at_station_due": /((at)\s[\w\.\s\-\']+(?=\sdue))/g,
+        "at_station_line": /((at)\s[\w\.\s\,\-\']+(?=\sdue))/g,
+        "between": /(((between)|(btwn))\s[\w\s\.\-\']+)(?=\s((station))|(?=\s(stn)))/g,
+        "between_no_station_wording": /((between)|(btwn))\s[\w\s\-\']+(?=\.)/g,
+        "between_due": /((between)|(btwn))\s[\w\s\,\-\']+(due)/g,
+        "between_abbr_bw": /((b\/w)\s[\w\s\.\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
         "near_station": /(near)\s.+(stn|station)/g,
@@ -304,10 +304,28 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         }
     });
     var returnArray = _.flatten(result);
+    // remove as invalid if present
+    var messageBlacklist = [
+        // Service time update
+        /(\d{1}:\d{2}(am|pm))/g
+    ];
+    _.each(returnArray, function (station, index){
+        var test = _.find(messageBlacklist, function (item, index) {
+            return station.search(item) > -1;
+        });
+        if (!_.isUndefined(test)){
+            returnArray = returnArray.slice(index, 1);
+        }
+    });
+    // Sanity check if array is empty
+    if (_.isEmpty(returnArray)){
+        // This will probably change later
+        returnArray = ["All Stations"];
+    }
     return returnArray;
 };
 
-StationLibrary.prototype.retrieveLineNumber = function(stations) {
+StationLibrary.prototype.retrieveLineNumber = function(stations, description) {
     var self = this;
     var searchLineArray = [];
     _.each(stations, function (item, index){

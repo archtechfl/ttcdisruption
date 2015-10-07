@@ -10,9 +10,13 @@ function formatDescription (text) {
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     // change saint (st.) to st
     formattedText = formattedText.replace(/(st\.)/g,"st");
+    // Correct any missing spaces around commas
+    formattedText = formattedText.replace(/\,(?=[a-zA-z])/g,", ");
     // Spelling errors, correct them
     var spellingErrors = {
-        "bwtn": "btwn"
+        "bwtn": "btwn",
+        "srn": "stn",
+        "queens park": "queen's park"
     };
     _.each(spellingErrors, function (replacement, original) {
         formattedText = formattedText.replace(original, replacement);
@@ -94,7 +98,7 @@ Template.ttcdisruption.helpers({
         var streetcarCheck = _.filter(searchTerms, function(term, index){ 
             return text.search(term) > -1;
         });
-        // If there is a stretcar line number, results will be 0 or greater
+        // If there is a streetcar line number, results will be 0 or greater
         if (streetcarCheck.length > 0){
           return true;
         } else {
@@ -177,7 +181,7 @@ Template.ttcdisruption.helpers({
             // Get station list
             var stationList = stationInfo.retrieveStationListing(textForSearch);
             // search through station name database by passing station list
-            lineNumber = stationInfo.retrieveLineNumber(stationList);
+            lineNumber = stationInfo.retrieveLineNumber(stationList, textForSearch);
             lineNumbers.push(lineNumber);
         }
       }
@@ -331,7 +335,9 @@ Template.ttcdisruption.helpers({
         var messageBlacklist = [
             /(full)\s(service)/g,
             /(board)/g,
-            /(longer\sthan\snormal)/g
+            /(longer\sthan\snormal)/g,
+            // Service time update
+            /(\d{1}(\:?)\d{2}(am|pm))/g
         ];
         // List of intersection expressions
         // Looks for common patterns and parses the intersection
@@ -340,8 +346,10 @@ Template.ttcdisruption.helpers({
             "between_and": /((between)|(btwn))\s[\w\s]+(and)\s[\w\s]+/g,
             // Handle "at" street "and" street reference
             "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
-            // handle "on street near street" or "on street at street" combinations
-            "on_at_near": /(\s(on)\s[\w\s]+((at\s)|(near\s))[\w\s]+)/g,
+            // handle "on street near street" or "on street at street" combinations or "on-and"
+            "on_at_near_and": /(\s(on)\s[\w\s]+(((at\s)|(near\s))|(and))[\w\s]+)/g,
+            // Check for subway station reference as location of disruption
+            "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             // All clear combinations
             "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
             "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
@@ -349,8 +357,6 @@ Template.ttcdisruption.helpers({
             "on_and": /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g,
             // Direction relative to intersection combination
             "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
-            // Check for subway station reference as location of disruption
-            "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             // Single "At" condition followed by "due"
             "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
             // Intersection "at" street "and" street, end of alert
@@ -419,11 +425,13 @@ Template.ttcdisruption.helpers({
             }
             // return cross street array
             returnArray = crossStreets;
-        } else if (searchUsed == "on_at_near") {
+        } else if (searchUsed == "on_at_near_and") {
             // Handle "on" street condition, and periods
             entry = entry.replace(/\s(on)\s/g, "");
             if (entry.search(" near ") > -1){
                 crossStreets = entry.split(" near ");
+            } else if (entry.search(" and ") > -1) {
+                crossStreets = entry.split(" and "); 
             } else {
                 crossStreets = entry.split(" at "); 
             }
@@ -510,23 +518,36 @@ Template.ttcdisruption.helpers({
     disruptionType: function () {
         // Disruption type reporting
         var text = formatDescription(this.description);
+        // Split at due if present
+        var splitAlert = text.split(" due ");
         // Track the disruption type
         var type = "";
+        // Disruption regexes
+        var disruptionRegexes = {
+            "unauthorized track level": /[authorized]{4,10}\s(person\sat\strack\slevel)/g,
+            "extended hours": /(running)\s(from)\s(\d{1}:\d{2}(am|pm)).+(\d{1}:\d{2}(am|pm))/g
+        }
         var disruptionTypes = {
-            "police": ["tps", "security", "police", "unauthorized", "person at track level"],
+            "police": ["tps", "security", "police", disruptionRegexes["unauthorized track level"]],
             "fire": ["tfs", "fire", "smoke", "hazmat", "materials"],
             "vehicular": ["collision", "blocking", "auto"],
             "elevator": ["elevator"],
             "medical": ["medical", "personal injury"],
+            "power": ["power off"],
             "construction": ["construction", "repair", " track ", "upgrade"],
-            "mechanical": ["mechanical", "stalled", "signal", "disabled", "switch", "power off"],
+            "mechanical": ["mechanical", "stalled", "signal", "disabled", "switch", "overhead"],
             "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
-            "surface_stoppage": ["turning back"],
-            "suspension": ["alternative", "suspended"],
+            "surface_stoppage": ["turning back", "turn back"],
+            "suspension": ["alternative", "suspended", "no train"],
             "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
-            "increased": ["service increased", "increased"],
+            "increased": [
+                "service increased",
+                "increased",
+                disruptionRegexes["extended hours"],
+                "supplementary"
+            ]
         };
         var icons = {
             "suspension": "stop",
@@ -534,6 +555,7 @@ Template.ttcdisruption.helpers({
             "elevator": "elevator",
             "fire": "fire",
             "mechanical": "cogs",
+            "power": "power-off",
             "vehicular": "car",
             "construction": "wrench",
             "reroute": "level-up",
@@ -545,25 +567,31 @@ Template.ttcdisruption.helpers({
             "increased": "plus-square",
             "other": "question"
         }
-        // Two level find to get the key with the first match to search terms
-        var search = _.find(disruptionTypes, function(category, index){
-            // returns true for the first disruption array that contains a term match
-            // to the twitter alert
-            // - This is used to retrieve index or disruption type 
-            return _.find(category, function(entry){
-                if (text.search(entry) > -1){
-                    type = index;
-                } else {
-                    type = "other";
-                }
-                // return true if the disruptuon type is found in the alert
-                return text.search(entry) > -1; 
-            }); 
+        // Store all of the alert types
+        var alertsStorage = [];
+        // Search through each part of the alert for the disruptions
+        _.each(splitAlert, function (alert, index) {
+            // Two level find to get the key with the first match to search terms
+            var searchSplit = _.find(disruptionTypes, function(category, index){
+                // returns true for the first disruption array that contains a term match
+                // to the twitter alert
+                // - This is used to retrieve index or disruption type 
+                return _.find(category, function(entry){
+                    if (alert.search(entry) > -1){
+                        alertsStorage.push({
+                            "icon": icons[index],
+                            "type": index,
+                            "custom": index === "police" || index === "elevator"
+                        });
+                    }
+                    // return true if the disruptuon type is found in the alert
+                    return alert.search(entry) > -1; 
+                }); 
+            });
         });
+        // Create return object
         var returnObj = {
-            "icon": icons[type],
-            "text": type,
-            "custom": type === "police" || type === "elevator"
+            "alerts": alertsStorage,
         };
         return returnObj;
     },
@@ -624,5 +652,42 @@ Template.ttcdisruption.helpers({
     }
 
   });
-// End helpers
+
+// Event for showing alert drawer
+Template.ttcdisruption.events({
+    // UI events go here
+    "click .toggle-cons": function (event) {
+        // get description container
+        var descriptionContainer = $(event.currentTarget).parent('.description')[0];
+        // get parent row
+        var parentRow = $(descriptionContainer).parent()[0];
+        // get tray status
+        var getTrayStatus = $(parentRow).hasClass("drawerOpen");
+        // If drawer is open
+        if (getTrayStatus){
+            // Get current mobile description
+            var mobileDescriptionCurrent = $(parentRow).find('.mobile-description')[0];
+            var renderedAlert = Blaze.getView(mobileDescriptionCurrent);
+            Blaze.remove(renderedAlert);
+            $(parentRow).find('.mobile-ui-viz').toggle();
+            // Transition arrow back
+            $(parentRow).find('.toggle-cons .fa-chevron-right').removeClass("fa-chevron-right").addClass("fa-chevron-left");
+            $(parentRow).removeClass("drawerOpen");
+        } else {
+            var formattedAlert = formatDescription(this.description);
+            var renderedAlert = Blaze.renderWithData(
+                Template.alert_drawer,
+                {"description": formattedAlert},
+                parentRow
+            );
+            $(parentRow).find('.mobile-ui-viz').toggle();
+            // add drawerOpen class
+            $(parentRow).addClass("drawerOpen");
+            // Change arrow from point left to pointing right to indicate
+            // it closes in that direction
+            $(parentRow).find('.toggle-cons .fa-chevron-left').removeClass("fa-chevron-left").addClass("fa-chevron-right");
+        }
+    }
+});
+
 }
