@@ -83,7 +83,7 @@ Template.ttcdisruption.helpers({
         var streetcarCheck = _.filter(searchTerms, function(term, index){ 
             return text.search(term) > -1;
         });
-        // If there is a stretcar line number, results will be 0 or greater
+        // If there is a streetcar line number, results will be 0 or greater
         if (streetcarCheck.length > 0){
           return true;
         } else {
@@ -167,7 +167,7 @@ Template.ttcdisruption.helpers({
             // Get station list
             var stationList = stationInfo.retrieveStationListing(textForSearch);
             // search through station name database by passing station list
-            lineNumber = stationInfo.retrieveLineNumber(stationList);
+            lineNumber = stationInfo.retrieveLineNumber(stationList, textForSearch);
             lineNumbers.push(lineNumber);
         }
       }
@@ -588,10 +588,6 @@ Template.ttcdisruption.helpers({
                 }); 
             });
         });
-        console.log("____________");
-        console.log(alertsStorage);
-        console.log(text);
-        console.log("____________");
         // Create return object
         var returnObj = {
             "icons": alertsStorage,
