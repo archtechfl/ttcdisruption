@@ -2,6 +2,10 @@ if (Meteor.isServer) {
       Meteor.startup(function () {
         // BEGIN meteor methods
         Meteor.methods({
+          googleMapRetrieve: function () {
+            var test = "Google Data will be returned here";
+            return test;
+          },
           getTweets: function (latest_tweet_id) {
             console.log("Latest ID: " + latest_tweet_id);
             var Twit = Meteor.npmRequire('twit');
