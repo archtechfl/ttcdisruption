@@ -16,6 +16,7 @@ if (Meteor.isClient) {
         if ($(previousEntry).hasClass("disruption-table-header")){
             Session.set("currentTime", moment().toISOString());
             afterHeader = true;
+            $('[data-toggle="tooltip"]').tooltip();
         }
         var previousDays = 0;
         var boundaryCheck = false;

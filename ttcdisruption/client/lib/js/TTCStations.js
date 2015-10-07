@@ -306,7 +306,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
     return returnArray;
 };
 
-StationLibrary.prototype.retrieveLineNumber = function(stations) {
+StationLibrary.prototype.retrieveLineNumber = function(stations, description) {
     var self = this;
     var searchLineArray = [];
     _.each(stations, function (item, index){
