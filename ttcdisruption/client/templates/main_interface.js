@@ -16,7 +16,8 @@ function formatDescription (text) {
     var spellingErrors = {
         "bwtn": "btwn",
         "srn": "stn",
-        "queens park": "queen's park"
+        "queens park": "queen's park",
+        "ratburn": "rathburn"
     };
     _.each(spellingErrors, function (replacement, original) {
         formattedText = formattedText.replace(original, replacement);

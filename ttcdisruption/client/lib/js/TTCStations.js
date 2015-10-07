@@ -104,7 +104,7 @@ function StationLibrary () {
             "bloor yonge",
             "yonge bloor",
             "bloor",
-            /(yonge)\s(?!university)/g
+            /(yonge)\s?(?!university)/g
         ]
     };
 };
@@ -295,7 +295,8 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
             // Check for interchange stations at this stage
             edited = edited.split(" and ");
             result[index] = edited;
-        } else if (edited.search("-") > -1){
+        } else if (edited.search("-") > -1 && !interchange.hasChanged){
+            // IMPORTANT: may need to update with additional logic
             edited = edited.split("-");
             result[index] = edited;
         } else {
