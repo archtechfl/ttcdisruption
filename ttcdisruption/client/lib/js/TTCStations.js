@@ -104,7 +104,7 @@ function StationLibrary () {
             "bloor yonge",
             "yonge bloor",
             "bloor",
-            "yonge"
+            /(yonge)\s(?!university)/g
         ]
     };
 };
@@ -283,26 +283,23 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         edited = edited.replace(/(\.|\,)/g,"");
         // Check for interchange stations at this stage
         var interchange = self.interchangeLookup(edited);
+        // Change station names and replace with interchange names if present
         if (interchange.hasChanged){
-            result[index] = interchange.revisedInterchange;
-            var textTest = edited.replace(interchange.originalInterchange, interchange.revisedInterchange);
-            console.log(textTest);
+            edited = edited.replace(interchange.originalInterchange, interchange.revisedInterchange);
+        }
+        // Perform regular splitting operations to obtains stations
+        if (edited.search(" to ") > -1){
+            edited = edited.split(" to ");
+            result[index] = edited;
+        } else if (edited.search(" and ") > -1){
+            // Check for interchange stations at this stage
+            edited = edited.split(" and ");
+            result[index] = edited;
+        } else if (edited.search("-") > -1){
+            edited = edited.split("-");
+            result[index] = edited;
         } else {
-            // Perform regular splitting operations to obtains stations
-            // if no interchange found
-            if (edited.search(" to ") > -1){
-                edited = edited.split(" to ");
-                result[index] = edited;
-            } else if (edited.search(" and ") > -1){
-                // Check for interchange stations at this stage
-                edited = edited.split(" and ");
-                result[index] = edited;
-            } else if (edited.search("-") > -1){
-                edited = edited.split("-");
-                result[index] = edited;
-            } else {
-                result[index] = edited;
-            }
+            result[index] = edited;
         }
     });
     var returnArray = _.flatten(result);

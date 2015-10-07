@@ -518,8 +518,14 @@ Template.ttcdisruption.helpers({
     disruptionType: function () {
         // Disruption type reporting
         var text = formatDescription(this.description);
-        // Split at due if present
-        var splitAlert = text.split(" due ");
+        // Split at due if present, or at " for " if present
+        var splitDue = text.search(" due ") > -1;
+        var splitAlert = [];
+        if (splitDue){
+            splitAlert = text.split(" due ");
+        } else {
+            splitAlert = text.split(" for ");
+        }
         // Track the disruption type
         var type = "";
         // Disruption regexes
@@ -539,7 +545,7 @@ Template.ttcdisruption.helpers({
             "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
             "surface_stoppage": ["turning back", "turn back"],
-            "suspension": ["alternative", "suspended", "no train"],
+            "suspension": ["alternative", "suspended", "no train", "closed", "no service"],
             "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
             "increased": [
@@ -547,7 +553,8 @@ Template.ttcdisruption.helpers({
                 "increased",
                 disruptionRegexes["extended hours"],
                 "supplementary"
-            ]
+            ],
+            "shuttle": ["shuttle"]
         };
         var icons = {
             "suspension": "stop",
@@ -565,7 +572,8 @@ Template.ttcdisruption.helpers({
             "resolved": "thumbs-up",
             "surface_stoppage": "refresh",
             "increased": "plus-square",
-            "other": "question"
+            "other": "question",
+            "shuttle": "bus"
         }
         // Store all of the alert types
         var alertsStorage = [];
