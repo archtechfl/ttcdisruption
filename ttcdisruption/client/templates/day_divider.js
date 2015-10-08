@@ -7,6 +7,8 @@ if (Meteor.isClient) {
         var daysAgoCheck = this.$('.disruption-entry .time-overall').data("days-ago");
         // current node
         var currentNode = this.$('.disruption-entry')[0];
+        // Enabled tooltip
+        $(currentNode).find('[data-toggle="tooltip"]').tooltip();
         // Get information on entry before this one
         var previousEntry = this.$('.disruption-entry').prev();
         previousEntry = previousEntry[0];

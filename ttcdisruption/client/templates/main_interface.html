@@ -9,7 +9,7 @@
 					{{/each}}
 					</div>
 				</td>
-				<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+				<td class="time-overall time-of-day icon-pad mobile-ui-viz" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 					<span class="time-hour-minute">{{ getDateTime.time }}</span>
 					{{#if getDateTime.isBeforeToday }}
 					<div class="time-month-day clearfix">
@@ -18,17 +18,21 @@
 					</div>
 					{{/if}}
 				</td>
-				<td class="type-involving icon-pad">
-					<span class="type-icon">
-						{{#if disruptionType.custom }}
-							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
-						{{else}}
-							<i class="fa fa-{{ disruptionType.icon }}"></i>
-						{{/if}}
-					</span>
-					<span class="type-text">{{ disruptionType.text }}</span>
+				<td class="type-involving icon-pad mobile-ui-viz">
+					<div class="icons-listing">
+						{{#each disruptionType.alerts}}
+						<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{type}}">
+							{{#if custom }}
+								<span class="ico-{{icon}} icon-non-fa"></span>
+							{{else}}
+								<i class="fa fa-{{icon}}"></i>
+							{{/if}}
+						</span>
+						{{/each}}
+					</div>
+					<span class="type-text">{{ disruptionType.alert_type }}</span>
 				</td>
-				<td class="location-alert intersection">
+				<td class="location-alert intersection mobile-ui-viz">
 					{{#if getIntersection.hasIntersections}}
 					<span class="ico-intersection icon-non-fa"></span>
 					{{/if}}
@@ -44,11 +48,17 @@
 						{{/if}}
 					</div>
 				</td>
-				<td class="direction">
+				<td class="direction mobile-ui-viz">
 					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
 					<span class="letter">{{ direction.text }}</span>
 				</td>
-				<td class="description">{{{ formattedDescription }}}</td>
+				<td class="description">
+					<span class="toggle-cons">
+						<i class="fa fa-list-alt"></i>
+						<i class="fa fa-chevron-left"></i>
+					</span>
+					<span class="desc-text">{{{ formattedDescription }}}</span>
+				</td>
 			</tr>
 		{{else}}
 			{{#if isSubway }}
@@ -61,7 +71,7 @@
 					<div class="subway-line-number subway-line-{{.}}-num">{{.}}</div>
 					{{/each}}
 				</td>
-				<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+				<td class="time-overall time-of-day icon-pad mobile-ui-viz" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 					<span class="time-hour-minute">{{ getDateTime.time }}</span>
 					{{#if getDateTime.isBeforeToday }}
 					<div class="time-month-day clearfix">
@@ -70,26 +80,36 @@
 					</div>
 					{{/if}}
 				</td>
-				<td class="type-involving icon-pad">
-					<span class="type-icon">
-						{{#if disruptionType.custom }}
-							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
-						{{else}}
-							<i class="fa fa-{{ disruptionType.icon }}"></i>
-						{{/if}}
-					</span>
-					<span class="type-text">{{ disruptionType.text }}</span>
+				<td class="type-involving icon-pad mobile-ui-viz">
+					<div class="icons-listing">
+						{{#each disruptionType.alerts}}
+						<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{type}}">
+							{{#if custom }}
+								<span class="ico-{{icon}} icon-non-fa"></span>
+							{{else}}
+								<i class="fa fa-{{icon}}"></i>
+							{{/if}}
+						</span>
+						{{/each}}
+					</div>
+					<span class="type-text">{{ disruptionType.alert_type }}</span>
 				</td>
-				<td class="location-alert station-location">
+				<td class="location-alert station-location mobile-ui-viz">
 					{{#each subwayLine.stations}}
 						<span class="station-name"><i class="fa fa-subway"></i>{{.}}</span>
 					{{/each}}
 				</td>
-				<td class="direction">
+				<td class="direction mobile-ui-viz">
 					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
 					<span class="letter">{{ direction.text }}</span>
 				</td>
-				<td class="description">{{{ formattedDescription }}}</td>
+				<td class="description">
+					<span class="toggle-cons">
+						<i class="fa fa-list-alt"></i>
+						<i class="fa fa-chevron-left"></i>
+					</span>
+					<span class="desc-text">{{{ formattedDescription }}}</span>
+				</td>
 			</tr>
 			{{else}}
 				<tr class="disruption-entry bus-entry">
@@ -101,7 +121,7 @@
 							{{/each}}
 						</div>
 					</td>
-					<td class="time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+					<td class="time-overall time-of-day icon-pad mobile-ui-viz" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 						<span class="time-hour-minute">{{ getDateTime.time }}</span>
 						{{#if getDateTime.isBeforeToday }}
 						<div class="time-month-day clearfix">
@@ -110,17 +130,21 @@
 						</div>
 						{{/if}}
 					</td>
-					<td class="type-involving icon-pad">
-						<span class="type-icon">
-						{{#if disruptionType.custom }}
-							<span class="ico-{{disruptionType.icon}} icon-non-fa"></span>
-						{{else}}
-							<i class="fa fa-{{ disruptionType.icon }}"></i>
-						{{/if}}
-					</span>
+					<td class="type-involving icon-pad mobile-ui-viz">
+						<div class="icons-listing">
+							{{#each disruptionType.alerts}}
+							<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{type}}">
+								{{#if custom }}
+									<span class="ico-{{icon}} icon-non-fa"></span>
+								{{else}}
+									<i class="fa fa-{{icon}}"></i>
+								{{/if}}
+							</span>
+							{{/each}}
+						</div>
 						<span class="type-text">{{ disruptionType.text }}</span>
 					</td>
-					<td class="location-alert intersection">
+					<td class="location-alert intersection mobile-ui-viz">
 						{{#if getIntersection.hasIntersections}}
 						<span class="ico-intersection icon-non-fa"></span>
 						{{/if}}
@@ -136,11 +160,17 @@
 						{{/if}}
 						</div>
 					</td>
-					<td class="direction">
+					<td class="direction mobile-ui-viz">
 						<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
 						<span class="letter">{{ direction.text }}</span>
 					</td>
-					<td class="description">{{{ formattedDescription }}}</td>
+					<td class="description">
+						<span class="toggle-cons">
+							<i class="fa fa-list-alt"></i>
+							<i class="fa fa-chevron-left"></i>
+						</span>
+						<span class="desc-text">{{{ formattedDescription }}}</span>
+					</td>
 				</tr>
 			{{/if}}
 		{{/if}}

@@ -91,46 +91,57 @@ function StationLibrary () {
     // matched with their standardized equivalent
     this.interchangeStations = {
         "Sheppard-Yonge": [
-            "sheppard",
             "yonge sheppard",
             "yonge-sheppard",
             "sheppard yonge",
             "yonge and sheppard",
-            "sheppard and yonge"
+            "sheppard and yonge",
+            /\s?(sheppard)\s?/g
         ],
         "Bloor-Yonge": [
             "yonge and bloor",
             "bloor and yonge",
             "bloor yonge",
-            "yonge bloor"
+            "yonge bloor",
+            "bloor",
+            /(yonge)(?!\suniversity)/g
         ]
     };
 };
 
 StationLibrary.prototype.interchangeLookup = function (name) {
     var self = this;
-    // get name
-    var originalStationName = name;
+    // get text
+    var originalText = name;
+    // Original station name
+    var originalName = "";
     // Standardize interchange station names
     // Get the formatted station name
     // Create a holder for station name
     var formattedName = "";
+    // track hasChanged
+    var hasChanged = false;
     var search = _.find(self.interchangeStations, function (standardStation, index){
         // returns true for the first station array that contains a name match
         return _.find(standardStation, function(station){
-            if (name.search(station) > -1){
+            if (originalText.search(station) > -1){
                 formattedName = index;
-            } else {
-                // Return original station name if there is no match
-                formattedName = originalStationName;
+                originalName = station;
+                hasChanged = true;
             }
             // return true if the station name is found in the station array
-            return name.search(station) > -1; 
+            return originalText.search(station) > -1; 
         }); 
     });
+    // Sheppard regex for "Sheppard" station alone
+    var sanityRegexCheck = /\s?(sheppard)\s?/g;
+    if (originalName.toString() == sanityRegexCheck.toString()){
+        formattedName = " " + formattedName;
+    }
     return {
-        "name": formattedName,
-        "hasChanged": formattedName !== originalStationName
+        "revisedInterchange": formattedName,
+        "originalInterchange": originalName,
+        "hasChanged": hasChanged
     }
 };
 
@@ -147,7 +158,8 @@ StationLibrary.prototype.compileDictionary = function() {
 StationLibrary.prototype.retrieveStationListing = function(alert) {
     var self = this;
     var searches = {
-        "clear": /.+(clear:\s)[\w\s\.\-\']+((station)|(stn))?(has|is)/g,
+        "clear": /.+(clear:\s)[\w\s\.\-]+((station)|(stn))?(has|is)/g,
+        "delay_cleared": /(delay)\s.+(cleared)/g,
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "at_station": /((at)\s[\w\.\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_due": /((at)\s[\w\.\s\-\']+(?=\sdue))/g,
@@ -246,15 +258,22 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
                 edited = edited.replace(/.+(bound)/g,"");
             }
         } 
-        if (searchUsed == "clear"){
-            // Remove everything after station names
+        if (searchUsed == "clear" || searchUsed == "delay_cleared"){
+            // Remove everything after station names, either has, is or are
             edited = edited.replace(/\s(has).*/g,"");
             // This step is required because of islington station name
             edited = edited.replace(/\s(is).*/g,"");
             // handle "have" occurences
             edited = edited.replace(/\s?(have).*/g,"");
-            // Remove everything before delay and certain words after
-            edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
+            // handle "are" occurences
+            edited = edited.replace(/(\s?are).*/g,"");
+            if (searchUsed == "clear"){
+                // Remove everything before delay and certain words after
+                edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
+            } else {
+                edited = edited.replace(/(delay)\s?/g,"");
+                edited = edited.replace(/\s?(at)\s/g,"");
+            }
         }  
         // Remove SRT (Scarborough RT) reference if present
         if (edited.search(/\s(srt)/g) > -1){
@@ -264,24 +283,24 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         edited = edited.replace(/(\.|\,)/g,"");
         // Check for interchange stations at this stage
         var interchange = self.interchangeLookup(edited);
+        // Change station names and replace with interchange names if present
         if (interchange.hasChanged){
-            result[index] = interchange.name;
+            edited = edited.replace(interchange.originalInterchange, interchange.revisedInterchange);
+        }
+        // Perform regular splitting operations to obtains stations
+        if (edited.search(" to ") > -1){
+            edited = edited.split(" to ");
+            result[index] = edited;
+        } else if (edited.search(" and ") > -1){
+            // Check for interchange stations at this stage
+            edited = edited.split(" and ");
+            result[index] = edited;
+        } else if (edited.search("-") > -1 && !interchange.hasChanged){
+            // IMPORTANT: may need to update with additional logic
+            edited = edited.split("-");
+            result[index] = edited;
         } else {
-            // Perform regular splitting operations to obtains stations
-            // if no interchange found
-            if (edited.search(" to ") > -1){
-                edited = edited.split(" to ");
-                result[index] = edited;
-            } else if (edited.search(" and ") > -1){
-                // Check for interchange stations at this stage
-                edited = edited.split(" and ");
-                result[index] = edited;
-            } else if (edited.search("-") > -1){
-                edited = edited.split("-");
-                result[index] = edited;
-            } else {
-                result[index] = edited;
-            }
+            result[index] = edited;
         }
     });
     var returnArray = _.flatten(result);
@@ -306,12 +325,12 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
     return returnArray;
 };
 
-StationLibrary.prototype.retrieveLineNumber = function(stations) {
+StationLibrary.prototype.retrieveLineNumber = function(stations, description) {
     var self = this;
     var searchLineArray = [];
     _.each(stations, function (item, index){
         // Standardize station name, removing punctuation
-        searchLineArray.push(_.where(self.stationLineListing, {name: item}));
+        searchLineArray.push(_.where(self.stationLineListing, {name: item.toLowerCase()}));
     });
     searchLineArray = _.flatten(searchLineArray);
     var linesGrouping = _.groupBy(searchLineArray, 'line');
@@ -322,7 +341,35 @@ StationLibrary.prototype.retrieveLineNumber = function(stations) {
             var maxLine = _.max(linesGrouping, function(group){
                 return group.length;
             });
-            return maxLine[0].line;
+            if (maxLine[0].name == "bloor-yonge" && maxLine.length == 1){
+                var directions = {
+                    "east/west": ["e/b", "eastbound", "w/b", "westbound"],
+                    "north/south": ["n/b", "northbound", "norhtbound", "s/b", "southbound"]
+                };
+                // Storage for direction
+                var directionName = "";
+                var search = _.find(directions, function(dir, index){
+                    // returns true for the first array that contains a term match
+                    // to the direction
+                    // - this is used to retrive index (direction)
+                    return _.find(dir, function(entry){
+                        if (description.search(entry) > -1){
+                            directionName = index;
+                        } else {
+                            directionName = "other";
+                        }
+                        // return true if the direction is found in the alert
+                        return description.search(entry) > -1; 
+                    }); 
+                });
+                if (directionName == "east/west"){
+                    return 2;
+                } else {
+                    return 1;
+                }
+            } else {
+                return maxLine[0].line;
+            }
         } else {
             return 5;
         }

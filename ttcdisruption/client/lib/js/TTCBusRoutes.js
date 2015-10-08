@@ -209,7 +209,8 @@ function BusRoutesLibrary () {
     };
     this.alternateNames = {
         103: ["mount pleasant","mount pleasant north", "mt. pleasant"],
-        191: ["highway 27 rocket"]
+        191: ["highway 27 rocket"],
+        48: ["ratburn"]
     }
     this.createIndexes();
 };
