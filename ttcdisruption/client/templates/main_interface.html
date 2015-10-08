@@ -32,7 +32,7 @@
 					</div>
 					<span class="type-text">{{ disruptionType.alert_type }}</span>
 				</td>
-				<td class="location-alert intersection mobile-ui-viz">
+				<td class="location-alert intersection mobile-ui-viz mobile-ui-viz-divert">
 					{{#if getIntersection.hasIntersections}}
 					<span class="ico-intersection icon-non-fa"></span>
 					{{/if}}
@@ -48,11 +48,11 @@
 						{{/if}}
 					</div>
 				</td>
-				<td class="direction mobile-ui-viz">
+				<td class="direction mobile-ui-viz mobile-ui-viz-divert">
 					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
 					<span class="letter">{{ direction.text }}</span>
 				</td>
-				<td class="description">
+				<td class="description mobile-ui-viz-divert">
 					<span class="toggle-description">
 						<i class="fa fa-list-alt"></i>
 						<i class="fa fa-chevron-left"></i>
@@ -94,16 +94,16 @@
 					</div>
 					<span class="type-text">{{ disruptionType.alert_type }}</span>
 				</td>
-				<td class="location-alert station-location mobile-ui-viz">
+				<td class="location-alert station-location mobile-ui-viz mobile-ui-viz-divert">
 					{{#each subwayLine.stations}}
 						<span class="station-name"><i class="fa fa-subway"></i>{{.}}</span>
 					{{/each}}
 				</td>
-				<td class="direction mobile-ui-viz">
+				<td class="direction mobile-ui-viz mobile-ui-viz-divert">
 					<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
 					<span class="letter">{{ direction.text }}</span>
 				</td>
-				<td class="description">
+				<td class="description mobile-ui-viz-divert">
 					<span class="toggle-description">
 						<i class="fa fa-list-alt"></i>
 						<i class="fa fa-chevron-left"></i>
@@ -144,7 +144,7 @@
 						</div>
 						<span class="type-text">{{ disruptionType.text }}</span>
 					</td>
-					<td class="location-alert intersection mobile-ui-viz">
+					<td class="location-alert intersection mobile-ui-viz mobile-ui-viz-divert">
 						{{#if getIntersection.hasIntersections}}
 						<span class="ico-intersection icon-non-fa"></span>
 						{{/if}}
@@ -160,11 +160,11 @@
 						{{/if}}
 						</div>
 					</td>
-					<td class="direction mobile-ui-viz">
+					<td class="direction mobile-ui-viz mobile-ui-viz-divert">
 						<span class="icon"><i class="fa fa-{{ direction.icon }}"></i></span>
 						<span class="letter">{{ direction.text }}</span>
 					</td>
-					<td class="description">
+					<td class="description mobile-ui-viz-divert">
 						<span class="toggle-description">
 							<i class="fa fa-list-alt"></i>
 							<i class="fa fa-chevron-left"></i>

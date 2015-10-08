@@ -545,7 +545,7 @@ Template.ttcdisruption.helpers({
             "mechanical": ["mechanical", "stalled", "signal", "disabled", "switch", "overhead"],
             "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
-            "surface_stoppage": ["turning back", "turn back"],
+            "turning back": ["turning back", "turn back"],
             "suspension": ["alternative", "suspended", "no train", "closed", "no service"],
             "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
@@ -571,7 +571,7 @@ Template.ttcdisruption.helpers({
             "delay": "clock-o",
             "alarm": "exclamation-triangle",
             "resolved": "thumbs-up",
-            "surface_stoppage": "refresh",
+            "turning back": "refresh",
             "increased": "plus-square",
             "other": "question",
             "shuttle": "bus"
@@ -710,15 +710,41 @@ Template.ttcdisruption.events({
         }
     },
     "click .diversion-alert": function (event) {
+        var diversionListing,
+            parentRow,
+            diversion,
+            diversionListing,
+            getTrayStatus;
         // Activate the diversion alert tray when diversion is clicked
         // get diversion listing
-        var diversionListing = $(event.currentTarget)[0];
+        diversionListing = $(event.currentTarget)[0];
         // Get parent row
-        var parentRow = $(diversionListing).parents(".disruption-entry")[0];
+        parentRow = $(diversionListing).parents(".disruption-entry")[0];
         // Get diversion
-        var diversion = $(diversionListing).data("original-title");
-        console.log(parentRow);
-        console.log(diversion);
+        diversion = $(diversionListing).data("original-title");
+        // Split the diversion data
+        diversionListing = diversion.split(",");
+        diversionListing = _.compact(diversionListing);
+        // get tray status
+        var getTrayStatus = $(parentRow).hasClass("drawerOpenDivert");
+        // If drawer is open
+        if (getTrayStatus){
+            // Get current mobile description
+            var diversionCurrent = $(parentRow).find('.diversion-drawer')[0];
+            var renderedDiversion = Blaze.getView(diversionCurrent);
+            Blaze.remove(renderedDiversion);
+            $(parentRow).find('.mobile-ui-viz-divert').toggle();
+            $(parentRow).removeClass("drawerOpenDivert");
+        } else {
+            var renderedDiversion = Blaze.renderWithData(
+                Template.diversion_drawer,
+                {"diversions": diversionListing},
+                parentRow
+            );
+            $(parentRow).find('.mobile-ui-viz-divert').toggle();
+            // add drawerOpen class
+            $(parentRow).addClass("drawerOpenDivert");
+        }
     }
 });
 
