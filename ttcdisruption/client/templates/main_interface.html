@@ -21,7 +21,7 @@
 				<td class="type-involving icon-pad mobile-ui-viz">
 					<div class="icons-listing">
 						{{#each disruptionType.alerts}}
-						<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{/if}}">
+						<span class="type-icon {{#if diversionRoute }}diversion-alert{{else}}std-alert{{/if}}" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{else}}{{type}}{{/if}}">
 							{{#if custom }}
 								<span class="ico-{{icon}} icon-non-fa"></span>
 							{{else}}
@@ -53,7 +53,7 @@
 					<span class="letter">{{ direction.text }}</span>
 				</td>
 				<td class="description">
-					<span class="toggle-cons">
+					<span class="toggle-description">
 						<i class="fa fa-list-alt"></i>
 						<i class="fa fa-chevron-left"></i>
 					</span>
@@ -83,7 +83,7 @@
 				<td class="type-involving icon-pad mobile-ui-viz">
 					<div class="icons-listing">
 						{{#each disruptionType.alerts}}
-						<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{/if}}">
+						<span class="type-icon {{#if diversionRoute }}diversion-alert{{else}}std-alert{{/if}}" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{else}}{{type}}{{/if}}">
 							{{#if custom }}
 								<span class="ico-{{icon}} icon-non-fa"></span>
 							{{else}}
@@ -104,7 +104,7 @@
 					<span class="letter">{{ direction.text }}</span>
 				</td>
 				<td class="description">
-					<span class="toggle-cons">
+					<span class="toggle-description">
 						<i class="fa fa-list-alt"></i>
 						<i class="fa fa-chevron-left"></i>
 					</span>
@@ -133,7 +133,7 @@
 					<td class="type-involving icon-pad mobile-ui-viz">
 						<div class="icons-listing">
 							{{#each disruptionType.alerts}}
-							<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{/if}}">
+							<span class="type-icon {{#if diversionRoute }}diversion-alert{{else}}std-alert{{/if}}" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{else}}{{type}}{{/if}}">
 								{{#if custom }}
 									<span class="ico-{{icon}} icon-non-fa"></span>
 								{{else}}
@@ -165,7 +165,7 @@
 						<span class="letter">{{ direction.text }}</span>
 					</td>
 					<td class="description">
-						<span class="toggle-cons">
+						<span class="toggle-description">
 							<i class="fa fa-list-alt"></i>
 							<i class="fa fa-chevron-left"></i>
 						</span>

@@ -578,8 +578,6 @@ Template.ttcdisruption.helpers({
         }
         // Store all of the alert types
         var alertsStorage = [];
-        // store the diversion route
-        var diversionRoute = [];
         // Search through each part of the alert for the disruptions
         _.each(splitAlert, function (alert, index) {
             // Two level find to get the key with the first match to search terms
@@ -589,17 +587,15 @@ Template.ttcdisruption.helpers({
                 // - This is used to retrieve index or disruption type 
                 return _.find(category, function(entry){
                     if (alert.search(entry) > -1){
+                        var diversionRoute = "";
                         // Handle a reroute alert, get the reroute
                         if (index == "reroute"){
                             var diversion = alert.match(/(\svia\s).+/g);
                             if (!_.isNull(diversion)){
                                 diversion = diversion[0];
                                 diversion = diversion.replace(" via ", "");
-                                diversion= diversion.replace(/\,\s/g,",");
-                                var diversionListing = diversion.split(",");
-                                diversionRoute = _.filter(diversionListing, function(entry){
-                                    return entry != "";
-                                });
+                                diversion = diversion.replace(/\,\s/g,",");
+                                diversionRoute = diversion;
                             }
                         }
                         alertsStorage.push({
@@ -616,7 +612,7 @@ Template.ttcdisruption.helpers({
         });
         // Create return object
         var returnObj = {
-            "alerts": alertsStorage,
+            "alerts": alertsStorage
         };
         return returnObj;
     },
@@ -681,13 +677,13 @@ Template.ttcdisruption.helpers({
 // Event for showing alert drawer
 Template.ttcdisruption.events({
     // UI events go here
-    "click .toggle-cons": function (event) {
+    "click .toggle-description": function (event) {
         // get description container
         var descriptionContainer = $(event.currentTarget).parent('.description')[0];
         // get parent row
         var parentRow = $(descriptionContainer).parent()[0];
         // get tray status
-        var getTrayStatus = $(parentRow).hasClass("drawerOpen");
+        var getTrayStatus = $(parentRow).hasClass("drawerOpenDesc");
         // If drawer is open
         if (getTrayStatus){
             // Get current mobile description
@@ -696,8 +692,8 @@ Template.ttcdisruption.events({
             Blaze.remove(renderedAlert);
             $(parentRow).find('.mobile-ui-viz').toggle();
             // Transition arrow back
-            $(parentRow).find('.toggle-cons .fa-chevron-right').removeClass("fa-chevron-right").addClass("fa-chevron-left");
-            $(parentRow).removeClass("drawerOpen");
+            $(parentRow).find('.toggle-description .fa-chevron-right').removeClass("fa-chevron-right").addClass("fa-chevron-left");
+            $(parentRow).removeClass("drawerOpenDesc");
         } else {
             var formattedAlert = formatDescription(this.description);
             var renderedAlert = Blaze.renderWithData(
@@ -707,11 +703,22 @@ Template.ttcdisruption.events({
             );
             $(parentRow).find('.mobile-ui-viz').toggle();
             // add drawerOpen class
-            $(parentRow).addClass("drawerOpen");
+            $(parentRow).addClass("drawerOpenDesc");
             // Change arrow from point left to pointing right to indicate
             // it closes in that direction
-            $(parentRow).find('.toggle-cons .fa-chevron-left').removeClass("fa-chevron-left").addClass("fa-chevron-right");
+            $(parentRow).find('.toggle-description .fa-chevron-left').removeClass("fa-chevron-left").addClass("fa-chevron-right");
         }
+    },
+    "click .diversion-alert": function (event) {
+        // Activate the diversion alert tray when diversion is clicked
+        // get diversion listing
+        var diversionListing = $(event.currentTarget)[0];
+        // Get parent row
+        var parentRow = $(diversionListing).parents(".disruption-entry")[0];
+        // Get diversion
+        var diversion = $(diversionListing).data("original-title");
+        console.log(parentRow);
+        console.log(diversion);
     }
 });
 
