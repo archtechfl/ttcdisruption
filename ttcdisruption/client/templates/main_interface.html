@@ -21,7 +21,7 @@
 				<td class="type-involving icon-pad mobile-ui-viz">
 					<div class="icons-listing">
 						{{#each disruptionType.alerts}}
-						<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{type}}">
+						<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{/if}}">
 							{{#if custom }}
 								<span class="ico-{{icon}} icon-non-fa"></span>
 							{{else}}
@@ -83,7 +83,7 @@
 				<td class="type-involving icon-pad mobile-ui-viz">
 					<div class="icons-listing">
 						{{#each disruptionType.alerts}}
-						<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{type}}">
+						<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{/if}}">
 							{{#if custom }}
 								<span class="ico-{{icon}} icon-non-fa"></span>
 							{{else}}
@@ -133,7 +133,7 @@
 					<td class="type-involving icon-pad mobile-ui-viz">
 						<div class="icons-listing">
 							{{#each disruptionType.alerts}}
-							<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{type}}">
+							<span class="type-icon" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{/if}}">
 								{{#if custom }}
 									<span class="ico-{{icon}} icon-non-fa"></span>
 								{{else}}

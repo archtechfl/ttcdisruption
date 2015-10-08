@@ -578,6 +578,8 @@ Template.ttcdisruption.helpers({
         }
         // Store all of the alert types
         var alertsStorage = [];
+        // store the diversion route
+        var diversionRoute = [];
         // Search through each part of the alert for the disruptions
         _.each(splitAlert, function (alert, index) {
             // Two level find to get the key with the first match to search terms
@@ -587,10 +589,24 @@ Template.ttcdisruption.helpers({
                 // - This is used to retrieve index or disruption type 
                 return _.find(category, function(entry){
                     if (alert.search(entry) > -1){
+                        // Handle a reroute alert, get the reroute
+                        if (index == "reroute"){
+                            var diversion = alert.match(/(\svia\s).+/g);
+                            if (!_.isNull(diversion)){
+                                diversion = diversion[0];
+                                diversion = diversion.replace(" via ", "");
+                                diversion= diversion.replace(/\,\s/g,",");
+                                var diversionListing = diversion.split(",");
+                                diversionRoute = _.filter(diversionListing, function(entry){
+                                    return entry != "";
+                                });
+                            }
+                        }
                         alertsStorage.push({
                             "icon": icons[index],
                             "type": index,
-                            "custom": index === "police" || index === "elevator"
+                            "custom": index === "police" || index === "elevator",
+                            "diversionRoute": diversionRoute
                         });
                     }
                     // return true if the disruptuon type is found in the alert
