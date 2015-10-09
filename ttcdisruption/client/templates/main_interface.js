@@ -734,7 +734,7 @@ Template.ttcdisruption.events({
             "(norhtbound)",
             "(s\/b)",
             "(southbound)",
-            "(both ways)"
+            "(both\sway)s?"
         ];
         // get tray status
         var getTrayStatus = $(parentRow).hasClass("drawerOpenDivert");
