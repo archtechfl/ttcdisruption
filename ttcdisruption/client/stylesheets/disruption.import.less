@@ -110,17 +110,23 @@
 
 		// Disruption icons
 		.type-involving {
+			// Common styles
+			padding: 1.1em 0em;
+			min-width: 52px;
+			// Icons
 			.icons-listing {
 				text-align: center;
 			}
-			min-width: 52px;
 			i, .icon-non-fa {
-				margin: .2em .1em;
+				margin: .2em .8em;
 			}
-			.type-text {
-				margin-left: .3em;
-				display: none;
-				float: left;
+			// Diversion alert
+			.diversion-alert {
+				border-bottom-left-radius: 20px;
+				border-top-left-radius: 20px;
+				&.active {
+					background-color: @diversion-bg;
+				}
 			}
 			/* Adjust icon sizes */
 			.icon-non-fa {
