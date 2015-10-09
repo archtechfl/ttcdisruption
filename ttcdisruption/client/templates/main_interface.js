@@ -746,6 +746,7 @@ Template.ttcdisruption.events({
             Blaze.remove(renderedDiversion);
             $(parentRow).find('.mobile-ui-viz-divert').toggle();
             $(parentRow).removeClass("drawerOpenDivert");
+            $(event.currentTarget).removeClass("active");
         } else {
             // If drawer is not open, perform all data operations
             // Store all direction flags found
@@ -821,6 +822,7 @@ Template.ttcdisruption.events({
             $(parentRow).find('.mobile-ui-viz-divert').toggle();
             // add drawerOpen class
             $(parentRow).addClass("drawerOpenDivert");
+            $(event.currentTarget).addClass("active");
         }
     }
 });
