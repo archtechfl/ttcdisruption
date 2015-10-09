@@ -545,7 +545,7 @@ Template.ttcdisruption.helpers({
             "mechanical": ["mechanical", "stalled", "signal", "disabled", "switch", "overhead"],
             "reroute": ["diverting", "divert", "bypassing"],
             "alarm": ["alarm"],
-            "surface_stoppage": ["turning back", "turn back"],
+            "turning back": ["turning back", "turn back"],
             "suspension": ["alternative", "suspended", "no train", "closed", "no service"],
             "resolved": ["clear", "all clear"],
             "delay": ["holding", "longer"],
@@ -571,7 +571,7 @@ Template.ttcdisruption.helpers({
             "delay": "clock-o",
             "alarm": "exclamation-triangle",
             "resolved": "thumbs-up",
-            "surface_stoppage": "refresh",
+            "turning back": "refresh",
             "increased": "plus-square",
             "other": "question",
             "shuttle": "bus"
@@ -587,10 +587,22 @@ Template.ttcdisruption.helpers({
                 // - This is used to retrieve index or disruption type 
                 return _.find(category, function(entry){
                     if (alert.search(entry) > -1){
+                        var diversionRoute = "";
+                        // Handle a reroute alert, get the reroute
+                        if (index == "reroute"){
+                            var diversion = alert.match(/(\sdiverting\s).+/g);
+                            if (!_.isNull(diversion)){
+                                diversion = diversion[0];
+                                diversion = diversion.replace(" diverting ", "");
+                                diversion = diversion.replace(/\,\s/g,",");
+                                diversionRoute = diversion;
+                            }
+                        }
                         alertsStorage.push({
                             "icon": icons[index],
                             "type": index,
-                            "custom": index === "police" || index === "elevator"
+                            "custom": index === "police" || index === "elevator",
+                            "diversionRoute": diversionRoute
                         });
                     }
                     // return true if the disruptuon type is found in the alert
@@ -600,7 +612,7 @@ Template.ttcdisruption.helpers({
         });
         // Create return object
         var returnObj = {
-            "alerts": alertsStorage,
+            "alerts": alertsStorage
         };
         return returnObj;
     },
@@ -665,13 +677,13 @@ Template.ttcdisruption.helpers({
 // Event for showing alert drawer
 Template.ttcdisruption.events({
     // UI events go here
-    "click .toggle-cons": function (event) {
+    "click .toggle-description": function (event) {
         // get description container
         var descriptionContainer = $(event.currentTarget).parent('.description')[0];
         // get parent row
         var parentRow = $(descriptionContainer).parent()[0];
         // get tray status
-        var getTrayStatus = $(parentRow).hasClass("drawerOpen");
+        var getTrayStatus = $(parentRow).hasClass("drawerOpenDesc");
         // If drawer is open
         if (getTrayStatus){
             // Get current mobile description
@@ -680,8 +692,8 @@ Template.ttcdisruption.events({
             Blaze.remove(renderedAlert);
             $(parentRow).find('.mobile-ui-viz').toggle();
             // Transition arrow back
-            $(parentRow).find('.toggle-cons .fa-chevron-right').removeClass("fa-chevron-right").addClass("fa-chevron-left");
-            $(parentRow).removeClass("drawerOpen");
+            $(parentRow).find('.toggle-description .fa-chevron-right').removeClass("fa-chevron-right").addClass("fa-chevron-left");
+            $(parentRow).removeClass("drawerOpenDesc");
         } else {
             var formattedAlert = formatDescription(this.description);
             var renderedAlert = Blaze.renderWithData(
@@ -691,10 +703,126 @@ Template.ttcdisruption.events({
             );
             $(parentRow).find('.mobile-ui-viz').toggle();
             // add drawerOpen class
-            $(parentRow).addClass("drawerOpen");
+            $(parentRow).addClass("drawerOpenDesc");
             // Change arrow from point left to pointing right to indicate
             // it closes in that direction
-            $(parentRow).find('.toggle-cons .fa-chevron-left').removeClass("fa-chevron-left").addClass("fa-chevron-right");
+            $(parentRow).find('.toggle-description .fa-chevron-left').removeClass("fa-chevron-left").addClass("fa-chevron-right");
+        }
+    },
+    "click .diversion-alert": function (event) {
+        var diversionListing,
+            parentRow,
+            diversion,
+            diversionListing,
+            getTrayStatus,
+            directionFlag;
+        // Activate the diversion alert tray when diversion is clicked
+        // get diversion listing
+        diversionListing = $(event.currentTarget)[0];
+        // Get parent row
+        parentRow = $(diversionListing).parents(".disruption-entry")[0];
+        // Get diversion
+        diversion = $(diversionListing).data("diversion");
+        // Check for direction indicators
+        var directions = [
+            "(e\/b)",
+            "(eastbound)",
+            "(w\/b)",
+            "(westbound)",
+            "(n\/b)",
+            "(northbound)",
+            "(norhtbound)",
+            "(s\/b)",
+            "(southbound)",
+            "((both way)s?)"
+        ];
+        // get tray status
+        var getTrayStatus = $(parentRow).hasClass("drawerOpenDivert");
+        // If drawer is open
+        if (getTrayStatus){
+            // Get current mobile description
+            var diversionCurrent = $(parentRow).find('.diversion-drawer')[0];
+            var renderedDiversion = Blaze.getView(diversionCurrent);
+            Blaze.remove(renderedDiversion);
+            $(parentRow).find('.mobile-ui-viz-divert').toggle();
+            $(parentRow).removeClass("drawerOpenDivert");
+            $(event.currentTarget).removeClass("active");
+        } else {
+            // If drawer is not open, perform all data operations
+            // Store all direction flags found
+            var dirs = _.filter(directions, function(entry){
+                var exp = new RegExp(entry,"g");
+                return diversion.search(exp) > -1;
+            });
+            // Remove "via" mentions
+            diversion = diversion.replace(/\s?(via)\s?/g,"");
+            // Direction flag, for determining rendering process
+            directionFlag = false;
+            // Remove direction if only one present
+            if (dirs.length == 1){
+                var singleDirExp = new RegExp(dirs[0],"g");
+                diversion = diversion.replace(singleDirExp,"");
+                // Split the diversion data
+                diversionListing = diversion.split(",");
+                diversionListing = _.compact(diversionListing);
+                // End of single direction operation
+            } else {
+                // Contruct a regExp for splitting, and split into direction groupings
+                var newExpBase = "";
+                _.each(dirs, function (exp, index){
+                    newExpBase += exp;
+                });
+                newExpBase = newExpBase.replace(/\)\(/g,")|(");
+                // Create new focused regular expression, string together all known
+                // direction flags, split only on those
+                var newExp = new RegExp(newExpBase,"g");
+                // Perform direction split
+                var diversionMoreOne = diversion.split(newExp);
+                // Get rid of blank string and undefineds coming from split operation
+                // after direction search
+                diversionMoreOne = _.compact(diversionMoreOne);
+                // Remove any "and" or other extra words
+                // Compact each element at end to account for trailing commas
+                diversionMoreOne = _.map(diversionMoreOne, function(entry){
+                    entry = entry.replace(/(and)\s/g,"");
+                    entry = entry.split(",");
+                    entry = _.compact(entry);
+                    return entry;
+                });
+                // Extra words have been removed
+                // Store the diversions as objects with the direction and streets as properties
+                var diversionHash = {};
+                _.each(diversionMoreOne, function (street, index){
+                    var checkIfDir = street[0].match(newExp);
+                    if (checkIfDir && !_.has(diversionHash, checkIfDir[0])){
+                        diversionHash[street] = {
+                            "streets": diversionMoreOne[index + 1],
+                            "direction": checkIfDir
+                        }
+                    }
+                });
+                directionFlag = true;
+                // Take the objects in the diversion Hash and move them to an array
+                // for rendering
+                var diversionArray = [];
+                _.each(diversionHash, function (item, index){
+                    diversionArray.push(item);
+                });
+            }
+            // Begin rendering
+            var renderedDiversion = Blaze.renderWithData(
+                Template.diversion_drawer,
+                {
+                    "diversions": diversionListing,
+                    "multiDirection": directionFlag,
+                    "multiDiversions": diversionArray
+                },
+                parentRow
+            );
+            $(parentRow).find('.mobile-ui-viz-divert').toggle();
+            // add drawerOpen class
+            $(parentRow).addClass("drawerOpenDivert");
+            $(event.currentTarget).addClass("active");
         }
     }
 });
