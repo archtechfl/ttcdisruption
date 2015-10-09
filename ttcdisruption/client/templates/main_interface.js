@@ -761,6 +761,10 @@ Template.ttcdisruption.events({
             if (dirs.length == 1){
                 var singleDirExp = new RegExp(dirs[0],"g");
                 diversion = diversion.replace(singleDirExp,"");
+                // Split the diversion data
+                diversionListing = diversion.split(",");
+                diversionListing = _.compact(diversionListing);
+                // End of single direction operation
             } else {
                 // Contruct a regExp for splitting, and split into direction groupings
                 var newExpBase = "";
@@ -768,23 +772,31 @@ Template.ttcdisruption.events({
                     newExpBase += exp;
                 });
                 newExpBase = newExpBase.replace(/\)\(/g,")|(");
+                // Create new focused regular expression, string together all known
+                // direction flags, split only on those
                 var newExp = new RegExp(newExpBase,"g");
-                var diversionTest = diversion.split(newExp);
-                // Get rid of blank string and undefineds comine from split operation
-                diversionTest = _.compact(diversionTest);
+                // Perform direction split
+                var diversionMoreOne = diversion.split(newExp);
+                // Get rid of blank string and undefineds coming from split operation
+                // after direction search
+                diversionMoreOne = _.compact(diversionMoreOne);
                 // Remove any "and" or other extra words
-                diversionTest = _.map(diversionTest, function(entry){
-                    return entry.replace(/\s(and)\s/g,"");
+                // Compact each element at end to account for trailing commas
+                diversionMoreOne = _.map(diversionMoreOne, function(entry){
+                    entry = entry.replace(/(and)\s/g,"");
+                    entry = entry.split(",");
+                    entry = _.compact(entry);
+                    return entry;
                 });
                 // Extra words have been removed
                 // Store the diversions as objects with the direction and streets as properties
                 var diversionHash = {};
-                _.each(diversionTest, function (street, index){
-                    var checkIfDir = street.match(newExp);
+                _.each(diversionMoreOne, function (street, index){
+                    var checkIfDir = street[0].match(newExp);
                     if (checkIfDir && !_.has(diversionHash, checkIfDir[0])){
                         diversionHash[street] = {
-                            "streets": diversionTest[index + 1].split(","),
-                            "direction": street
+                            "streets": diversionMoreOne[index + 1],
+                            "direction": checkIfDir
                         }
                     }
                 });
@@ -796,9 +808,6 @@ Template.ttcdisruption.events({
                     diversionArray.push(item);
                 });
             }
-            // Split the diversion data
-            diversionListing = diversion.split(",");
-            diversionListing = _.compact(diversionListing);
             // Begin rendering
             var renderedDiversion = Blaze.renderWithData(
                 Template.diversion_drawer,
