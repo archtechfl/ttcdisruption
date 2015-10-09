@@ -21,13 +21,23 @@
 				<td class="type-involving icon-pad mobile-ui-viz">
 					<div class="icons-listing">
 						{{#each disruptionType.alerts}}
-						<span class="type-icon {{#if diversionRoute }}diversion-alert{{else}}std-alert{{/if}}" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{else}}{{type}}{{/if}}">
-							{{#if custom }}
-								<span class="ico-{{icon}} icon-non-fa"></span>
+							{{#if diversionRoute}}
+								<span class="type-icon diversion-alert" data-toggle="tooltip" data-placement="top" title="{{type}}" data-diversion="{{diversionRoute}}">
+								{{#if custom }}
+									<span class="ico-{{icon}} icon-non-fa"></span>
+								{{else}}
+									<i class="fa fa-{{icon}}"></i>
+								{{/if}}
+								</span>
 							{{else}}
-								<i class="fa fa-{{icon}}"></i>
+								<span class="type-icon std-alert" data-toggle="tooltip" data-placement="top" title="{{type}}">
+								{{#if custom }}
+									<span class="ico-{{icon}} icon-non-fa"></span>
+								{{else}}
+									<i class="fa fa-{{icon}}"></i>
+								{{/if}}
+								</span>
 							{{/if}}
-						</span>
 						{{/each}}
 					</div>
 					<span class="type-text">{{ disruptionType.alert_type }}</span>
@@ -83,13 +93,23 @@
 				<td class="type-involving icon-pad mobile-ui-viz">
 					<div class="icons-listing">
 						{{#each disruptionType.alerts}}
-						<span class="type-icon {{#if diversionRoute }}diversion-alert{{else}}std-alert{{/if}}" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{else}}{{type}}{{/if}}">
-							{{#if custom }}
-								<span class="ico-{{icon}} icon-non-fa"></span>
+							{{#if diversionRoute}}
+								<span class="type-icon diversion-alert" data-toggle="tooltip" data-placement="top" title="{{type}}" data-diversion="{{diversionRoute}}">
+								{{#if custom }}
+									<span class="ico-{{icon}} icon-non-fa"></span>
+								{{else}}
+									<i class="fa fa-{{icon}}"></i>
+								{{/if}}
+								</span>
 							{{else}}
-								<i class="fa fa-{{icon}}"></i>
+								<span class="type-icon std-alert" data-toggle="tooltip" data-placement="top" title="{{type}}">
+								{{#if custom }}
+									<span class="ico-{{icon}} icon-non-fa"></span>
+								{{else}}
+									<i class="fa fa-{{icon}}"></i>
+								{{/if}}
+								</span>
 							{{/if}}
-						</span>
 						{{/each}}
 					</div>
 					<span class="type-text">{{ disruptionType.alert_type }}</span>
@@ -133,13 +153,23 @@
 					<td class="type-involving icon-pad mobile-ui-viz">
 						<div class="icons-listing">
 							{{#each disruptionType.alerts}}
-							<span class="type-icon {{#if diversionRoute }}diversion-alert{{else}}std-alert{{/if}}" data-toggle="tooltip" data-placement="top" title="{{#if diversionRoute }}{{diversionRoute}}{{else}}{{type}}{{/if}}">
-								{{#if custom }}
-									<span class="ico-{{icon}} icon-non-fa"></span>
+								{{#if diversionRoute}}
+									<span class="type-icon diversion-alert" data-toggle="tooltip" data-placement="top" title="{{type}}" data-diversion="{{diversionRoute}}">
+									{{#if custom }}
+										<span class="ico-{{icon}} icon-non-fa"></span>
+									{{else}}
+										<i class="fa fa-{{icon}}"></i>
+									{{/if}}
+									</span>
 								{{else}}
-									<i class="fa fa-{{icon}}"></i>
+									<span class="type-icon std-alert" data-toggle="tooltip" data-placement="top" title="{{type}}">
+									{{#if custom }}
+										<span class="ico-{{icon}} icon-non-fa"></span>
+									{{else}}
+										<i class="fa fa-{{icon}}"></i>
+									{{/if}}
+									</span>
 								{{/if}}
-							</span>
 							{{/each}}
 						</div>
 						<span class="type-text">{{ disruptionType.text }}</span>

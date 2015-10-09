@@ -590,10 +590,10 @@ Template.ttcdisruption.helpers({
                         var diversionRoute = "";
                         // Handle a reroute alert, get the reroute
                         if (index == "reroute"){
-                            var diversion = alert.match(/(\svia\s).+/g);
+                            var diversion = alert.match(/(\sdiverting\s).+/g);
                             if (!_.isNull(diversion)){
                                 diversion = diversion[0];
-                                diversion = diversion.replace(" via ", "");
+                                diversion = diversion.replace(" diverting ", "");
                                 diversion = diversion.replace(/\,\s/g,",");
                                 diversionRoute = diversion;
                             }
@@ -714,17 +714,28 @@ Template.ttcdisruption.events({
             parentRow,
             diversion,
             diversionListing,
-            getTrayStatus;
+            getTrayStatus,
+            directionFlag;
         // Activate the diversion alert tray when diversion is clicked
         // get diversion listing
         diversionListing = $(event.currentTarget)[0];
         // Get parent row
         parentRow = $(diversionListing).parents(".disruption-entry")[0];
         // Get diversion
-        diversion = $(diversionListing).data("original-title");
-        // Split the diversion data
-        diversionListing = diversion.split(",");
-        diversionListing = _.compact(diversionListing);
+        diversion = $(diversionListing).data("diversion");
+        // Check for direction indicators
+        var directions = [
+            "(e\/b)",
+            "(eastbound)",
+            "(w\/b)",
+            "(westbound)",
+            "(n\/b)",
+            "(northbound)",
+            "(norhtbound)",
+            "(s\/b)",
+            "(southbound)",
+            "(both ways)"
+        ];
         // get tray status
         var getTrayStatus = $(parentRow).hasClass("drawerOpenDivert");
         // If drawer is open
@@ -736,9 +747,66 @@ Template.ttcdisruption.events({
             $(parentRow).find('.mobile-ui-viz-divert').toggle();
             $(parentRow).removeClass("drawerOpenDivert");
         } else {
+            // If drawer is not open, perform all data operations
+            // Store all direction flags found
+            var dirs = _.filter(directions, function(entry){
+                var exp = new RegExp(entry,"g");
+                return diversion.search(exp) > -1;
+            });
+            // Remove "via" mentions
+            diversion = diversion.replace(/\s?(via)\s?/g,"");
+            // Direction flag, for determining rendering process
+            directionFlag = false;
+            // Remove direction if only one present
+            if (dirs.length == 1){
+                var singleDirExp = new RegExp(dirs[0],"g");
+                diversion = diversion.replace(singleDirExp,"");
+            } else {
+                // Contruct a regExp for splitting, and split into direction groupings
+                var newExpBase = "";
+                _.each(dirs, function (exp, index){
+                    newExpBase += exp;
+                });
+                newExpBase = newExpBase.replace(/\)\(/g,")|(");
+                var newExp = new RegExp(newExpBase,"g");
+                var diversionTest = diversion.split(newExp);
+                // Get rid of blank string and undefineds comine from split operation
+                diversionTest = _.compact(diversionTest);
+                // Remove any "and" or other extra words
+                diversionTest = _.map(diversionTest, function(entry){
+                    return entry.replace(/\s(and)\s/g,"");
+                });
+                // Extra words have been removed
+                // Store the diversions as objects with the direction and streets as properties
+                var diversionHash = {};
+                _.each(diversionTest, function (street, index){
+                    var checkIfDir = street.match(newExp);
+                    if (checkIfDir && !_.has(diversionHash, checkIfDir[0])){
+                        diversionHash[street] = {
+                            "streets": diversionTest[index + 1].split(","),
+                            "direction": street
+                        }
+                    }
+                });
+                directionFlag = true;
+                // Take the objects in the diversion Hash and move them to an array
+                // for rendering
+                var diversionArray = [];
+                _.each(diversionHash, function (item, index){
+                    diversionArray.push(item);
+                });
+            }
+            // Split the diversion data
+            diversionListing = diversion.split(",");
+            diversionListing = _.compact(diversionListing);
+            // Begin rendering
             var renderedDiversion = Blaze.renderWithData(
                 Template.diversion_drawer,
-                {"diversions": diversionListing},
+                {
+                    "diversions": diversionListing,
+                    "multiDirection": directionFlag,
+                    "multiDiversions": diversionArray
+                },
                 parentRow
             );
             $(parentRow).find('.mobile-ui-viz-divert').toggle();

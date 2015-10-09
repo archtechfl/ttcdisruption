@@ -1,9 +1,22 @@
 <template name="diversion_drawer">
 	<td class="diversion-drawer" colspan="3">
 		<div class="diversion-text">
-		{{#each diversions}}
-			<span class="diversion-element">{{.}}</span>
-		{{/each}}
+		{{#if multiDirection}}
+			{{#each multiDiversions}}
+				<div class="multi-diversion">
+					<span class="diversion-common diversion-direction">{{direction}}</span>
+					{{#each streets}}
+						<span class="diversion-common diversion-element">{{.}}</span>
+					{{/each}}
+				</div>
+			{{/each}}
+		{{else}}
+			<div class="single-diversion">
+			{{#each diversions}}
+				<span class="diversion-common diversion-element">{{.}}</span>
+			{{/each}}
+			</div>
+		{{/if}}
 		</div>
 	</td>
 </template>
