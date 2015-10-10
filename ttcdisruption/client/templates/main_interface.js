@@ -178,10 +178,10 @@ Template.ttcdisruption.helpers({
         if (lineNum){
             if (lineNum.line < 5){
                 lineNumber = lineNum.line;
-                stationList = stationInfo.retrieveStationListing(textForSearch);
             } else {
                 lineNumber = 5;
             }
+            stationList = stationInfo.retrieveStationListing(textForSearch);
             lineNumbers.push(lineNumber);
         } else {
             // If there is not a matching abbreviation, do station checking
