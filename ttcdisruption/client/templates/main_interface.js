@@ -152,6 +152,8 @@ Template.ttcdisruption.helpers({
       var lineBlocks = [];
       // Final line numbers repository
       var lineNumbers = [];
+      // Final station list
+      var stationList = [];
       try {
         lineBlocks = text.match(searchTermsLineEach);
         if (_.isNull(lineBlocks)){
@@ -164,23 +166,27 @@ Template.ttcdisruption.helpers({
             });
         }
         // Get station list
-        var stationList = stationInfo.retrieveStationListing(textForSearch);
+        stationList = stationInfo.retrieveStationListing(textForSearch);
       } catch(err) {
         // Line number not included, proceed to search for abbreviations
         // station database search to come later
         var lineNum = _.find(ttcLineAbbreviations, function(abbrs){
-            return text.search(abbrs.abbr) > -1; 
+            return textForSearch.search(abbrs.abbr) > -1; 
         });
         var lineNumber = 0;
+        // If there is a matching abbreviation
         if (lineNum){
             if (lineNum.line < 5){
                 lineNumber = lineNum.line;
+                stationList = stationInfo.retrieveStationListing(textForSearch);
             } else {
                 lineNumber = 5;
             }
+            lineNumbers.push(lineNumber);
         } else {
+            // If there is not a matching abbreviation, do station checking
             // Get station list
-            var stationList = stationInfo.retrieveStationListing(textForSearch);
+            stationList = stationInfo.retrieveStationListing(textForSearch);
             // search through station name database by passing station list
             lineNumber = stationInfo.retrieveLineNumber(stationList, textForSearch);
             lineNumbers.push(lineNumber);
