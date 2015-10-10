@@ -178,6 +178,7 @@ Template.ttcdisruption.helpers({
             } else {
                 lineNumber = 5;
             }
+            lineNumbers.push(lineNumber);
         } else {
             // Get station list
             var stationList = stationInfo.retrieveStationListing(textForSearch);
