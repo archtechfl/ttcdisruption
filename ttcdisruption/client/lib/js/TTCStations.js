@@ -100,6 +100,7 @@ function StationLibrary () {
             "yonge sheppard",
             "yonge-sheppard",
             "sheppard yonge",
+            "sheppard-yonge",
             "yonge and sheppard",
             "sheppard and yonge",
             /\s?(sheppard)\s?/g
@@ -170,172 +171,201 @@ StationLibrary.prototype.compileDictionary = function() {
 
 StationLibrary.prototype.retrieveStationListing = function(alert) {
     var self = this;
-    var searches = {
-        "clear": /.+(clear:\s)[\w\s\.\-]+((station)|(stn))?(has|is)/g,
+    // station search patterns to try
+    var stationSearches = {
+        "clear": /.+(clear:\s)[\w\s\-]+((station)|(stn))?(has|is)/g,
         "delay_cleared": /(delay)\s.+(cleared)/g,
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
-        "at_station": /((at)\s[\w\.\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
-        "at_station_due": /((at)\s[\w\.\s\-\']+(?=\sdue))/g,
-        "at_station_line": /((at)\s[\w\.\s\,\-\']+(?=\sdue))/g,
-        "between": /(((between)|(btwn))\s[\w\s\.\-\']+)(?=\s((station))|(?=\s(stn)))/g,
-        "between_due": /((between)|(btwn))\s[\w\s\,\-\']+(due)/g,
+        "at_station": /((at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
+        "at_station_line": /((at)\s[\w\s\,\-\']+)/g,
+        "between": /(((between)|(btwn))\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s\-\']+(?=\.)/g,
-        "between_abbr_bw": /((b\/w)\s[\w\s\.\-\']+)(?=\s((station))|(?=\s(stn)))/g,
+        "between_due": /((between)|(btwn))\s[\w\s\,\-\']+/g,
+        "between_abbr_bw": /((b\/w)\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
         "near_station": /(near)\s.+(stn|station)/g,
         "line_stations_direction_commas": /(line)\s\d{1},?.+(?=,)/g,
         "from_for": /(from).+(for)/g,
         "from_stn": /(from).+((station)|(stn))/g,
-        "from": /(from\s).+(due)/g
+        "from": /(from\s).+/g,
+        "at_station_period": /((at)\s[\w\s\-\']+(?=.))/g,
+        "abbr_stations": /(\)\s).+(?=\s((station))|(?=\s(stn)))/g
     };
     // Alert text
     var text = alert + ".";
     // Get result
     var result = [];
-    var matchingSearch = "";
     // The search being used, to be stored later in this var
     var searchUsed = "";
-    var search = _.find(searches, function(search, index){
-        // Determines which search to use based on results
-        var matching = text.match(search);
-        if (matching){
-            var matches = matching;
-            result = matches;
-            searchUsed = index;
-        } else {
-            var matches = [];
-        }
-        matchingSearch = index;
-        return matches.length > 0;
-    });
-    if (result.length == 0){
-        result = ["None specified"];
+    // Split at due if present, or at " for " if present
+    var splitDue = text.search(" due ") > -1;
+    // Storage for split alert
+    var splitAlert = [];
+    if (splitDue){
+        splitAlert = text.split(" due ");
+    } else if (text.search("expect") > -1) {
+        splitAlert = text.split(" expect ");
+    } else {
+        splitAlert = text.split(" for ");
     }
-    // Sanity check, then split if there is a reason
-    if (result.length > 0){
-        if (result[0].search(" due ") > -1){
-            result = result[0].split(" due ");
-        }
-    }
-    // Remove at and between
-    // Additional processing needed 
-    _.each(result, function (item, index){
-        var initialText = item;
-        // replace anything before "at", irrelevant
-        edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
-        edited = edited.replace(/((between\s)|(btwn\s))/g,"");
-        // remove "from" and "due"
-        edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
-        // Remove station, stations, stn or stns
-        edited = edited.replace(/((\sstn)s?|(\sstation)s?)/g,"");
-        // remove bypassing language
-        edited = edited.replace("bypassing ","");
-        // Remove "all clear text"
-        edited = edited.replace(/.+(clear:\s)/g,"");
-        // Remove colon for elevator alert
-        if (matchingSearch === "elevator"){
-            edited = edited.replace(/.+:\s/g,""); 
-        }
-        // handle comma and line number reference
-        if (searchUsed == "at_station_line"){
-            edited = edited.replace(/\,.+/g,""); 
-        }
-        // handle station name range with dash
-        if (searchUsed == "between_stations_dash"){
-            edited = edited.replace(/(operating\s)/g,""); 
-        }
-        // handle station with between b/w abbreviation
-        if (searchUsed == "between_abbr_bw"){
-            edited = edited.replace(/(b\/w)\s/g,""); 
-        }
-        // handle station name near reference
-        if (searchUsed == "near_station"){
-            edited = edited.replace(/(near\s)/g,""); 
-        }
-        // handle station from -- for reference
-        if (searchUsed == "from_for"){
-            edited = edited.replace(/(\sfor)/g,""); 
-        }
-        // handle line followed by station reference, commas
-        // ex line 2, woodbine to warden, eastbound
-        if (searchUsed == "line_stations_direction_commas"){
-            // Remove "Line 1, " instances
-            edited = edited.replace(/(line)\s\d{1},\s/g,"");
-            // Remove SRT instances, ex "Line 3 (SRT) "
-            edited = edited.replace(/(line)\s\d{1},?.+\)\s/g, "");
-            // Remove any information trailing second comma 
-            edited = edited.replace(/,\s.+/g,"");
-            // Remove direction if it comes before station names
-            if (edited.search(/.+(bound)/g) > -1){
-                edited = edited.replace(/.+(bound)/g,"");
-            }
-        } 
-        if (searchUsed == "clear" || searchUsed == "delay_cleared"){
-            // Remove everything after station names, either has, is or are
-            edited = edited.replace(/\s(has).*/g,"");
-            // This step is required because of islington station name
-            edited = edited.replace(/\s(is).*/g,"");
-            // handle "have" occurences
-            edited = edited.replace(/\s?(have).*/g,"");
-            // handle "are" occurences
-            edited = edited.replace(/(\s?are).*/g,"");
-            if (searchUsed == "clear"){
-                // Remove everything before delay and certain words after
-                edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
+    // Go through each part of the alert and find stations
+    var stationSearchResult = [];
+    _.each(splitAlert, function (alert, index) {
+        var searchAll = _.find(stationSearches, function(search, index){
+            // Determines which search to use based on results
+            var matching = alert.match(search);
+            if (matching){
+                var matches = matching;
+                // Process matches and remove an extraneous information
+                // not related to station names
+                matchesProcessed = self.stationIsolate(matches[0], index);
+                stationSearchResult.push(matchesProcessed);
             } else {
-                edited = edited.replace(/(delay)\s?/g,"");
-                edited = edited.replace(/\s?(at)\s/g,"");
+                var matches = [];
             }
-        }  
-        // Remove SRT (Scarborough RT) reference if present
-        if (edited.search(/\s(srt)/g) > -1){
-            edited = edited.replace(/\s(srt)/g,"");
-        } 
-        // Remove punctuation
-        edited = edited.replace(/(\.|\,)/g,"");
-        // Check for interchange stations at this stage
-        var interchange = self.interchangeLookup(edited);
-        // Change station names and replace with interchange names if present
-        if (interchange.hasChanged){
-            edited = edited.replace(interchange.originalInterchange, interchange.revisedInterchange);
-        }
-        // Perform regular splitting operations to obtains stations
-        if (edited.search(" to ") > -1){
-            edited = edited.split(" to ");
-            result[index] = edited;
-        } else if (edited.search(" and ") > -1){
-            // Check for interchange stations at this stage
-            edited = edited.split(" and ");
-            result[index] = edited;
-        } else if (edited.search("-") > -1 && !interchange.hasChanged){
-            // IMPORTANT: may need to update with additional logic
-            edited = edited.split("-");
-            result[index] = edited;
-        } else {
-            result[index] = edited;
-        }
+            return matches.length > 0;
+        });
     });
+    if (stationSearchResult.length == 0){
+        result = ["None specified"];
+    } else {
+        result = stationSearchResult;
+    }
     var returnArray = _.flatten(result);
     // remove as invalid if present
     var messageBlacklist = [
         // Service time update
-        /(\d{1}:\d{2}(am|pm))/g
+        /(\d{1}:\d{2}(am|pm))/g,
+        /(track level)/g
     ];
-    _.each(returnArray, function (station, index){
+    // Remove blacklisted terms
+    var whitelistedArray = _.reject(returnArray, function(station){
         var test = _.find(messageBlacklist, function (item, index) {
             return station.search(item) > -1;
         });
-        if (!_.isUndefined(test)){
-            returnArray = returnArray.slice(index, 1);
-        }
+        return _.isUndefined(test) == false;
     });
     // Sanity check if array is empty
-    if (_.isEmpty(returnArray)){
+    if (_.isEmpty(whitelistedArray)){
         // This will probably change later
-        returnArray = ["All Stations"];
+        whitelistedArray = ["All Stations"];
     }
-    return returnArray;
+    // Ensure all entries are unique since some station names are repeated
+    var duplicateFreeReturn = _.uniq(whitelistedArray);
+    return duplicateFreeReturn;
+};
+
+StationLibrary.prototype.stationIsolate = function(entry, search_used) {
+    // Store reference to class instance
+    var self = this;
+    // Get result
+    var result = [];
+    // The search being used, to be stored later in this var
+    var searchUsed = search_used;
+    // Store the initial text
+    var initialText = entry;
+    // replace anything before "at", irrelevant
+    edited = initialText.replace(/(.+(at)\s)|(at\s)/g,"");
+    edited = edited.replace(/((between\s)|(btwn\s))/g,"");
+    // remove "from" and "due"
+    edited = edited.replace(/(\s?from\s?)|(\s?due\s?)/g,"");
+    // Remove station, stations, stn or stns
+    edited = edited.replace(/((\sstn)s?|(\sstation)s?)/g,"");
+    // remove bypassing language
+    edited = edited.replace("bypassing ","");
+    // Remove "all clear text"
+    edited = edited.replace(/.+(clear:\s)/g,"");
+    // Remove colon for elevator alert
+    if (searchUsed === "elevator"){
+        edited = edited.replace(/.+:\s/g,""); 
+    }
+    // handle comma and line number reference
+    if (searchUsed == "at_station_line"){
+        edited = edited.replace(/\,.+/g,""); 
+    }
+    // handle station name range with dash
+    if (searchUsed == "between_stations_dash"){
+        edited = edited.replace(/(operating\s)/g,""); 
+    }
+    // handle station with between b/w abbreviation
+    if (searchUsed == "between_abbr_bw"){
+        edited = edited.replace(/(b\/w)\s/g,""); 
+    }
+    // handle station name near reference
+    if (searchUsed == "near_station"){
+        edited = edited.replace(/(near\s)/g,""); 
+    }
+    // handle station from -- for reference
+    if (searchUsed == "from_for"){
+        edited = edited.replace(/(\sfor)/g,""); 
+    }
+    // handle line followed by station reference, commas
+    // ex line 2, woodbine to warden, eastbound
+    if (searchUsed == "line_stations_direction_commas"){
+        // Remove "Line 1, " instances, take into account punctuation errors
+        // ex. "line 2. jane to" vs "line 2, jane to"
+        edited = edited.replace(/(line)\s\d{1}(\,|\.)\s/g,"");
+        // Remove SRT instances, ex "Line 3 (SRT) "
+        edited = edited.replace(/(line)\s\d{1},?.+\)\s/g, "");
+        // Remove any information trailing second comma 
+        edited = edited.replace(/,\s.+/g,"");
+        // Remove direction if it comes before station names
+        if (edited.search(/.+(bound)/g) > -1){
+            edited = edited.replace(/.+(bound)/g,"");
+        }
+    } 
+    if (searchUsed == "clear" || searchUsed == "delay_cleared"){
+        // Remove everything after station names, either has, is or are
+        edited = edited.replace(/\s(has).*/g,"");
+        // This step is required because of islington station name
+        edited = edited.replace(/\s(is).*/g,"");
+        // handle "have" occurences
+        edited = edited.replace(/\s?(have).*/g,"");
+        // handle "are" occurences
+        edited = edited.replace(/(\s?are).*/g,"");
+        if (searchUsed == "clear"){
+            // Remove everything before delay and certain words after
+            edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
+        } else {
+            edited = edited.replace(/(delay)\s?/g,"");
+            edited = edited.replace(/\s?(at)\s/g,"");
+        }
+    }  
+    // Remove SRT (Scarborough RT) reference if present
+    if (edited.search(/\s(srt)/g) > -1){
+        edited = edited.replace(/\s(srt)/g,"");
+    }
+    if (searchUsed == "abbr_stations"){
+        edited = edited.replace(/(\)\s?)/g,"");
+    }
+    // Remove punctuation
+    edited = edited.replace(/(\.|\,)/g,"");
+    // Check for interchange stations at this stage
+    var interchange = self.interchangeLookup(edited);
+    // Change station names and replace with interchange names if present
+    if (interchange.hasChanged){
+        edited = edited.replace(interchange.originalInterchange, interchange.revisedInterchange);
+    }
+    // Result to return
+    var toReturn = [];
+    // Perform regular splitting operations to obtains stations
+    if (edited.search(" to ") > -1){
+        edited = edited.split(" to ");
+        toReturn = edited;
+    } else if (edited.search(" and ") > -1){
+        // Check for interchange stations at this stage
+        edited = edited.split(" and ");
+        toReturn = edited;
+    } else if (edited.search("-") > -1 && !interchange.hasChanged){
+        // IMPORTANT: may need to update with additional logic
+        edited = edited.split("-");
+        toReturn = edited;
+    } else {
+        toReturn = edited;
+    }
+    // Return the stations
+    return toReturn;
 };
 
 StationLibrary.prototype.retrieveLineNumber = function(stations, description) {
