@@ -81,12 +81,18 @@ function StationLibrary () {
         "Leslie",
         "Don Mills"
     ];
+    var lineTwoAlternate = [
+        "Main"
+    ];
     this.stationList = {
         1: lineOne,
         2: lineTwo,
         3: lineThree,
         4: lineFour
     };
+    this.alternateStationList = {
+        2: lineTwoAlternate
+    }
     // Any non-standard occurences of interchange station names need to be
     // matched with their standardized equivalent
     this.interchangeStations = {
@@ -149,7 +155,14 @@ StationLibrary.prototype.interchangeLookup = function (name) {
 StationLibrary.prototype.compileDictionary = function() {
     this.stationLineListing = [];
     var self = this;
+    // Go through main station list (spellings from website)
     _.each(this.stationList, function (lineList, index) {
+        _.each(lineList, function (item, subindex) {
+            self.stationLineListing.push({"line": index, "name": item.toLowerCase()});
+        });
+    });
+    // Go through alternate list
+    _.each(this.alternateStationList, function (lineList, index) {
         _.each(lineList, function (item, subindex) {
             self.stationLineListing.push({"line": index, "name": item.toLowerCase()});
         });
