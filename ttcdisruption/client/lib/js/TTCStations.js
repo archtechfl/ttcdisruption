@@ -178,6 +178,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "at_station": /((at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_line": /((at)\s[\w\s\,\-\']+)/g,
+        "line_comma_stations": /((line)\s\d{1}\,)\s?.+(?=\s((station))|(?=\s(stn)))/g,
         "between": /(((between)|(btwn))\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s\-\']+(?=\.)/g,
         "between_due": /((between)|(btwn))\s[\w\s\,\-\']+/g,
@@ -185,7 +186,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
         "near_station": /(near)\s.+(stn|station)/g,
-        "line_stations_direction_commas": /(line)\s\d{1},?.+(?=,)/g,
+        "line_comma_stations_comma": /(line)\s\d{1},?.+(?=,)/g,
         "from_for": /(from).+(for)/g,
         "from_stn": /(from).+((station)|(stn))/g,
         "from": /(from\s).+/g,
@@ -302,7 +303,7 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     }
     // handle line followed by station reference, commas
     // ex line 2, woodbine to warden, eastbound
-    if (searchUsed == "line_stations_direction_commas"){
+    if (searchUsed == "line_comma_stations_comma" || searchUsed == "line_comma_stations"){
         // Remove "Line 1, " instances, take into account punctuation errors
         // ex. "line 2. jane to" vs "line 2, jane to"
         edited = edited.replace(/(line)\s\d{1}(\,|\.)\s/g,"");
