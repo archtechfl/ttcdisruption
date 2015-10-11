@@ -210,9 +210,6 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
     } else {
         splitAlert = text.split(" for ");
     }
-    if (text.search("finch") > -1){
-        console.log(splitAlert);
-    }
     // Go through each part of the alert and find stations
     var stationSearchResult = [];
     _.each(splitAlert, function (alert, index) {
