@@ -1,6 +1,6 @@
 <template name="ttcdisruption">
 		{{#if isStreetcar }}
-		<article class="disruption-entry streetcar-entry clearfix">
+		<article class="disruption-entry row streetcar-entry clearfix">
 				<div class="{{icon_column_class}} icon"><i class="fa fa-train"></i></div>
 				<div class="{{route_column_class}} route-numbers">
 					<div class="streetcar-routes-affected">
@@ -9,7 +9,7 @@
 					{{/each}}
 					</div>
 				</div>
-				<div class="{{time_column_class}} time-overall time-of-day icon-pad mobile-ui-viz" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+				<div class="{{time_column_class}} time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 					<span class="time-hour-minute">{{ getDateTime.time }}</span>
 					{{#if getDateTime.isBeforeToday }}
 					<div class="time-month-day clearfix">
@@ -18,7 +18,7 @@
 					</div>
 					{{/if}}
 				</div>
-				<div class="{{disruption_column_class}} type-involving mobile-ui-viz">
+				<div class="{{disruption_column_class}} type-involving">
 					<div class="icons-listing">
 						{{#each disruptionType.alerts}}
 							{{#if diversionRoute}}
@@ -63,15 +63,15 @@
 				</div>
 				<div class="{{desc_column_class}} description mobile-ui-viz-divert">
 					<span class="toggle-description">
-						<i class="fa fa-list-alt"></i>
 						<i class="fa fa-chevron-left"></i>
+						<i class="fa fa-list-alt"></i>
 					</span>
 					<span class="desc-text">{{{ formattedDescription }}}</span>
 				</div>
 			</article>
 		{{else}}
 			{{#if isSubway }}
-			<article class="disruption-entry subway-entry {{subwayLine.name}} clearfix">
+			<article class="disruption-entry row subway-entry {{subwayLine.name}} clearfix">
 				<div class="{{icon_column_class}} icon">
 					<i class="fa fa-subway"></i>
 				</div>
@@ -80,7 +80,7 @@
 					<div class="subway-line-number subway-line-{{.}}-num">{{.}}</div>
 					{{/each}}
 				</div>
-				<div class="{{time_column_class}} time-overall time-of-day icon-pad mobile-ui-viz" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+				<div class="{{time_column_class}} time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 					<span class="time-hour-minute">{{ getDateTime.time }}</span>
 					{{#if getDateTime.isBeforeToday }}
 					<div class="time-month-day clearfix">
@@ -89,7 +89,7 @@
 					</div>
 					{{/if}}
 				</div>
-				<div class="{{disruption_column_class}} type-involving mobile-ui-viz">
+				<div class="{{disruption_column_class}} type-involving">
 					<div class="icons-listing">
 						{{#each disruptionType.alerts}}
 							{{#if diversionRoute}}
@@ -123,14 +123,14 @@
 				</div>
 				<div class="{{desc_column_class}} description mobile-ui-viz-divert">
 					<span class="toggle-description">
-						<i class="fa fa-list-alt"></i>
 						<i class="fa fa-chevron-left"></i>
+						<i class="fa fa-list-alt"></i>
 					</span>
 					<span class="desc-text">{{{ formattedDescription }}}</span>
 				</div>
 			</article>
 			{{else}}
-				<article class="disruption-entry bus-entry clearfix">
+				<article class="disruption-entry row bus-entry clearfix">
 					<div class="{{icon_column_class}} icon"><i class="fa fa-bus"></i></div>
 					<div class="{{route_column_class}} route-numbers">
 						<div class="bus-routes-affected">
@@ -139,7 +139,7 @@
 							{{/each}}
 						</div>
 					</div>
-					<div class="{{time_column_class}} time-overall time-of-day icon-pad mobile-ui-viz" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
+					<div class="{{time_column_class}} time-overall time-of-day icon-pad" data-month="{{ getDateTime.month }}" data-day="{{ getDateTime.day }}" data-days-ago="{{getDateTime.difference}}">
 						<span class="time-hour-minute">{{ getDateTime.time }}</span>
 						{{#if getDateTime.isBeforeToday }}
 						<div class="time-month-day clearfix">
@@ -148,7 +148,7 @@
 						</div>
 						{{/if}}
 					</div>
-					<div class="{{disruption_column_class}} type-involving mobile-ui-viz">
+					<div class="{{disruption_column_class}} type-involving">
 						<div class="icons-listing">
 							{{#each disruptionType.alerts}}
 								{{#if diversionRoute}}
@@ -193,8 +193,8 @@
 					</div>
 					<div class="{{desc_column_class}} description mobile-ui-viz-divert">
 						<span class="toggle-description">
-							<i class="fa fa-list-alt"></i>
 							<i class="fa fa-chevron-left"></i>
+							<i class="fa fa-list-alt"></i>
 						</span>
 						<span class="desc-text">{{{ formattedDescription }}}</span>
 					</div>

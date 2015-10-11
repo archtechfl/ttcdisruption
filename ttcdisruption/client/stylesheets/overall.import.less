@@ -56,7 +56,7 @@ html {
 
 .ui-control {
 	margin: 1em 0 1em 0;
-
+	font-size: 2.5em;
 	option.no-mobile {
 		.mobile-all({
 		    display: none;
@@ -66,8 +66,17 @@ html {
 }
 
 .app-header {
+	h1 {
+		font-size: 3em;
+		.mobile-all({
+		    font-size: 4em;
+		});
+	}
 	p {
 		font-size: 2em;
+		.mobile-all({
+		    font-size: 2.6em;
+		});
 	}
 }
 

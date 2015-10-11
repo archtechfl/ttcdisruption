@@ -726,7 +726,8 @@ Template.ttcdisruption.events({
             var renderedAlert = Blaze.renderWithData(
                 Template.alert_drawer,
                 {"description": formattedAlert},
-                parentRow
+                parentRow,
+                descriptionContainer
             );
             $(parentRow).find('.mobile-ui-viz').toggle();
             // add drawerOpen class
