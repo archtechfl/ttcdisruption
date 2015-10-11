@@ -41,6 +41,27 @@ Template.ttcdisruption.events({
   });
 
 Template.ttcdisruption.helpers({
+    icon_column_class: function () {
+        return "col-xs-3 col-sm-1 col-md-1 col-lg-1";
+    },
+    route_column_class: function () {
+        return "col-xs-3 col-sm-1 col-md-1 col-lg-1";
+    },
+    time_column_class: function () {
+        return "col-xs-3 col-sm-1 col-md-1 col-lg-1";
+    },
+    disruption_column_class: function () {
+        return "col-xs-3 col-sm-1 col-md-1 col-lg-1";
+    },
+    location_column_class: function () {
+        return "col-xs-9 col-sm-3 col-md-3 col-lg-3";
+    },
+    direction_column_class: function () {
+        return "col-xs-1 col-sm-1 col-md-1 col-lg-1";
+    },
+    desc_column_class: function () {
+        return "col-xs-2 col-sm-4 col-md-4 col-lg-4";
+    },
     // Owner is defined when the task is created, set to the user ID that created it
     isSubway: function () {
         // Track the presence of key terms

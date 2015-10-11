@@ -5,17 +5,33 @@
 	border-spacing: 0em 0.5em;
 	border-collapse: separate;
 
-	tbody {
+	.disruption-list-body {
 
 		.disruption-entry {
 
-			td {
+			margin-bottom: 1em;
+			margin-top: 1em;
+			height: 12em;
+
+			.xs-screen({
+			    height: 24em;
+			});
+
+			.mobile-all({
+			    height: 30em;
+			});
+
+			> div {
 				border-top: none;
 				vertical-align: middle;
-				height: 5em;
-				.mobile-all({
-				    height: 8em;
+				height: 100%;
+				.xs-screen({
+				    height: 50%;
 				});
+				.mobile-all({
+			    	height: 50%;
+				});
+				float: left;
 			}
 
 		}
@@ -49,17 +65,21 @@
 		list-style-type: none;
 		color: @std-text-white;
 
+		.icon {
+			text-align: center;
+		}
+
 		.bus-routes-affected,
 		.subway-line-number,
 		.streetcar-routes-affected {
 			font-weight: 500;
-			font-size: 1.9em;
-			margin: .3em .5em; 
+			font-size: 4em;
+			margin: .3em 0em; 
 			text-align: center;
 		}
 
 		.route-numbers {
-			min-width: 8em;
+			// mid-width: 8em;
 		}
 
 		.subway-line-number {
@@ -69,7 +89,7 @@
     		border-radius: 30px;
     		width: 1.7em;
     		height: 1.7em;
-    		margin: .2em auto;
+    		margin: .3em auto;
 		}
 
 		.icon-pad {
@@ -78,11 +98,11 @@
 
 		.time-overall {
 
-			min-width: 135px;
+			// mid-width: 135px;
 			text-align: center;
 
 			.time-hour-minute {
-				font-size: 1.4em;
+				font-size: 3em;
 				font-weight: 600;
 			}
 
@@ -97,7 +117,7 @@
 				}
 
 				.time-day {
-					font-size: 1.3em;
+					font-size: 2.5em;
 				}
 
 				.time-month {
@@ -112,13 +132,13 @@
 		.type-involving {
 			// Common styles
 			padding: 1.1em 0em;
-			min-width: 52px;
+			// mid-width: 52px;
 			// Icons
 			.icons-listing {
 				text-align: center;
 			}
 			i, .icon-non-fa {
-				margin: .2em .8em;
+				margin: .2em 0em;
 			}
 			.type-icon {
 				margin: .4em 0em;
@@ -133,20 +153,20 @@
 			}
 			/* Adjust icon sizes */
 			.icon-non-fa {
-				font-size: 1.5em;
+				font-size: 3em;
 			}
 			.ico-elevator {
-				font-size: 2.6em;
+				font-size: 5em;
 			}
 			// Font awesome custom sizes
 			.fa.fa-level-up {
-			    font-size: 2.1em;
+			    font-size: 4em;
 			}
 			.fa-clock-o {
-				font-size: 2.2em;
+				font-size: 4.4em;
 			}
 			.ico-police {
-				font-size: 2.1em;
+				font-size: 4.2em;
 			}
 			/* End icon sizes adjustment */
 		}
@@ -155,9 +175,9 @@
 
 		.intersection, .station-location {
 
-			min-width: 17em;
-			padding: 0em 1em;
-			font-size: 1.2em;
+			// mid-width: 17em;
+			padding: 0em .3em;
+			font-size: 2.6em;
 
 			i.fa {
 				margin: 0.2em 1em 0.2em 0em;
@@ -187,21 +207,24 @@
 
 		.direction {
 
+			padding: 0em .2em;
+
 			text-align: center;
-			min-width: 6.5em;
+			// mid-width: 6.5em;
 
 			i.fa {
 				margin: .2em .2em;
 			}
 			.letter {
 				font-weight: 600;
-				font-size: 1.3em;
+				font-size: 3em;
 			}
 		}
 
 		// description
 		.description {
 			padding: 1.3em;
+			font-size: 2em;
 
 			.toggle-description {
 				display: none;
@@ -209,7 +232,12 @@
 
 				.fa {
 					margin: 0em 0em;
+					font-size: 2em;
 				}
+
+				.xs-screen({
+				    display: block;
+				});
 
 				.mobile-all({
 				    display: block;
@@ -218,6 +246,10 @@
 			}
 
 			.desc-text {
+
+				.xs-screen({
+				    display: none;
+				});
 
 				.mobile-all({
 				    display: none;
@@ -232,7 +264,7 @@
 		.mobile-description {
 			padding-left: 3em;
     		padding-right: 3em;
-    		font-size: 1.7em;
+    		font-size: 3em;
     		background-color: @panel-lighter-grey;
 		}
 

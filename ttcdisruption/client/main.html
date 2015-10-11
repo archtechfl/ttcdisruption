@@ -1,43 +1,50 @@
 <head>
   <title>TTC Twitter Notice App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:title" content="TTC Twitter Alerts Reader" />
+  <meta property="og:type" content="transit" />
+  <meta property="og:url" content="http://ttcdisruption.meteor.com" />
+  <meta property="og:locale" content="en_CA" />
 </head>
 
 <body>
 	<div class="container">
-	  	<h1>TTC Twitter Notice App</h1>
-	  	<p>Easy to read display of the latest Twitter notices with enhanced visuals showing vehicle type,
-	  	location, and type of disruption</p>
-	  	<p>Note: this application is currently in development. No guarantee is made regarding accuracy.</p>
-	  	<div class="current-time">
-	  		<p>Last updated: </p>
-	  		<p class="time-display">{{ currentTime }}</p>
-	  	</div>
-	  	<div class="ui-control">
-		  	<select>
-			  	<option value="1" selected>Last 3 Hours</option>
-			  	<option value="2">Last 24 Hours</option>
-			  	<option value="3" class="no-mobile">Last Week</option>
-			  	<option value="4" class="no-mobile">Last Two Weeks</option>
-			  	<option value="5" class="no-mobile">All alerts</option>
-			</select>
-		</div>
-	  	<table class="table disruption-list">
+		<header class="app-header">
+		  	<h1>TTC Twitter Notice App</h1>
+		  	<p>Easy to read display of the latest Twitter notices with enhanced visuals showing vehicle type,
+		  	location, and type of disruption</p>
+		  	<p>Note: this application is currently in development. No guarantee is made regarding accuracy.</p>
+		  	<div class="current-time clearfix">
+		  		<p>Last updated: </p>
+		  		<p class="time-display">{{ currentTime }}</p>
+		  	</div>
+		  	<div class="ui-control">
+			  	<select>
+				  	<option value="1" selected>Last 3 Hours</option>
+				  	<option value="2">Last 24 Hours</option>
+				  	<option value="3" class="no-mobile">Last Week</option>
+				  	<option value="4" class="no-mobile">Last Two Weeks</option>
+				  	<option value="5" class="no-mobile">All alerts</option>
+				</select>
+			</div>
+		</header>
+	  	<main class="table disruption-list">
 	  		<!-- 
 	  		Police icon courtesy OCHA Visual Information Unit, Public Domain
 	  		https://thenounproject.com/ochaavmu/
 	  		-->
-		  	<tbody class="disruption-list-body">
-		  		<tr class="disruption-table-header">
-					<th class="icon-header">Mode</th>
-					<th class="route-numbers-header">Routes</th>
-					<th class="time-of-day-header">Time</th>
-					<th class="type-involving-header">Type</th>
-					<th class="intersection-header">Location</th>
-					<th class="direction-header">Direction</th>
-					<th class="description-header">Description</th>
-				</tr>
+		  	<section class="disruption-list-body">
+		  		<header class="disruption-table-header clearfix">
+					<div class="icon-header">Mode</div>
+					<div class="route-numbers-header">Routes</div>
+					<div class="time-of-day-header">Time</div>
+					<div class="type-involving-header">Type</div>
+					<div class="intersection-header">Location</div>
+					<div class="direction-header">Direction</div>
+					<div class="description-header">Description</div>
+				</header>
 		  	{{> listing }}
-			</tbody>
-		</table>
+			</section>
+		</main>
 	</div>
 </body>

@@ -4,7 +4,7 @@
 
 	&.BD-Line {
 		//background-color: @ttc-green;
-		td {
+		> div {
 			&.icon {
 				background-color: @ttc-green;
 			}
@@ -16,7 +16,7 @@
 
 	&.YUS-Line {
 		// background-color: @ttc-yellow;
-		td {
+		> div {
 			&.icon, &.route-numbers {
 				background-color: @ttc-yellow;
 				color: @std-text-dark-grey;
@@ -35,7 +35,7 @@
 
 	&.SRT-Line {
 		// background-color: @ttc-blue;
-		td {
+		> div {
 			&.icon {
 				background-color: @ttc-blue;
 			}
@@ -47,7 +47,7 @@
 
 	&.Sheppard-Line {
 		// background-color: @ttc-purple;
-		td {
+		> div {
 			&.icon {
 				background-color: @ttc-purple;
 			}
@@ -59,7 +59,7 @@
 
 	/* Multiple line combinations */
 	&.YUS-Line-BD-Line {
-		td {
+		> div {
 			&.icon {
 				background: linear-gradient(0deg, @ttc-green 50%, @ttc-yellow 50%);
 				.fa-subway {
@@ -78,7 +78,7 @@
 	}
 
 	&.YUS-Line-Sheppard-Line {
-		td {
+		> div {
 			&.icon {
 				background: linear-gradient(0deg, @ttc-purple 50%, @ttc-yellow 50%);
 				.fa-subway {

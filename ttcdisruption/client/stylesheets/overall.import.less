@@ -40,6 +40,10 @@
 body {
 	background-color: @body-background;
 	font-family: 'Open Sans', sans-serif;
+	font-size: 62.5%;
+}
+html {
+	font-size: 62.5%;
 }
 
 .container {
@@ -52,7 +56,6 @@ body {
 
 .ui-control {
 	margin: 1em 0 1em 0;
-	clear: both;
 
 	option.no-mobile {
 		.mobile-all({
@@ -62,6 +65,12 @@ body {
 
 }
 
+.app-header {
+	p {
+		font-size: 2em;
+	}
+}
+
 .current-time {
 	p {
 		float: left;
@@ -69,22 +78,27 @@ body {
 	.time-display {
 		margin-left: 2em;
 	}
-	clear: both;
-	font-size: 1.4em;
 }
 
 /* End body */
 
 i.fa {
-	margin: .5em 1em;
+	margin: .5em auto;
 	font-weight: 500;
-	font-size: 1.8em;
+	font-size: 4em;
 }
 
 .disruption-table-header {
 	background-color: @std-black;
 	color: @std-text-white;
-	th {
+	.xs-screen({
+	    display: none;
+	});
+	.mobile-all({
+	    display: none;
+	});
+	> div {
+		float: left;
 		text-align: center;
 		font-weight: 700;
 	}
