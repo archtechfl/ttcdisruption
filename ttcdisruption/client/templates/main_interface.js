@@ -2,7 +2,6 @@ if (Meteor.isClient) {
 
 function formatDescription (text) {
     var text = text;
-    console.log(text);
     // Remove TTC mentions
     formattedText = text.replace(/(http)s?:\/\/.+/g, "");
     formattedText = formattedText.replace(/\#?\s?(ttc)\#?/g, "");
