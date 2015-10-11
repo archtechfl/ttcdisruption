@@ -178,7 +178,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "at_station": /((at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
         "at_station_line": /((at)\s[\w\s\,\-\']+)/g,
-        "line_comma_stations": /\,\s?.+(?=\s((station))|(?=\s(stn)))/g,
+        "line_comma_stations": /((line)\s\d{1}\,)\s?.+(?=\s((station))|(?=\s(stn)))/g,
         "between": /(((between)|(btwn))\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s\-\']+(?=\.)/g,
         "between_due": /((between)|(btwn))\s[\w\s\,\-\']+/g,
@@ -209,6 +209,9 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         splitAlert = text.split(" expect ");
     } else {
         splitAlert = text.split(" for ");
+    }
+    if (text.search("finch") > -1){
+        console.log(splitAlert);
     }
     // Go through each part of the alert and find stations
     var stationSearchResult = [];

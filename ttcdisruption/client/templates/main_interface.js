@@ -357,6 +357,8 @@ Template.ttcdisruption.helpers({
             "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
             // handle "on street near street" or "on street at street" combinations or "on-and"
             "on_at_near_and": /(\s(on)\s[\w\s]+(((at\s)|(near\s))|(and))[\w\s]+)/g,
+            // Bypassing station
+            "bypassing_station": /(\s(bypassing)\s.+(?=\s((station))|(?=\s(stn))))/g,
             // Check for subway station reference as location of disruption
             "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
             // All clear combinations
@@ -480,15 +482,19 @@ Template.ttcdisruption.helpers({
             crossStreets = entry.split(/((north|south)|(east|west))(\sof\s)/g);
             // Get the first and last entry in the array corresponding to the actual streets
             returnArray = [_.first(crossStreets), _.last(crossStreets)];
-        } else if (searchUsed == "at_station"){
-            // Handle reference to disruption at a station
-            var atSanityCheck = entry.match(/(\sat\s)/g);
-            // If there are multiple at conditions, the station
-            // will be the last entry in the array since it should come before
-            // "station" text captured at end of regex
-            if (atSanityCheck.length == 2){
-                var entrySplitAt = entry.split(/\sat\s/g);
-                entry = _.last(entrySplitAt);
+        } else if (searchUsed == "at_station" || searchUsed == "bypassing_station"){
+            if (searchUsed == "at_station"){
+                // Handle reference to disruption at a station
+                var atSanityCheck = entry.match(/(\sat\s)/g);
+                // If there are multiple at conditions, the station
+                // will be the last entry in the array since it should come before
+                // "station" text captured at end of regex
+                if (atSanityCheck.length == 2){
+                    var entrySplitAt = entry.split(/\sat\s/g);
+                    entry = _.last(entrySplitAt);
+                }
+            } else {
+                entry = entry.replace(/\s?(bypassing)\s?/g,"");
             }
             returnArray = [entry];
         } else if (searchUsed == "near"){
@@ -531,7 +537,7 @@ Template.ttcdisruption.helpers({
         return {
             "intersections": finalArray,
             "hasIntersections": finalArray.length > 1,
-            "isSubwayLocation": searchUsed === "at_station"
+            "isSubwayLocation": searchUsed === "at_station" || searchUsed === "bypassing_station"
         }
     },
     disruptionType: function () {
@@ -777,13 +783,18 @@ Template.ttcdisruption.events({
             // Direction flag, for determining rendering process
             directionFlag = false;
             // Remove direction if only one present
-            if (dirs.length == 1){
-                var singleDirExp = new RegExp(dirs[0],"g");
-                diversion = diversion.replace(singleDirExp,"");
-                // Split the diversion data
-                diversionListing = diversion.split(",");
-                diversionListing = _.compact(diversionListing);
-                // End of single direction operation
+            if (dirs.length <= 1){
+                if (dirs.length == 1){
+                    var singleDirExp = new RegExp(dirs[0],"g");
+                    diversion = diversion.replace(singleDirExp,"");
+                    // Split the diversion data
+                    diversionListing = diversion.split(",");
+                    diversionListing = _.compact(diversionListing);
+                    // End of single direction operation
+                } else {
+                    diversionListing = diversion.split(",");
+                    diversionListing = _.compact(diversionListing);
+                }
             } else {
                 // Contruct a regExp for splitting, and split into direction groupings
                 var newExpBase = "";
