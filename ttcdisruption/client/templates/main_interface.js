@@ -2,9 +2,10 @@ if (Meteor.isClient) {
 
 function formatDescription (text) {
     var text = text;
+    console.log(text);
     // Remove TTC mentions
     formattedText = text.replace(/(http)s?:\/\/.+/g, "");
-    formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
+    formattedText = formattedText.replace(/\#?\s?(ttc)\#?/g, "");
     // handle punctuation (' and &)
     formattedText = formattedText.replace("’","'")
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
