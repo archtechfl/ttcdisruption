@@ -288,9 +288,6 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     if (searchUsed == "at_station_line"){
         edited = edited.replace(/\,.+/g,""); 
     }
-    if (searchUsed == "line_comma_stations"){
-        edited = edited.replace(/\,\s?/g,"");
-    }
     // handle station name range with dash
     if (searchUsed == "between_stations_dash"){
         edited = edited.replace(/(operating\s)/g,""); 
@@ -309,7 +306,7 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     }
     // handle line followed by station reference, commas
     // ex line 2, woodbine to warden, eastbound
-    if (searchUsed == "line_comma_stations_comma"){
+    if (searchUsed == "line_comma_stations_comma" || searchUsed == "line_comma_stations"){
         // Remove "Line 1, " instances, take into account punctuation errors
         // ex. "line 2. jane to" vs "line 2, jane to"
         edited = edited.replace(/(line)\s\d{1}(\,|\.)\s/g,"");
