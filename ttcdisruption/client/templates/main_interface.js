@@ -10,6 +10,8 @@ function formatDescription (text) {
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     // change saint (st.) to st
     formattedText = formattedText.replace(/(st\.)/g,"st");
+    // change mount (mt.) to mt
+    formattedText = formattedText.replace(/(mt\.)/g,"mt");
     // Correct any missing spaces around commas
     formattedText = formattedText.replace(/\,(?=[a-zA-z])/g,", ");
     // Spelling errors, correct them
@@ -366,6 +368,8 @@ Template.ttcdisruption.helpers({
             "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
             // Single "At" condition followed by "due"
             "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
+            // Intersection "near"
+            "near": /\s(at)\s[\w\s]+(near)\s[\w\s]+/g,
             // Intersection "at" street "and" street, end of alert
             "at_end_alert": /\s(at)\s[\w\s\.]+(?=.)/g
         };
@@ -487,6 +491,14 @@ Template.ttcdisruption.helpers({
                 entry = _.last(entrySplitAt);
             }
             returnArray = [entry];
+        } else if (searchUsed == "near"){
+            // Handle near reference
+            if (entry.search(" due ") > -1){
+                entry = entry.replace(/(due).+/g, "");
+            }
+            // Split at near
+            entry = entry.split(/\s?(near)\s?/g);
+            returnArray = [_.first(entry), _.last(entry)];
         } else {
             returnArray = [];
         }
@@ -498,9 +510,9 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/[\.\,]+/g,"");
             streetToEdit = streetToEdit.replace(/(shuttle).+/g, "");
             // Go through cross streets and remove unnecessary text not referring to streets
-            streetToEdit = streetToEdit.replace(/\s((has)|(is)).*/g, "");
+            streetToEdit = streetToEdit.replace(/\s((has)|(is))\s.*/g, "");
             // Remove "at" and all text before
-            streetToEdit = streetToEdit.replace(/.*(at\s)/g, "");
+            streetToEdit = streetToEdit.replace(/.*(\sat\s)/g, "");
             // Remove "due" and everything after
             streetToEdit = streetToEdit.replace(/(\s(due)\s.*)/g, "");
             // handle presence of "full service has resumed" or "onboard streetcar"
