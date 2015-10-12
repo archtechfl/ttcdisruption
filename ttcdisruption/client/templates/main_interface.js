@@ -617,7 +617,7 @@ Template.ttcdisruption.helpers({
                             var diversion = alert.match(/\s(divert)(ed|ing)\s.+/g);
                             if (!_.isNull(diversion)){
                                 diversion = diversion[0];
-                                diversion = diversion.replace(/\s(divert)(ed|ing)\s.+/g, "");
+                                diversion = diversion.replace(/\s(divert)(ed|ing)\s/g, "");
                                 diversion = diversion.replace(/\,\s/g,",");
                                 diversionRoute = diversion;
                             }
@@ -749,14 +749,14 @@ Template.ttcdisruption.events({
         diversion = $(diversionListing).data("diversion");
         // Check for direction indicators
         var directions = [
-            "(e\/b)",
+            "(e\/?b)",
             "(eastbound)",
-            "(w\/b)",
+            "(w\/?b)",
             "(westbound)",
-            "(n\/b)",
+            "(n\/?b)",
             "(northbound)",
             "(norhtbound)",
-            "(s\/b)",
+            "(s\/?b)",
             "(southbound)",
             "((both way)s?)"
         ];
