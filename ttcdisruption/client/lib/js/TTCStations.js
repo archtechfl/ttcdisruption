@@ -190,11 +190,11 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "from_for": /(from).+(for)/g,
         "from_stn": /(from).+((station)|(stn))/g,
         "from": /(from\s).+/g,
-        "at_station_period": /((at)\s[\w\s\-\']+(?=.))/g,
+        "at_station_period": /((at)\s[\w\s\-\']+(?=\.))/g,
         "abbr_stations": /(\)\s).+(?=\s((station))|(?=\s(stn)))/g
     };
     // Alert text
-    var text = alert + ".";
+    var text = alert;
     // Get result
     var result = [];
     // The search being used, to be stored later in this var
@@ -215,12 +215,29 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
     _.each(splitAlert, function (alert, index) {
         var searchAll = _.find(stationSearches, function(search, index){
             // Determines which search to use based on results
-            var matching = alert.match(search);
+            var addPeriodsEnd = alert + ".";
+            var matching = addPeriodsEnd.match(search);
             if (matching){
                 var matches = matching;
                 // Process matches and remove an extraneous information
                 // not related to station names
-                matchesProcessed = self.stationIsolate(matches[0], index);
+                // remove as invalid if present
+                var messageBlacklist = [
+                    // Service time update
+                    /(\d{1}:\d{2}(am|pm))/g,
+                    /(track level)/g
+                ];
+                // Reject
+                matches = _.reject(matches, function(entry){
+                    var test = _.find(messageBlacklist, function (item, index) {
+                        return entry.search(item) > -1;
+                    });
+                    return _.isUndefined(test) == false;
+                });
+                var matchesProcessed = [];
+                if (matches.length > 0){
+                    matchesProcessed = self.stationIsolate(matches[0], index); 
+                }
                 stationSearchResult.push(matchesProcessed);
             } else {
                 var matches = [];
@@ -234,26 +251,13 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         result = stationSearchResult;
     }
     var returnArray = _.flatten(result);
-    // remove as invalid if present
-    var messageBlacklist = [
-        // Service time update
-        /(\d{1}:\d{2}(am|pm))/g,
-        /(track level)/g
-    ];
-    // Remove blacklisted terms
-    var whitelistedArray = _.reject(returnArray, function(station){
-        var test = _.find(messageBlacklist, function (item, index) {
-            return station.search(item) > -1;
-        });
-        return _.isUndefined(test) == false;
-    });
     // Sanity check if array is empty
-    if (_.isEmpty(whitelistedArray)){
+    if (_.isEmpty(returnArray)){
         // This will probably change later
-        whitelistedArray = ["All Stations"];
+        returnArray = ["All Stations"];
     }
     // Ensure all entries are unique since some station names are repeated
-    var duplicateFreeReturn = _.uniq(whitelistedArray);
+    var duplicateFreeReturn = _.uniq(returnArray);
     return duplicateFreeReturn;
 };
 
@@ -283,6 +287,7 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     }
     // handle comma and line number reference
     if (searchUsed == "at_station_line"){
+        console.log(edited);
         edited = edited.replace(/\,.+/g,""); 
     }
     // handle station name range with dash
@@ -309,8 +314,8 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
         edited = edited.replace(/(line)\s\d{1}(\,|\.)\s/g,"");
         // Remove SRT instances, ex "Line 3 (SRT) "
         edited = edited.replace(/(line)\s\d{1},?.+\)\s/g, "");
-        // Remove any information trailing second comma 
-        edited = edited.replace(/,\s.+/g,"");
+        // Remove any information trailing second comma
+        // edited = edited.replace(/,\s.+/g,"");
         // Remove direction if it comes before station names
         if (edited.search(/.+(bound)/g) > -1){
             edited = edited.replace(/.+(bound)/g,"");
@@ -341,7 +346,7 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
         edited = edited.replace(/(\)\s?)/g,"");
     }
     // Remove punctuation
-    edited = edited.replace(/(\.|\,)/g,"");
+    // edited = edited.replace(/(\.|\,)/g,"");
     // Check for interchange stations at this stage
     var interchange = self.interchangeLookup(edited);
     // Change station names and replace with interchange names if present
@@ -353,6 +358,11 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     // Perform regular splitting operations to obtains stations
     if (edited.search(" to ") > -1){
         edited = edited.split(" to ");
+        if (searchUsed == "line_comma_stations_comma" || searchUsed == "line_comma_stations"){
+            if (edited.length == 2){
+                edited[0] = edited[0].replace(/.*\,\s/g,"");
+            }
+        }
         toReturn = edited;
     } else if (edited.search(" and ") > -1){
         // Check for interchange stations at this stage
