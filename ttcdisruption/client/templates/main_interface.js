@@ -614,10 +614,10 @@ Template.ttcdisruption.helpers({
                         var diversionRoute = "";
                         // Handle a reroute alert, get the reroute
                         if (index == "reroute"){
-                            var diversion = alert.match(/(\sdiverting\s).+/g);
+                            var diversion = alert.match(/\s(divert)(ed|ing)\s.+/g);
                             if (!_.isNull(diversion)){
                                 diversion = diversion[0];
-                                diversion = diversion.replace(" diverting ", "");
+                                diversion = diversion.replace(/\s(divert)(ed|ing)\s.+/g, "");
                                 diversion = diversion.replace(/\,\s/g,",");
                                 diversionRoute = diversion;
                             }
