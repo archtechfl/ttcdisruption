@@ -140,11 +140,6 @@ StationLibrary.prototype.interchangeLookup = function (name) {
             return originalText.search(station) > -1; 
         }); 
     });
-    // Sheppard regex for "Sheppard" station alone
-    var sanityRegexCheck = /\s?(sheppard)\s?/g;
-    if (originalName.toString() == sanityRegexCheck.toString()){
-        formattedName = " " + formattedName;
-    }
     return {
         "revisedInterchange": formattedName,
         "originalInterchange": originalName,
@@ -154,19 +149,33 @@ StationLibrary.prototype.interchangeLookup = function (name) {
 
 StationLibrary.prototype.compileDictionary = function() {
     this.stationLineListing = [];
+    this.stationWordPlusListing = [];
     var self = this;
     // Go through main station list (spellings from website)
     _.each(this.stationList, function (lineList, index) {
         _.each(lineList, function (item, subindex) {
             self.stationLineListing.push({"line": index, "name": item.toLowerCase()});
+            var longNames = item.match(/\s/g);
+            if (longNames){
+                if (longNames.length > 0){
+                    self.stationWordPlusListing.push(item.toLowerCase());
+                }
+            }
         });
     });
     // Go through alternate list
     _.each(this.alternateStationList, function (lineList, index) {
         _.each(lineList, function (item, subindex) {
             self.stationLineListing.push({"line": index, "name": item.toLowerCase()});
+            var longNames = item.match(/\s/g);
+            if (longNames){
+                if (longNames.length > 0){
+                    self.stationWordPlusListing.push(item.toLowerCase());
+                }
+            }
         });
     });
+    console.log(self.stationWordPlusListing);
 };
 
 StationLibrary.prototype.retrieveStationListing = function(alert) {
@@ -176,13 +185,13 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "clear": /.+(clear:\s)[\w\s\-]+((station)|(stn))?(has|is)/g,
         "delay_cleared": /(delay)\s.+(cleared)/g,
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
-        "at_station": /((at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
-        "at_station_line": /((at)\s[\w\s\,\-\']+)/g,
-        "line_comma_stations": /((line)\s\d{1}\,)\s?.+(?=\s((station))|(?=\s(stn)))/g,
         "between": /(((between)|(btwn))\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s\-\']+(?=\.)/g,
         "between_due": /((between)|(btwn))\s[\w\s\,\-\']+/g,
         "between_abbr_bw": /((b\/w)\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
+        "at_station": /((at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
+        "at_station_line": /((at)\s[\w\s\,\-\']+)/g,
+        "line_comma_stations": /((line)\s\d{1}\,)\s?.+(?=\s((station))|(?=\s(stn)))/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
         "near_station": /(near)\s.+(stn|station)/g,
@@ -190,11 +199,11 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "from_for": /(from).+(for)/g,
         "from_stn": /(from).+((station)|(stn))/g,
         "from": /(from\s).+/g,
-        "at_station_period": /((at)\s[\w\s\-\']+(?=.))/g,
+        "at_station_period": /((at)\s[\w\s\-\']+(?=\.))/g,
         "abbr_stations": /(\)\s).+(?=\s((station))|(?=\s(stn)))/g
     };
     // Alert text
-    var text = alert + ".";
+    var text = alert;
     // Get result
     var result = [];
     // The search being used, to be stored later in this var
@@ -207,20 +216,42 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         splitAlert = text.split(" due ");
     } else if (text.search("expect") > -1) {
         splitAlert = text.split(" expect ");
-    } else {
+    } else if (text.search(" no trains ") > -1){
+        // Split for new divider, "no trains", 13-10-2015
+        splitAlert = text.split(" no trains ");
+    } else if (text.search(" for ") > -1){
         splitAlert = text.split(" for ");
+    } else {
+        splitAlert = [text];
     }
     // Go through each part of the alert and find stations
     var stationSearchResult = [];
     _.each(splitAlert, function (alert, index) {
         var searchAll = _.find(stationSearches, function(search, index){
             // Determines which search to use based on results
-            var matching = alert.match(search);
+            var addPeriodsEnd = alert + ".";
+            var matching = addPeriodsEnd.match(search);
             if (matching){
                 var matches = matching;
                 // Process matches and remove an extraneous information
                 // not related to station names
-                matchesProcessed = self.stationIsolate(matches[0], index);
+                // remove as invalid if present
+                var messageBlacklist = [
+                    // Service time update
+                    /(\d{1}:\d{2}(am|pm))/g,
+                    /(track level)/g
+                ];
+                // Reject
+                matches = _.reject(matches, function(entry){
+                    var test = _.find(messageBlacklist, function (item, index) {
+                        return entry.search(item) > -1;
+                    });
+                    return _.isUndefined(test) == false;
+                });
+                var matchesProcessed = [];
+                if (matches.length > 0){
+                    matchesProcessed = self.stationIsolate(matches[0], index); 
+                }
                 stationSearchResult.push(matchesProcessed);
             } else {
                 var matches = [];
@@ -234,26 +265,8 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         result = stationSearchResult;
     }
     var returnArray = _.flatten(result);
-    // remove as invalid if present
-    var messageBlacklist = [
-        // Service time update
-        /(\d{1}:\d{2}(am|pm))/g,
-        /(track level)/g
-    ];
-    // Remove blacklisted terms
-    var whitelistedArray = _.reject(returnArray, function(station){
-        var test = _.find(messageBlacklist, function (item, index) {
-            return station.search(item) > -1;
-        });
-        return _.isUndefined(test) == false;
-    });
-    // Sanity check if array is empty
-    if (_.isEmpty(whitelistedArray)){
-        // This will probably change later
-        whitelistedArray = ["All Stations"];
-    }
     // Ensure all entries are unique since some station names are repeated
-    var duplicateFreeReturn = _.uniq(whitelistedArray);
+    var duplicateFreeReturn = _.uniq(returnArray);
     return duplicateFreeReturn;
 };
 
@@ -318,9 +331,9 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     } 
     if (searchUsed == "clear" || searchUsed == "delay_cleared"){
         // Remove everything after station names, either has, is or are
-        edited = edited.replace(/\s(has).*/g,"");
+        edited = edited.replace(/\s(has)\s.*/g,"");
         // This step is required because of islington station name
-        edited = edited.replace(/\s(is).*/g,"");
+        edited = edited.replace(/\s(is)\s.*/g,"");
         // handle "have" occurences
         edited = edited.replace(/\s?(have).*/g,"");
         // handle "are" occurences
@@ -329,6 +342,7 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
             // Remove everything before delay and certain words after
             edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
         } else {
+            console.log(edited);
             edited = edited.replace(/(delay)\s?/g,"");
             edited = edited.replace(/\s?(at)\s/g,"");
         }
@@ -348,6 +362,9 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     if (interchange.hasChanged){
         edited = edited.replace(interchange.originalInterchange, interchange.revisedInterchange);
     }
+    if (edited.search(/\s(and)[a-zA-z]/g) > -1){
+        edited = edited.replace(/\s(and)[a-zA-z]/g, " and ");
+    }
     // Result to return
     var toReturn = [];
     // Perform regular splitting operations to obtains stations
@@ -365,6 +382,20 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     } else {
         toReturn = edited;
     }
+    if (!_.isArray(toReturn)){
+        toReturn = [toReturn];
+    }
+    // Handle removing any additional unnecessary text after station names
+    _.each(toReturn, function (station, index) {
+        var modify = _.find(self.stationWordPlusListing, function(entry){
+            return station.search(entry) > -1;
+        });
+        if (_.isUndefined(modify)){
+            toReturn[index] = station.replace(/\s.+/g,"");
+        } else {
+            toReturn[index] = modify;
+        }
+    });
     // Return the stations
     return toReturn;
 };
