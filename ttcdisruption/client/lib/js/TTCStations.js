@@ -175,15 +175,12 @@ StationLibrary.prototype.compileDictionary = function() {
             }
         });
     });
-    console.log(self.stationWordPlusListing);
 };
 
 StationLibrary.prototype.retrieveStationListing = function(alert) {
     var self = this;
     // station search patterns to try
     var stationSearches = {
-        "clear": /.+(clear:\s)[\w\s\-]+((station)|(stn))?(has|is)/g,
-        "delay_cleared": /(delay)\s.+(cleared)/g,
         "elevator": /(elevator\salert:)\s?.+((station)|(stn))/g,
         "between": /(((between)|(btwn))\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "between_no_station_wording": /((between)|(btwn))\s[\w\s\-\']+(?=\.)/g,
@@ -200,7 +197,9 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "from_stn": /(from).+((station)|(stn))/g,
         "from": /(from\s).+/g,
         "at_station_period": /((at)\s[\w\s\-\']+(?=\.))/g,
-        "abbr_stations": /(\)\s).+(?=\s((station))|(?=\s(stn)))/g
+        "abbr_stations": /(\)\s).+(?=\s((station))|(?=\s(stn)))/g,
+        "clear": /.+(clear:\s)[\w\s\-]+((station)|(stn))?((has)|(is)|(are))/g,
+        "delay_cleared": /(delay)\s.+(cleared)/g
     };
     // Alert text
     var text = alert;
@@ -221,6 +220,8 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         splitAlert = text.split(" no trains ");
     } else if (text.search(" for ") > -1){
         splitAlert = text.split(" for ");
+    } else if (text.search(" during ") > -1){
+        splitAlert = text.split(" during ");
     } else {
         splitAlert = [text];
     }
@@ -250,9 +251,11 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
                 });
                 var matchesProcessed = [];
                 if (matches.length > 0){
-                    matchesProcessed = self.stationIsolate(matches[0], index); 
+                    matchesProcessed = self.stationIsolate(matches[0], index);
+                    if (matchesProcessed.length > 0){
+                        stationSearchResult.push(matchesProcessed);
+                    } 
                 }
-                stationSearchResult.push(matchesProcessed);
             } else {
                 var matches = [];
             }
@@ -342,7 +345,6 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
             // Remove everything before delay and certain words after
             edited = edited.replace(/.+(delay)\s?(on|near)?\s?/g,"");
         } else {
-            console.log(edited);
             edited = edited.replace(/(delay)\s?/g,"");
             edited = edited.replace(/\s?(at)\s/g,"");
         }
