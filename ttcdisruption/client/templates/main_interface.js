@@ -436,8 +436,10 @@ Template.ttcdisruption.helpers({
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
+            } else if (entry.search(" near ") > -1) {
+                crossStreets = entry.split(" near ");
             } else {
-                // If there is no "and" for splitting, assume single entry
+                // If there is no "and" or "near" for splitting, assume single entry
                 crossStreets[0] = entry;
             }
             // return cross street array
