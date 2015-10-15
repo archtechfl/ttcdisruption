@@ -525,7 +525,7 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/[\.\,]+/g,"");
             streetToEdit = streetToEdit.replace(/(shuttle).+/g, "");
             // Go through cross streets and remove unnecessary text not referring to streets
-            streetToEdit = streetToEdit.replace(/\s((has)|(is))\s.*/g, "");
+            streetToEdit = streetToEdit.replace(/\s((has)|(is)|(on))\s.*/g, "");
             // Remove "at" and all text before
             streetToEdit = streetToEdit.replace(/.*(\sat\s)/g, "");
             // Remove "due" and everything after
