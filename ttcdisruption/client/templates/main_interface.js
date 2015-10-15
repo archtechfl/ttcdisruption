@@ -72,7 +72,9 @@ Template.ttcdisruption.helpers({
             "go_transit": "go station",
             "racing_venue": /(race)\s?(track)/g,
             "surface_routes": /(surface\sroutes)|(night\sbus)/g,
-            "street_level": "street level"
+            "street_level": "street level",
+            "outside": "outside",
+            "diversion_ended": "regular routing"
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
@@ -361,19 +363,21 @@ Template.ttcdisruption.helpers({
             "bypassing_station": /(\s(bypassing)\s.+(?=\s((station))|(?=\s(stn))))/g,
             // Check for subway station reference as location of disruption
             "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
-            // All clear combinations
-            "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
-            "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
             // On and intersection combination
             "on_and": /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g,
             // Direction relative to intersection combination
             "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
             // Single "At" condition followed by "due"
             "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
+            // All clear combinations
+            "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
+            "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
             // Intersection "near"
             "near": /\s(at)\s[\w\s]+(near)\s[\w\s]+/g,
             // Intersection "at" street "and" street, end of alert
-            "at_end_alert": /\s(at)\s[\w\s\.]+(?=.)/g
+            "at_end_alert": /\s(at)\s[\w\s]+(?=.)/g,
+            // Outside station
+            "outside_from_station": /((outside)|(from))\s.+(?=\s((station))|(?=\s(stn)))/g
         };
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
@@ -505,6 +509,9 @@ Template.ttcdisruption.helpers({
             // Split at near
             entry = entry.split(/\s?(near)\s?/g);
             returnArray = [_.first(entry), _.last(entry)];
+        } else if (searchUsed == "outside_from_station"){
+            entry = entry.replace(/(outside)\s|(from)\s/g, "");
+            returnArray = [entry];
         } else {
             returnArray = [];
         }
@@ -537,7 +544,9 @@ Template.ttcdisruption.helpers({
         return {
             "intersections": finalArray,
             "hasIntersections": finalArray.length > 1,
-            "isSubwayLocation": searchUsed === "at_station" || searchUsed === "bypassing_station"
+            "isSubwayLocation": searchUsed === "at_station" || 
+                searchUsed === "bypassing_station" ||
+                searchUsed === "outside_from_station"
         }
     },
     disruptionType: function () {
@@ -548,8 +557,17 @@ Template.ttcdisruption.helpers({
         var splitAlert = [];
         if (splitDue){
             splitAlert = text.split(" due ");
-        } else {
+        } else if (text.search(" expect ") > -1) {
+            splitAlert = text.split(" expect ");
+        } else if (text.search(" no trains ") > -1){
+            // Split for new divider, "no trains", 13-10-2015
+            splitAlert = text.split(" no trains ");
+        } else if (text.search(" for ") > -1){
             splitAlert = text.split(" for ");
+        } else if (text.search(" during ") > -1){
+            splitAlert = text.split(" during ");
+        } else {
+            splitAlert = [text];
         }
         // Track the disruption type
         var type = "";
