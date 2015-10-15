@@ -393,7 +393,14 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
             return station.search(entry) > -1;
         });
         if (_.isUndefined(modify)){
-            toReturn[index] = station.replace(/\s.+/g,"");
+            var stationCheck = _.find(self.stationLineListing, function(entry){
+                return station.search(entry.name) > -1;
+            });
+            if (!_.isUndefined(stationCheck)){
+                toReturn[index] = stationCheck.name; 
+            } else {
+                toReturn[index] = "General Notice: All Stations";
+            }
         } else {
             toReturn[index] = modify;
         }

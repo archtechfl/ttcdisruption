@@ -73,7 +73,8 @@ Template.ttcdisruption.helpers({
             "racing_venue": /(race)\s?(track)/g,
             "surface_routes": /(surface\sroutes)|(night\sbus)/g,
             "street_level": "street level",
-            "outside": "outside"
+            "outside": "outside",
+            "diversion_ended": "regular routing"
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
