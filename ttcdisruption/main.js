@@ -21,13 +21,15 @@ if (Meteor.isClient) {
         if (Session.get("displayState")) {
           // Filter alerts based on visibility selection
           var state = Number(Session.get("displayState"));
-          if (state != 4){
+          if (state != 5){
             if (state === 1){
               state = moment().subtract(3, 'hours').toISOString();
             } else if (state === 2){
               state = moment().subtract(24, 'hours').toISOString();
             } else if (state === 3){
               state = moment().subtract(1, 'week').toISOString();
+            } else if (state === 4){
+              state = moment().subtract(2, 'week').toISOString();
             } else {
               state = "";
             }

@@ -4,12 +4,14 @@ function formatDescription (text) {
     var text = text;
     // Remove TTC mentions
     formattedText = text.replace(/(http)s?:\/\/.+/g, "");
-    formattedText = formattedText.replace(/\#?(ttc)\#?/g, "");
+    formattedText = formattedText.replace(/\#?\s?(ttc)\#?/g, "");
     // handle punctuation (' and &)
     formattedText = formattedText.replace("’","'")
     formattedText = formattedText.replace(/\s?&amp;\s?/g, " and ");
     // change saint (st.) to st
     formattedText = formattedText.replace(/(st\.)/g,"st");
+    // change mount (mt.) to mt
+    formattedText = formattedText.replace(/(mt\.)/g,"mt");
     // Correct any missing spaces around commas
     formattedText = formattedText.replace(/\,(?=[a-zA-z])/g,", ");
     // Spelling errors, correct them
@@ -70,7 +72,9 @@ Template.ttcdisruption.helpers({
             "go_transit": "go station",
             "racing_venue": /(race)\s?(track)/g,
             "surface_routes": /(surface\sroutes)|(night\sbus)/g,
-            "street_level": "street level"
+            "street_level": "street level",
+            "outside": "outside",
+            "diversion_ended": "regular routing"
         };
         var excludeTracker = [];
         // Check the text for either search term that might indicate bus
@@ -152,6 +156,8 @@ Template.ttcdisruption.helpers({
       var lineBlocks = [];
       // Final line numbers repository
       var lineNumbers = [];
+      // Final station list
+      var stationList = [];
       try {
         lineBlocks = text.match(searchTermsLineEach);
         if (_.isNull(lineBlocks)){
@@ -164,23 +170,27 @@ Template.ttcdisruption.helpers({
             });
         }
         // Get station list
-        var stationList = stationInfo.retrieveStationListing(textForSearch);
+        stationList = stationInfo.retrieveStationListing(textForSearch);
       } catch(err) {
         // Line number not included, proceed to search for abbreviations
         // station database search to come later
         var lineNum = _.find(ttcLineAbbreviations, function(abbrs){
-            return text.search(abbrs.abbr) > -1; 
+            return textForSearch.search(abbrs.abbr) > -1; 
         });
         var lineNumber = 0;
+        // If there is a matching abbreviation
         if (lineNum){
             if (lineNum.line < 5){
                 lineNumber = lineNum.line;
             } else {
                 lineNumber = 5;
             }
+            stationList = stationInfo.retrieveStationListing(textForSearch);
+            lineNumbers.push(lineNumber);
         } else {
+            // If there is not a matching abbreviation, do station checking
             // Get station list
-            var stationList = stationInfo.retrieveStationListing(textForSearch);
+            stationList = stationInfo.retrieveStationListing(textForSearch);
             // search through station name database by passing station list
             lineNumber = stationInfo.retrieveLineNumber(stationList, textForSearch);
             lineNumbers.push(lineNumber);
@@ -349,19 +359,25 @@ Template.ttcdisruption.helpers({
             "at_and": /(\s(at)\s[\w\s']+(and)\s[\w\s\'\,]+(and)*[\w\s\'\,]+)/g,
             // handle "on street near street" or "on street at street" combinations or "on-and"
             "on_at_near_and": /(\s(on)\s[\w\s]+(((at\s)|(near\s))|(and))[\w\s]+)/g,
+            // Bypassing station
+            "bypassing_station": /(\s(bypassing)\s.+(?=\s((station))|(?=\s(stn))))/g,
             // Check for subway station reference as location of disruption
             "at_station": /(\s(at)\s[\w\.\s]+(?=\s((station))|(?=\s(stn))))/g,
-            // All clear combinations
-            "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
-            "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
             // On and intersection combination
             "on_and": /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g,
             // Direction relative to intersection combination
             "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
             // Single "At" condition followed by "due"
             "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
+            // All clear combinations
+            "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
+            "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
+            // Intersection "near"
+            "near": /\s(at)\s[\w\s]+(near)\s[\w\s]+/g,
             // Intersection "at" street "and" street, end of alert
-            "at_end_alert": /\s(at)\s[\w\s\.]+(?=.)/g
+            "at_end_alert": /\s(at)\s[\w\s]+(?=.)/g,
+            // Outside station
+            "outside_from_station": /((outside)|(from))\s.+(?=\s((station))|(?=\s(stn)))/g
         };
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
@@ -470,16 +486,31 @@ Template.ttcdisruption.helpers({
             crossStreets = entry.split(/((north|south)|(east|west))(\sof\s)/g);
             // Get the first and last entry in the array corresponding to the actual streets
             returnArray = [_.first(crossStreets), _.last(crossStreets)];
-        } else if (searchUsed == "at_station"){
-            // Handle reference to disruption at a station
-            var atSanityCheck = entry.match(/(\sat\s)/g);
-            // If there are multiple at conditions, the station
-            // will be the last entry in the array since it should come before
-            // "station" text captured at end of regex
-            if (atSanityCheck.length == 2){
-                var entrySplitAt = entry.split(/\sat\s/g);
-                entry = _.last(entrySplitAt);
+        } else if (searchUsed == "at_station" || searchUsed == "bypassing_station"){
+            if (searchUsed == "at_station"){
+                // Handle reference to disruption at a station
+                var atSanityCheck = entry.match(/(\sat\s)/g);
+                // If there are multiple at conditions, the station
+                // will be the last entry in the array since it should come before
+                // "station" text captured at end of regex
+                if (atSanityCheck.length == 2){
+                    var entrySplitAt = entry.split(/\sat\s/g);
+                    entry = _.last(entrySplitAt);
+                }
+            } else {
+                entry = entry.replace(/\s?(bypassing)\s?/g,"");
             }
+            returnArray = [entry];
+        } else if (searchUsed == "near"){
+            // Handle near reference
+            if (entry.search(" due ") > -1){
+                entry = entry.replace(/(due).+/g, "");
+            }
+            // Split at near
+            entry = entry.split(/\s?(near)\s?/g);
+            returnArray = [_.first(entry), _.last(entry)];
+        } else if (searchUsed == "outside_from_station"){
+            entry = entry.replace(/(outside)\s|(from)\s/g, "");
             returnArray = [entry];
         } else {
             returnArray = [];
@@ -492,9 +523,9 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/[\.\,]+/g,"");
             streetToEdit = streetToEdit.replace(/(shuttle).+/g, "");
             // Go through cross streets and remove unnecessary text not referring to streets
-            streetToEdit = streetToEdit.replace(/\s((has)|(is)).*/g, "");
+            streetToEdit = streetToEdit.replace(/\s((has)|(is))\s.*/g, "");
             // Remove "at" and all text before
-            streetToEdit = streetToEdit.replace(/.*(at\s)/g, "");
+            streetToEdit = streetToEdit.replace(/.*(\sat\s)/g, "");
             // Remove "due" and everything after
             streetToEdit = streetToEdit.replace(/(\s(due)\s.*)/g, "");
             // handle presence of "full service has resumed" or "onboard streetcar"
@@ -513,7 +544,9 @@ Template.ttcdisruption.helpers({
         return {
             "intersections": finalArray,
             "hasIntersections": finalArray.length > 1,
-            "isSubwayLocation": searchUsed === "at_station"
+            "isSubwayLocation": searchUsed === "at_station" || 
+                searchUsed === "bypassing_station" ||
+                searchUsed === "outside_from_station"
         }
     },
     disruptionType: function () {
@@ -524,8 +557,17 @@ Template.ttcdisruption.helpers({
         var splitAlert = [];
         if (splitDue){
             splitAlert = text.split(" due ");
-        } else {
+        } else if (text.search(" expect ") > -1) {
+            splitAlert = text.split(" expect ");
+        } else if (text.search(" no trains ") > -1){
+            // Split for new divider, "no trains", 13-10-2015
+            splitAlert = text.split(" no trains ");
+        } else if (text.search(" for ") > -1){
             splitAlert = text.split(" for ");
+        } else if (text.search(" during ") > -1){
+            splitAlert = text.split(" during ");
+        } else {
+            splitAlert = [text];
         }
         // Track the disruption type
         var type = "";
@@ -590,10 +632,10 @@ Template.ttcdisruption.helpers({
                         var diversionRoute = "";
                         // Handle a reroute alert, get the reroute
                         if (index == "reroute"){
-                            var diversion = alert.match(/(\sdiverting\s).+/g);
+                            var diversion = alert.match(/\s(divert)(ed|ing)\s.+/g);
                             if (!_.isNull(diversion)){
                                 diversion = diversion[0];
-                                diversion = diversion.replace(" diverting ", "");
+                                diversion = diversion.replace(/\s(divert)(ed|ing)\s/g, "");
                                 diversion = diversion.replace(/\,\s/g,",");
                                 diversionRoute = diversion;
                             }
@@ -725,14 +767,14 @@ Template.ttcdisruption.events({
         diversion = $(diversionListing).data("diversion");
         // Check for direction indicators
         var directions = [
-            "(e\/b)",
+            "(e\/?b)",
             "(eastbound)",
-            "(w\/b)",
+            "(w\/?b)",
             "(westbound)",
-            "(n\/b)",
+            "(n\/?b)",
             "(northbound)",
             "(norhtbound)",
-            "(s\/b)",
+            "(s\/?b)",
             "(southbound)",
             "((both way)s?)"
         ];
@@ -759,13 +801,18 @@ Template.ttcdisruption.events({
             // Direction flag, for determining rendering process
             directionFlag = false;
             // Remove direction if only one present
-            if (dirs.length == 1){
-                var singleDirExp = new RegExp(dirs[0],"g");
-                diversion = diversion.replace(singleDirExp,"");
-                // Split the diversion data
-                diversionListing = diversion.split(",");
-                diversionListing = _.compact(diversionListing);
-                // End of single direction operation
+            if (dirs.length <= 1){
+                if (dirs.length == 1){
+                    var singleDirExp = new RegExp(dirs[0],"g");
+                    diversion = diversion.replace(singleDirExp,"");
+                    // Split the diversion data
+                    diversionListing = diversion.split(",");
+                    diversionListing = _.compact(diversionListing);
+                    // End of single direction operation
+                } else {
+                    diversionListing = diversion.split(",");
+                    diversionListing = _.compact(diversionListing);
+                }
             } else {
                 // Contruct a regExp for splitting, and split into direction groupings
                 var newExpBase = "";
