@@ -436,8 +436,10 @@ Template.ttcdisruption.helpers({
             // Get cross streets by splitting at "and" or "&"
             if (entry.search(" and ") > -1){
                 crossStreets = entry.split(" and ");
+            } else if (entry.search(" near ") > -1) {
+                crossStreets = entry.split(" near ");
             } else {
-                // If there is no "and" for splitting, assume single entry
+                // If there is no "and" or "near" for splitting, assume single entry
                 crossStreets[0] = entry;
             }
             // return cross street array
@@ -523,7 +525,7 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/[\.\,]+/g,"");
             streetToEdit = streetToEdit.replace(/(shuttle).+/g, "");
             // Go through cross streets and remove unnecessary text not referring to streets
-            streetToEdit = streetToEdit.replace(/\s((has)|(is))\s.*/g, "");
+            streetToEdit = streetToEdit.replace(/\s((has)|(is)|(on))\s.*/g, "");
             // Remove "at" and all text before
             streetToEdit = streetToEdit.replace(/.*(\sat\s)/g, "");
             // Remove "due" and everything after
@@ -776,7 +778,8 @@ Template.ttcdisruption.events({
             "(norhtbound)",
             "(s\/?b)",
             "(southbound)",
-            "((both way)s?)"
+            "((both way)s?)",
+            "(b\/?w)"
         ];
         // get tray status
         var getTrayStatus = $(parentRow).hasClass("drawerOpenDivert");
