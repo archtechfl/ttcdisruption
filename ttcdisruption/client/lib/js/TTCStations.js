@@ -399,7 +399,7 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
             if (!_.isUndefined(stationCheck)){
                 toReturn[index] = stationCheck.name; 
             } else {
-                // toReturn[index] = "General Notice: All Stations";
+                toReturn[index] = "General Notice: All Stations";
             }
         } else {
             toReturn[index] = modify;

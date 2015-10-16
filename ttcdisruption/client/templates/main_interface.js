@@ -19,7 +19,8 @@ function formatDescription (text) {
         "bwtn": "btwn",
         "srn": "stn",
         "queens park": "queen's park",
-        "ratburn": "rathburn"
+        "ratburn": "rathburn",
+        "bessation": "bessarion"
     };
     _.each(spellingErrors, function (replacement, original) {
         formattedText = formattedText.replace(original, replacement);
