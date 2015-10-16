@@ -187,7 +187,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "between_due": /((between)|(btwn))\s[\w\s\,\-\']+/g,
         "between_abbr_bw": /((b\/w)\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "at_station": /((at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
-        "at_station_line": /((at)\s[\w\s\,\-\']+)/g,
+        "at_station_line": /((at)\s[\w\s\-\']+\,)/g,
         "line_comma_stations": /((line)\s\d{1}\,)\s?.+(?=\s((station))|(?=\s(stn)))/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
@@ -196,10 +196,10 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "from_for": /(from).+(for)/g,
         "from_stn": /(from).+((station)|(stn))/g,
         "from": /(from\s).+/g,
-        "at_station_period": /((at)\s[\w\s\-\']+(?=\.))/g,
         "abbr_stations": /(\)\s).+(?=\s((station))|(?=\s(stn)))/g,
         "clear": /.+(clear:\s)[\w\s\-]+((station)|(stn))?((has)|(is)|(are))/g,
-        "delay_cleared": /(delay)\s.+(cleared)/g
+        "delay_cleared": /(delay)\s.+(cleared)/g,
+        "at_station_period": /((at)\s[\w\s\-\']+(?=\.))/g
     };
     // Alert text
     var text = alert;
@@ -399,7 +399,7 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
             if (!_.isUndefined(stationCheck)){
                 toReturn[index] = stationCheck.name; 
             } else {
-                toReturn[index] = "General Notice: All Stations";
+                // toReturn[index] = "General Notice: All Stations";
             }
         } else {
             toReturn[index] = modify;
