@@ -370,15 +370,15 @@ Template.ttcdisruption.helpers({
             "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
             // Single "At" condition followed by "due"
             "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
+            // Outside station
+            "outside_from_station": /((outside)|(from))\s.+(?=\s((station))|(?=\s(stn)))/g,
             // All clear combinations
             "has_cleared_reopened": /.+(clear:\s)[\w\s\.]+\s(has)\s(now\s)?((cleared)|(re-opened))/g,
             "is_clear": /.+(clear:\s)[\w\s\.]+\s(is\s)/g,
             // Intersection "near"
             "near": /\s(at)\s[\w\s]+(near)\s[\w\s]+/g,
             // Intersection "at" street "and" street, end of alert
-            "at_end_alert": /\s(at)\s[\w\s]+(?=.)/g,
-            // Outside station
-            "outside_from_station": /((outside)|(from))\s.+(?=\s((station))|(?=\s(stn)))/g
+            "at_end_alert": /\s(at)\s[\w\s]+(?=.)/g
         };
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
