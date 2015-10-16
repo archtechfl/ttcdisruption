@@ -96,7 +96,7 @@ function StationLibrary () {
     // Any non-standard occurences of interchange station names need to be
     // matched with their standardized equivalent
     this.interchangeStations = {
-        "Sheppard-Yonge": [
+        "sheppard-yonge": [
             "yonge sheppard",
             "yonge-sheppard",
             "sheppard yonge",
@@ -105,7 +105,7 @@ function StationLibrary () {
             "sheppard and yonge",
             /\s?(sheppard)\s?/g
         ],
-        "Bloor-Yonge": [
+        "bloor-yonge": [
             "yonge and bloor",
             "bloor and yonge",
             "bloor yonge",
