@@ -125,6 +125,8 @@ Template.ttcdisruption.helpers({
         } else {
             routeListing.push(0);
         }
+        // Eliminate duplicate route numbers
+        routeListing = _.uniq(routeListing);
         return routeListing;
     },
     // identify the subway line
@@ -304,6 +306,8 @@ Template.ttcdisruption.helpers({
         }
         // Organize line numbers in ascending order
         returnArray = _.sortBy(returnArray, function(num){ return num * 1; });
+        // Eliminate duplicate route numbers
+        returnArray = _.uniq(returnArray);
         return returnArray;
     }, // End getBus method
     getDateTime: function () {
