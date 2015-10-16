@@ -411,6 +411,10 @@ Template.ttcdisruption.helpers({
             }
             return matches.length > 0;
         });
+        if (text.search("broadview") > -1){
+            console.log(text);
+            console.log(searchUsed);
+        }
         // Data to return
         var returnArray = [];
         // Cross streets array
