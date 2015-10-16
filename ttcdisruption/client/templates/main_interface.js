@@ -203,6 +203,8 @@ Template.ttcdisruption.helpers({
       var subwayLineColorStyle = "";
       // Organize line numbers in ascending order, from 1 to 4
       lineNumbers = _.sortBy(lineNumbers, function(num){ return num * 1; });
+      // Eliminate any duplicates
+      lineNumbers = _.uniq(lineNumbers);
       // Create line color style
       _.each(lineNumbers, function (item, index) {
         if (index > 0){
