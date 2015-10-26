@@ -364,9 +364,15 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     if (interchange.hasChanged){
         edited = edited.replace(interchange.originalInterchange, interchange.revisedInterchange);
     }
-    if (edited.search(/\s(and)[a-zA-z]/g) > -1){
-        edited = edited.replace(/\s(and)[a-zA-z]/g, " and ");
-    }
+    // 26-10-2015 - need to figure out better way of finding spelling errors involving
+    // "and"
+
+    // if (edited.search(/\s(and)[a-zA-z]/g) > -1){
+    //     if (edited.search("andrew") == -1){
+    //         edited = edited.replace(/\s(and)[a-zA-z]/g, " and ");
+    //     }
+    // }
+    
     // Result to return
     var toReturn = [];
     // Perform regular splitting operations to obtains stations
