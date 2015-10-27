@@ -372,7 +372,7 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
     //         edited = edited.replace(/\s(and)[a-zA-z]/g, " and ");
     //     }
     // }
-    
+
     // Result to return
     var toReturn = [];
     // Perform regular splitting operations to obtains stations

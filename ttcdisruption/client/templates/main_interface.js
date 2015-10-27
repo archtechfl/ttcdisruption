@@ -537,6 +537,8 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/.*(\sat\s)/g, "");
             // Remove "due" and everything after
             streetToEdit = streetToEdit.replace(/(\s(due)\s.*)/g, "");
+            // remove anything following "with"
+            streetToEdit = streetToEdit.replace(/(\s(with)\s.*)/g, "");
             // handle presence of "full service has resumed" or "onboard streetcar"
             var excludeCheck = _.find(messageBlacklist, function(excludeItem){ 
                 return streetToEdit.search(excludeItem) > -1; 
