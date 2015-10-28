@@ -5,17 +5,12 @@
 # but you can also edit it by hand.
 
 meteor-platform
-
-
 fortawesome:fontawesome
 less
-iron:router
 momentjs:moment
 nemo64:bootstrap
 percolate:synced-cron
 meteorhacks:npm
+npm-container
 sanjo:jasmine
 velocity:html-reporter
-
-
-npm-container

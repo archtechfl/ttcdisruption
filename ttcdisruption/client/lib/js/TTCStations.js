@@ -82,7 +82,8 @@ function StationLibrary () {
         "Don Mills"
     ];
     var lineTwoAlternate = [
-        "Main"
+        "Main",
+        "Vic Park"
     ];
     this.stationList = {
         1: lineOne,
@@ -93,6 +94,10 @@ function StationLibrary () {
     this.alternateStationList = {
         2: lineTwoAlternate
     }
+    this.replacementList = {
+        "main": "main street",
+        "vic park": "victoria park"
+    };
     // Any non-standard occurences of interchange station names need to be
     // matched with their standardized equivalent
     this.interchangeStations = {
@@ -186,8 +191,8 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "between_no_station_wording": /((between)|(btwn))\s[\w\s\-\']+(?=\.)/g,
         "between_due": /((between)|(btwn))\s[\w\s\,\-\']+/g,
         "between_abbr_bw": /((b\/w)\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
-        "at_station": /((at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
-        "at_station_line": /((at)\s[\w\s\-\']+\,)/g,
+        "at_station": /(\s(at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
+        "at_station_line": /(\s(at)\s[\w\s\-\']+\,)/g,
         "line_comma_stations": /((line)\s\d{1}\,)\s?.+(?=\s((station))|(?=\s(stn)))/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
         "between_stations_dash": /(operating\s)[\w]+(-)[\w]+/g,
@@ -199,7 +204,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "abbr_stations": /(\)\s).+(?=\s((station))|(?=\s(stn)))/g,
         "clear": /.+(clear:\s)[\w\s\-]+((station)|(stn))?((has)|(is)|(are))/g,
         "delay_cleared": /(delay)\s.+(cleared)/g,
-        "at_station_period": /((at)\s[\w\s\-\']+(?=\.))/g
+        "at_station_period": /(\s(at)\s[\w\s\-\']+(?=\.))/g
     };
     // Alert text
     var text = alert;
@@ -242,6 +247,11 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
                     /(\d{1}:\d{2}(am|pm))/g,
                     /(track level)/g
                 ];
+                if (index === "at_station" ||
+                    index === "at_station_period"){
+                        matches = matches[0].split(" at ");
+                        matches = _.compact(matches);
+                }
                 // Reject
                 matches = _.reject(matches, function(entry){
                     var test = _.find(messageBlacklist, function (item, index) {
@@ -270,6 +280,13 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
     var returnArray = _.flatten(result);
     // Ensure all entries are unique since some station names are repeated
     var duplicateFreeReturn = _.uniq(returnArray);
+    // Do substitutions for alternate spellings
+    _.each(duplicateFreeReturn, function (item, index) {
+        var replacement = self.replacementList[item];
+        if (!_.isUndefined(replacement)){
+            duplicateFreeReturn[index] = replacement;
+        }
+    });
     return duplicateFreeReturn;
 };
 
