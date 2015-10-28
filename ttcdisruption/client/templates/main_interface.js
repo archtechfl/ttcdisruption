@@ -355,7 +355,8 @@ Template.ttcdisruption.helpers({
             /(board)/g,
             /(longer\sthan\snormal)/g,
             // Service time update
-            /(\d{1}(\:?)\d{2}(am|pm))/g
+            /(\d{1}(\:?)\d{2}(am|pm))/g,
+            /(streetcar)/g
         ];
         // List of intersection expressions
         // Looks for common patterns and parses the intersection
