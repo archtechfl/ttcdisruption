@@ -192,6 +192,7 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
         "between_due": /((between)|(btwn))\s[\w\s\,\-\']+/g,
         "between_abbr_bw": /((b\/w)\s[\w\s\-\']+)(?=\s((station))|(?=\s(stn)))/g,
         "at_station": /(\s(at)\s[\w\s\-\']+(?=\s((station))|(?=\s(stn))))/g,
+        "direction_comma_stations": /\,.+((stn)|(station))/g,
         "at_station_line": /(\s(at)\s[\w\s\-\']+\,)/g,
         "line_comma_stations": /((line)\s\d{1}\,)\s?.+(?=\s((station))|(?=\s(stn)))/g,
         "bypassing": /(bypassing\s).+((station|stn))/g,
@@ -239,6 +240,9 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
             var matching = addPeriodsEnd.match(search);
             if (matching){
                 var matches = matching;
+                console.log(matches);
+                // Sanity, remove any falsey after match
+                matches = _.compact(matches);
                 // Process matches and remove an extraneous information
                 // not related to station names
                 // remove as invalid if present
@@ -348,7 +352,11 @@ StationLibrary.prototype.stationIsolate = function(entry, search_used) {
         if (edited.search(/.+(bound)/g) > -1){
             edited = edited.replace(/.+(bound)/g,"");
         }
-    } 
+    }
+    // remove everything in front of comma for "direction_comma_stations"
+    if (searchUsed == "direction_comma_stations"){
+        edited = edited.replace(/.+\,/g,"");
+    }
     if (searchUsed == "clear" || searchUsed == "delay_cleared"){
         // Remove everything after station names, either has, is or are
         edited = edited.replace(/\s(has)\s.*/g,"");

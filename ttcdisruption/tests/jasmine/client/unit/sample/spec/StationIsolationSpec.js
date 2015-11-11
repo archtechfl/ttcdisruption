@@ -39,4 +39,10 @@ describe('verify correct stations are being returned by parser', function() {
       expect(stationInfo.retrieveStationListing(alert)).toEqual(expectedResult);
     });
 
+    it('returns broadview-ossington-christie', function() {
+      var expectedResult = ["broadview", "ossington", "christie"];
+      var alert = "expect a 13 minute longer than normal travel time, line 2 (bd) , w/b, broadview to ossington stn, due to track work at christie stn.";
+      expect(stationInfo.retrieveStationListing(alert)).toEqual(expectedResult);
+    });
+
 });
