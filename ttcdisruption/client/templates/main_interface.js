@@ -374,7 +374,7 @@ Template.ttcdisruption.helpers({
             // On and intersection combination
             "on_and": /(\s(on)\s[\w\s]+((and)|(&))[\w\s]+)/g,
             // Direction relative to intersection combination
-            "direction_relative": /(due).+(on).+((south|north)|(east|west)).+/g,
+            "direction_relative": /(due).+\s(on)\s.+((south|north)|(east|west)).+/g,
             // Single "At" condition followed by "due"
             "at_due": /\s(at)\s[\w\s\'\,]+(and)?[\w\s\'\,]+(due)\s/g,
             // Outside station
@@ -385,7 +385,8 @@ Template.ttcdisruption.helpers({
             // Intersection "near"
             "near": /\s(at)\s[\w\s]+(near)\s[\w\s]+/g,
             // Intersection "at" street "and" street, end of alert
-            "at_end_alert": /\s(at)\s[\w\s]+(?=.)/g
+            "at_end_alert": /\s(at)\s[\w\s]+(?=.)/g,
+            "direction_streets": /(bound)\s.+\s(due)\s/g
         };
         // Correct any tense errors
         // replace "known tense errors", such as "had" instead of "has"
@@ -492,10 +493,11 @@ Template.ttcdisruption.helpers({
         } else if (searchUsed == "direction_relative"){
             // Handle directional reference, i.e. broadview south of danforth
             // Intrepret to intersection, remove vaguness
-            entry = entry.replace(/(due).+(on)\s/g, "");
+            entry = entry.replace(/(due).+\s(on)\s/g, "");
             crossStreets = entry.split(/((north|south)|(east|west))(\sof\s)/g);
             // Get the first and last entry in the array corresponding to the actual streets
             returnArray = [_.first(crossStreets), _.last(crossStreets)];
+            console.log(returnArray);
         } else if (searchUsed == "at_station" || searchUsed == "bypassing_station"){
             if (searchUsed == "at_station"){
                 // Handle reference to disruption at a station
@@ -522,6 +524,13 @@ Template.ttcdisruption.helpers({
         } else if (searchUsed == "outside_from_station"){
             entry = entry.replace(/(outside)\s|(from)\s/g, "");
             returnArray = [entry];
+        } else if (searchUsed == "direction_streets") {
+            entry = entry.replace(/(bound)\s/g,"");
+            if (entry.search(" and ") > -1){
+                crossStreets = entry.split(" and ");
+            }
+            console.log(crossStreets);
+            returnArray = crossStreets;
         } else {
             returnArray = [];
         }
@@ -540,6 +549,10 @@ Template.ttcdisruption.helpers({
             streetToEdit = streetToEdit.replace(/(\s(due)\s.*)/g, "");
             // remove anything following "with"
             streetToEdit = streetToEdit.replace(/(\s(with)\s.*)/g, "");
+            // Replace anything following blocking
+            if (streetToEdit.search(/\s(blocking)\s/g) > -1) {
+                streetToEdit = streetToEdit.replace(/\s(blocking)\s.+/g, "");
+            }
             // handle presence of "full service has resumed" or "onboard streetcar"
             var excludeCheck = _.find(messageBlacklist, function(excludeItem){ 
                 return streetToEdit.search(excludeItem) > -1; 

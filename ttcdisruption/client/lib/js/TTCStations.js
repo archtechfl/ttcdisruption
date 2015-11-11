@@ -240,7 +240,6 @@ StationLibrary.prototype.retrieveStationListing = function(alert) {
             var matching = addPeriodsEnd.match(search);
             if (matching){
                 var matches = matching;
-                console.log(matches);
                 // Sanity, remove any falsey after match
                 matches = _.compact(matches);
                 // Process matches and remove an extraneous information
