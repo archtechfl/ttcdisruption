@@ -11,6 +11,7 @@ momentjs:moment
 nemo64:bootstrap
 percolate:synced-cron
 meteorhacks:npm
-npm-container
 sanjo:jasmine
 velocity:html-reporter
+
+npm-container
